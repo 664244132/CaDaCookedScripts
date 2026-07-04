@@ -14,20 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentVersion: 1.01
   subtype: kitchenchaos
-  lastShownTimestamp: 1782022666
+  lastShownTimestamp: 1783176403
   lastUpdateResponse:
     version: 1.01
     versionUrl: https://unitycodemonkey.com
-  checkedLastUpdateTimestamp: 1782022666
+  checkedLastUpdateTimestamp: 1783176404
   lastQOTDResponse:
-    questionId: 314
-    questionText: The Profiler is useful for...
-    answerA: Balancing difficulty
-    answerB: Level Design
-    answerC: Indentifying performance bottlenecks
+    questionId: 318
+    questionText: 'Is this valid code?
+
+      <p>Vector3? targetPosition = new Vector3(10,
+      0, 0);</p>
+
+      <p>Vector3 moveToPosition = targetPosition;</p>'
+    answerA: Yes
+    answerB: No
+    answerC: 
     answerD: 
     answerE: 
-  lastQotdTimestamp: 1782022666
+  lastQotdTimestamp: 1783176404
   lastDynamicHeaderResponse:
     topImageUrl: https://codemonkeyexternal.blob.core.windows.net/external/Misc/summer2025CodeMonkeyBundle.png
     topText: Get 80% OFF on ALL my Courses and Games!!!
@@ -35,19 +40,19 @@ MonoBehaviour:
     bottomText: DONT MISS the latest important trends, sign up for my FREE Weekly
       Newsletter!
     bottomLink: gamedevreport
-  lastDynamicHeaderTimestamp: 1782022666
+  lastDynamicHeaderTimestamp: 1783176404
   websiteLatestMessage:
     text: <a href="https://cmonkey.co/freecourses">Check out all my FREE courses!
       Click here!</a>
-  websiteLatestMessageTimestamp: 1782022666
+  websiteLatestMessageTimestamp: 1783176404
   websiteLatestVideos:
     videos:
-    - youTubeId: l8haAb6CPCI
-      title: AWESOME Bundle 80% OFF for Beginners and Intermediates!
-    - youTubeId: tEmH8kAvGgk
-      title: Unity 6.5 is OUT!
-    - youTubeId: H36i5K3tTy8
-      title: TOP 10 NEW Games, Made with Unity! (MAY 2026)
-    - youTubeId: NYBe2xkcscA
-      title: Unity Summer Sale is live up to 90% OFF!
-  websiteLatestVideosTimestamp: 1782022666
+    - youTubeId: ngQCio7raFY
+      title: Apparently Indie devs are NOT dead?
+    - youTubeId: C9iHZDlnXdk
+      title: BEST NEW Visual Assets to INSPIRE YOU! (APRIL 2026)
+    - youTubeId: v2E2OkAYjs4
+      title: How to make $50 MILLION Indie Game (MECCHA CHAMELEON)
+    - youTubeId: YMZSa1CzQGk
+      title: TOP 10 NEW Systems and Tools JUNE 2026! | Unity Asset Store
+  websiteLatestVideosTimestamp: 1783176404
