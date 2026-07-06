@@ -18,6 +18,12 @@ public class DeliveryCounter : BaseCounter
                 DeliveryManager.Instance.DeliveryRecipe(plateKitchenObject);
                 player.GetKitchenObject().DestroySelf();
             }
+            else
+            {
+                // The object is not a plate (e.g. raw ingredient)
+                DeliveryManager.Instance.DeliverIncorrectRecipe();
+                player.GetKitchenObject().DestroySelf();
+            }
         }
     }
 }

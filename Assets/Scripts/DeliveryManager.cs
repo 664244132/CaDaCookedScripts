@@ -87,6 +87,11 @@ public class DeliveryManager : MonoBehaviour
 
     }
 
+    public void DeliverIncorrectRecipe()
+    {
+        OnRecipeFailed?.Invoke(this, EventArgs.Empty);
+    }
+
     public List<RecipeSO> GetWaitingRecipeSPList()
     {
         return waitingrecipeSOList;
