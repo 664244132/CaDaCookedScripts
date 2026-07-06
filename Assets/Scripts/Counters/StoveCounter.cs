@@ -33,16 +33,17 @@ public class StoveCounter : BaseCounter, IHasProgress
     {
         state = State.Idle;
     }
+
     private void Update()
     {
         if (HasKitchenObject())
         {
-        switch (state)
-        {
-            case State.Idle:
-                break;
-            case State.Frying:
-                fryingTimer += Time.deltaTime;
+            switch (state)
+            {
+                case State.Idle:
+                    break;
+                case State.Frying:
+                    fryingTimer += Time.deltaTime;
 
                     OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
                     {
@@ -50,12 +51,9 @@ public class StoveCounter : BaseCounter, IHasProgress
                     });
 
                     if (fryingTimer > fryingRecipeSO.fryingTimerMax)
-                {
-                    // ทอดสุกเเล้ว
-                    // ลบเนื้อยังไม่สุกออก
-                    GetKitchenObject().DestroySelf();
-                    // spawn เนื้อสุกเเล้วออกมา
-                    KitchenObject.SpawnKitchenObject(fryingRecipeSO.output, this);
+                    {
+                        GetKitchenObject().DestroySelf();
+                        KitchenObject.SpawnKitchenObject(fryingRecipeSO.output, this);
 
                         state = State.Fried;
                         burningTimer = 0f;
@@ -66,8 +64,8 @@ public class StoveCounter : BaseCounter, IHasProgress
                             state = state
                         });
                     }
-                break;
-            case State.Fried:
+                    break;
+                case State.Fried:
                     burningTimer += Time.deltaTime;
 
                     OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
@@ -77,10 +75,7 @@ public class StoveCounter : BaseCounter, IHasProgress
 
                     if (burningTimer > burningRecipeSO.burningTimerMax)
                     {
-                        // ทอดสุกเเล้ว
-                        // ลบเนื้อยังไม่สุกออก
                         GetKitchenObject().DestroySelf();
-                        // spawn เนื้อสุกเเล้วออกมา
                         KitchenObject.SpawnKitchenObject(burningRecipeSO.output, this);
 
                         state = State.Burned;
@@ -94,29 +89,27 @@ public class StoveCounter : BaseCounter, IHasProgress
                         {
                             progressNormalized = 0f
                         });
-
                     }
-
                     break;
-            case State.Burned:
-                break;
+                case State.Burned:
+                    break;
             }
         }
     }
 
     public override void Interact(Player player)
     {
-        if (!HasKitchenObject()) // ถ้าไม่มี obj
+        if (!HasKitchenObject())
         {
             if (player.HasKitchenObject())
             {
-                // player ถืออะไรมาด้วย
-                if (HasRecipeWithInput(player.GetKitchenObject().GetKitchenObjectSO())) // player ถือสิ่งที่สามารถทอดได้
+                if (HasRecipeWithInput(player.GetKitchenObject().GetKitchenObjectSO()))
                 {
                     player.GetKitchenObject().SetKitchenObjectParent(this);
-                    fryingRecipeSO = GetFryingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO()); //วางเเล้วก็ทำการทอด
+                    fryingRecipeSO = GetFryingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
+                    
                     state = State.Frying;
-                    fryingTimer = 0f; //หลังจากสุกเเล้วจำทำการรีเซ็ตการทอดของชิ้นต่อไปโดยจะเริ่มที่ 0 วิ
+                    fryingTimer = 0f;
 
                     OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
                     {
@@ -129,19 +122,13 @@ public class StoveCounter : BaseCounter, IHasProgress
                     });
                 }
             }
-            else
-            {
-                // ถ้าไม่ได้ถืออะไร
-            }
         }
-        else // ถ้ามี obj อยู่่บน counter อยู่เเล้ว
+        else
         {
             if (player.HasKitchenObject())
             {
-                // player ถืออะไรมาด้วย
                 if (player.GetKitchenObject().TryGetPlate(out PlateKitchenObject plateKitchenObject))
                 {
-                    // ผู้เล่นกำลังถือจายอยู่
                     if (plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO()))
                     {
                         GetKitchenObject().DestroySelf();
@@ -153,7 +140,6 @@ public class StoveCounter : BaseCounter, IHasProgress
                             state = state
                         });
 
-                        // ลบหลอดทำอาหารให้กลับมาปกติ เเละลบ ui
                         OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
                         {
                             progressNormalized = 0f
@@ -163,11 +149,25 @@ public class StoveCounter : BaseCounter, IHasProgress
             }
             else
             {
-                // player ไม่ได้ถืออะไร
+                // player grabs the item with empty hands
                 GetKitchenObject().SetKitchenObjectParent(player);
+
+                // **[BUG FIX]: Reset state and UI when picking up item from stove without a plate**
+                state = State.Idle;
+
+                OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
+                {
+                    state = state
+                });
+
+                OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
+                {
+                    progressNormalized = 0f
+                });
             }
         }
     }
+
     private bool HasRecipeWithInput(KitchenObjectSO inputKitchenObjectSO)
     {
         FryingRecipeSO fryingRecipeSO = GetFryingRecipeSOWithInput(inputKitchenObjectSO);

@@ -14,25 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentVersion: 1.01
   subtype: kitchenchaos
-  lastShownTimestamp: 1783176403
+  lastShownTimestamp: 1783335935
   lastUpdateResponse:
     version: 1.01
     versionUrl: https://unitycodemonkey.com
-  checkedLastUpdateTimestamp: 1783176404
+  checkedLastUpdateTimestamp: 1783335935
   lastQOTDResponse:
-    questionId: 318
-    questionText: 'Is this valid code?
+    questionId: 319
+    questionText: 'What is the Color on the SpriteRenderer after running this code?
 
-      <p>Vector3? targetPosition = new Vector3(10,
-      0, 0);</p>
+      <p>Color
+      myColor = Color.red;</p>
 
-      <p>Vector3 moveToPosition = targetPosition;</p>'
-    answerA: Yes
-    answerB: No
-    answerC: 
+      <p>spriteRenderer.color = myColor;</p>
+
+      <p>myColor
+      = Color.blue;</p>'
+    answerA: Red
+    answerB: Blue
+    answerC: Don't Know
     answerD: 
     answerE: 
-  lastQotdTimestamp: 1783176404
+  lastQotdTimestamp: 1783335935
   lastDynamicHeaderResponse:
     topImageUrl: https://codemonkeyexternal.blob.core.windows.net/external/Misc/summer2025CodeMonkeyBundle.png
     topText: Get 80% OFF on ALL my Courses and Games!!!
@@ -40,11 +43,11 @@ MonoBehaviour:
     bottomText: DONT MISS the latest important trends, sign up for my FREE Weekly
       Newsletter!
     bottomLink: gamedevreport
-  lastDynamicHeaderTimestamp: 1783176404
+  lastDynamicHeaderTimestamp: 1783335935
   websiteLatestMessage:
     text: <a href="https://cmonkey.co/freecourses">Check out all my FREE courses!
       Click here!</a>
-  websiteLatestMessageTimestamp: 1783176404
+  websiteLatestMessageTimestamp: 1783335935
   websiteLatestVideos:
     videos:
     - youTubeId: ngQCio7raFY
@@ -55,4 +58,4 @@ MonoBehaviour:
       title: How to make $50 MILLION Indie Game (MECCHA CHAMELEON)
     - youTubeId: YMZSa1CzQGk
       title: TOP 10 NEW Systems and Tools JUNE 2026! | Unity Asset Store
-  websiteLatestVideosTimestamp: 1783176404
+  websiteLatestVideosTimestamp: 1783335935
