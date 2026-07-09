@@ -10,10 +10,12 @@ public class GamePauseUI : MonoBehaviour
     {
        resumeButton.onClick.AddListener(() =>
        {
+           Debug.Log("Resume Button Clicked!");
            KitchenGameManager.Instance.TogglePauseGame();
        });
        mainMenuButton.onClick.AddListener(() =>
        {
+           Debug.Log("Main Menu Button Clicked!");
            Loader.Load(Loader.Scene.MainMenuScene);
        });
     }
