@@ -12,15 +12,16 @@
 | **Session 2: Documentation Harmonization** | ปรับปรุงเอกสาร Markdown ทั้งหมดในโฟลเดอร์ `markdowns/` แทนที่ข้อมูลเว็บแอปเดิมด้วยข้อมูลเกม CaDaCook ครบทุกหมวดหมู่ ได้แก่ ภาพรวมเกม, สเปกเทคโนโลยี, Game Design, กฎเหล็ก C# และคู่มือดีแบ๊ก | [`PROJECT.md`](file:///d:/unity/My%20project/markdowns/PROJECT.md), [`AboutProject.md`](file:///d:/unity/My%20project/markdowns/AboutProject.md), [`TECHSTACK.md`](file:///d:/unity/My%20project/markdowns/TECHSTACK.md), [`DESIGN.md`](file:///d:/unity/My%20project/markdowns/DESIGN.md), [`REFACTORCODE.md`](file:///d:/unity/My%20project/markdowns/REFACTORCODE.md), [`DEBUG.md`](file:///d:/unity/My%20project/markdowns/DEBUG.md), [`SECURITY.md`](file:///d:/unity/My%20project/markdowns/SECURITY.md) |
 | **Session 3: C# Unity Coding Standard & Logic Rules** | จัดทำคู่มือมาตรฐานการเขียน C# Unity (`CSharpCodingGuide.md`) และปรับปรุงคู่มือตรรกะ Boolean (`DeMorgansLaws.md`) ให้มีตัวอย่างโค้ด C# Unity ที่ชัดเจน | [`CSharpCodingGuide.md`](file:///d:/unity/My%20project/markdowns/CSharpCodingGuide.md), [`DeMorgansLaws.md`](file:///d:/unity/My%20project/markdowns/DeMorgansLaws.md) |
 | **Session 4: Git & AI Ignore Optimization** | ปรับปรุง `.gitignore` และ `.antigravityignore` ให้ครอบคลุมโฟลเดอร์ชั่วคราวและแคชของ Unity 6 ทั้ง Root และ Nested Folders อย่างสมบูรณ์ | [`.gitignore`](file:///d:/unity/My%20project/.gitignore), [`.antigravityignore`](file:///d:/unity/My%20project/.antigravityignore) |
+| **Session 5: Agent Skills Integration** | ติดตั้งชุด Skills จาก `mattpocock/skills` รวมถึง `grill-with-docs`, `grill-me`, `grilling` เพื่อยกระดับความสามารถในการวิเคราะห์และตรวจสอบเอกสารโปรเจกต์ | [`.agents/skills/grill-with-docs/`](file:///d:/unity/My%20project/.agents/skills/grill-with-docs/) |
 
 ---
 
 ## 📝 รายละเอียดการปรับปรุงระบบล่าสุด (Recent Active Sessions)
 
-### 🔹 Session 4: Git & AI Agent Ignore Rules Optimization
-- **`[.GITIGNORE & .ANTIGRAVITYIGNORE COMPREHENSIVE UPDATE]`**
-  - [`.gitignore`](file:///d:/unity/My%20project/.gitignore): เพิ่มกฎละเว้นโฟลเดอร์แคชแบบ Nested (`**/Library/`, `**/Temp/`, `**/Logs/`, `**/PackageCache/`), ไฟล์ Project Solution C# (`.csproj`, `.sln`, `.slnx`), ไฟล์ IDEs (`.vs/`, `.vscode/`, `.idea/`) และ OS Metadata เพื่อป้องกันการคอมมิตไฟล์ขยะขนาดใหญ่ขึ้น Git
-  - [`.antigravityignore`](file:///d:/unity/My%20project/.antigravityignore): ปรับแต่งให้ AI Agents ละเว้นไฟล์ขนาดใหญ่, ไบนารี 3D Models, Textures, Audio, Video, Archives และไฟล์ Serialized YAML ของ Unity เพื่อลดการใช้โทเคนและเพิ่มความเร็วในการสืบค้นโค้ด C# และเอกสาร Markdown
+### 🔹 Session 5: Agent Skills Installation (grill-with-docs)
+- **`[SKILL INSTALLATION VIA NPX SKILLS]`**
+  - รันคำสั่ง `npx skills@latest add mattpocock/skills --skill=grill-with-docs`
+  - ติดตั้ง Skill `grill-with-docs` และ Skills ที่เกี่ยวข้องลงในโฟลเดอร์ [`.agents/skills/`](file:///d:/unity/My%20project/.agents/skills/) เพื่อช่วยให้ AI Agents สามารถทำการ Grill และตรวจสอบความสอดคล้องของเอกสารคู่มือของโปรเจกต์ได้อย่างเข้มข้น
 
 ---
 
@@ -31,4 +32,5 @@
 - [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
 - [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
 - [x] **Beginner-Friendly Documentation:** จัดทำเอกสารและคำอธิบายเป็นภาษาไทย เข้าใจง่าย ละเอียด และถูกต้องตรงตามโปรเจกต์ 100%
+
 
