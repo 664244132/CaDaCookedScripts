@@ -64,18 +64,51 @@
 | **Session 54: Enlarge GameOver 3-Star Rating Dashboard Typography & Layout Dimensions** | ขยายขนาดข้อความและแดชบอร์ดใน [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs): 1. Header `GAME OVER!` (84pt, y: 290) 2. ระบบดาว 3 ระดับและฉายา (44pt) 3. คะแนนรวม `FINAL SCORE` (62pt สีทอง) 4. สถิติจานที่ส่งและคอมโบ (32pt) 5. เวลานับถอยหลัง (24pt) พร้อมขยายกรอบแดชบอร์ดเป็น 1350x520px ใหญ่ ชัดเจน เต็มตา | [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs) |
 | **Session 55: Fix Standalone Build Aspect Ratio Distortion & Stretched Visuals** | แก้ปัญหาภาพเกมที่ build ออกมาบวม/ยืดไม่สมส่วน: 1. ปรับค่าเริ่มต้นของเกมใน [`ProjectSettings.asset`](file:///d:/unity/My%20project/ProjectSettings/ProjectSettings.asset) จาก 1024x768 (สัดส่วน 4:3) เป็น 1920x1080 (สัดส่วน 16:9 Full HD) 2. ปรับค่า `MatchWidthOrHeight` ของ `CanvasScaler` ใน [`GameScene.unity`](file:///d:/unity/My%20project/Assets/Scenes/GameScene.unity) และ [`MainMenuScene.unity`](file:///d:/unity/My%20project/Assets/Scenes/MainMenuScene.unity) เป็น 0.5 (Balanced Aspect Ratio) ให้ UI สเกลสมดุลทุกหน้าจอ | [`ProjectSettings.asset`](file:///d:/unity/My%20project/ProjectSettings/ProjectSettings.asset), [`GameScene.unity`](file:///d:/unity/My%20project/Assets/Scenes/GameScene.unity), [`MainMenuScene.unity`](file:///d:/unity/My%20project/Assets/Scenes/MainMenuScene.unity) |
 | **Session 56: Update .gitignore & .antigravityignore with Complete Unity 6 Ignore Rules** | อัปเดตไฟล์ [`.gitignore`](file:///d:/unity/My%20project/.gitignore) และ [`.antigravityignore`](file:///d:/unity/My%20project/.antigravityignore) ให้ครอบคลุมโฟลเดอร์ผลลัพธ์การ Build (`DEMO-*/`, `DEMO-KaDaCooked/`, `WindowsBuild/`, `WebGLBuild/`), ไฟล์แคช Library/Temp/Obj/PackageCache, IDEs, และไฟล์ระบบ OS อย่างครบถ้วน ปลอดภัย 100% | [`.gitignore`](file:///d:/unity/My%20project/.gitignore), [`.antigravityignore`](file:///d:/unity/My%20project/.antigravityignore) |
+| **Session 57: Create Comprehensive Use Case Diagram & System Specifications for Research** | จัดทำแผนภาพและเอกสาร [**`USE_CASE_DIAGRAM.md`**](file:///d:/unity/My%20project/markdowns/USE_CASE_DIAGRAM.md) ในรูปแบบมาตรฐานวิชาการ แบ่ง 4 ซับซิสเต็มหลัก (Cooking, Hazards, Rating & Combo, Game Loop), จำแนก 5 Actors (Player, Game Manager, Delivery System, Hazard System, Cat NPC), แผนภาพ Mermaid Use Case Diagram, และตารางรายละเอียดสเปกทั้ง 22 Use Cases อย่างสมบูรณ์ | [`USE_CASE_DIAGRAM.md`](file:///d:/unity/My%20project/markdowns/USE_CASE_DIAGRAM.md) |
+| **Session 58: Comprehensive Game Details & Design Specifications Document** | จัดทำเอกสาร [**`GameDetails.md`**](file:///d:/unity/My%20project/markdowns/GameDetails.md) ครอบคลุม 5 หมวดหมู่หลัก: การออกแบบตัวเกม (Game Design & Loop), เนื้อเรื่องและปูมหลังตัวละคร (Story & Lore), การออกแบบองค์ประกอบตัวละครและฉากครัว 2 ธีม, ตรรกะระบบ FSM และสูตรอาหาร, องค์ประกอบพิเศษ (ถังดับเพลิง 3D, พื้นลื่น, แมวขโมยของ, เคาน์เตอร์เลื่อนคู่, ระบบเสียง 3D Spatial SFX) | [`GameDetails.md`](file:///d:/unity/My%20project/markdowns/GameDetails.md), [`README.md`](file:///d:/unity/My%20project/README.md) |
+| **Session 59: Update Story & Narrative to Prime Minister Banquet Emergency** | ปรับปรุงเนื้อเรื่องของเกมใน [**`GameDetails.md`**](file:///d:/unity/My%20project/markdowns/GameDetails.md): ผู้เล่นรับบทเชฟมือหนึ่งกำลังเดินทางไปทำอาหารงานเลี้ยงท่านนายกรัฐมนตรี แต่รถประสบอุบัติเหตุน้ำมันรั่วและใกล้เวลาเริ่มงาน จึงต้องเปิดครัวฉุกเฉินทำตาม ORDER ส่งให้คนนำส่งไปเสิร์ฟให้ทันเวลา พร้อมรับมือกับแมวไร้บ้านสองตัวและอุปสรรคสภาพแวดล้อมที่ไม่อำนวย | [`markdowns/GameDetails.md`](file:///d:/unity/My%20project/markdowns/GameDetails.md) |
+| **Session 60: Clean Up Duplicate GameDetails.md from Root** | ลบไฟล์ `GameDetails.md` ซ้ำที่รูทโฟลเดอร์ออกตามความต้องการของผู้ใช้ เพื่อรวมการจัดเก็บเอกสารทั้งหมดไว้ในโฟลเดอร์ [`markdowns/`](file:///d:/unity/My%20project/markdowns/) เพียงที่เดียวอย่างเป็นระเบียบ | [`markdowns/GameDetails.md`](file:///d:/unity/My%20project/markdowns/GameDetails.md) |
 
 ---
 
 ## 📝 รายละเอียดการปรับปรุงระบบล่าสุด (Recent Active Sessions)
 
-### 🔹 Session 56: Update .gitignore & .antigravityignore with Complete Unity 6 Ignore Rules
-- **`[GITIGNORE & ANTIGRAVITYIGNORE COMPREHENSIVE UPDATE]`**
-  - **อัปเดตไฟล์ [`.gitignore`](file:///d:/unity/My%20project/.gitignore):**
-    - เพิ่มกฎการละเว้นโฟลเดอร์ Standalone Build (`DEMO-*/`, `DEMO-KaDaCooked/`, `WindowsBuild/`, `WebGLBuild/`, `StandaloneWindows64/`, `*.apk`, `*.aab`, `*.unitypackage`)
-    - กฎครอบคลุมไฟล์ Temporary, Cache (`Library/`, `Temp/`, `Obj/`, `PackageCache/`), IDE (`.vs/`, `.vscode/`, `.idea/`, `.agents/`, `.gemini/`), และไฟล์ระบบ OS (`.DS_Store`, `Thumbs.db`)
-  - **อัปเดตไฟล์ [`.antigravityignore`](file:///d:/unity/My%20project/.antigravityignore):**
-    - กรองไฟล์ Asset Binary ขนาดใหญ่ (`.unity`, `.prefab`, `.fbx`, `.png`, `.jpg`, `.mp3`, `.wav` ฯลฯ) เพื่อให้ AI Agent ค้นหาโค้ดและทำงานได้รวดเร็ว แม่นยำ ไม่เสีย Token
+### 🔹 Session 60: Clean Up Duplicate GameDetails.md from Root
+- **`[DOCUMENTATION CLEANUP & SINGLE-SOURCE OF TRUTH]`**
+  - **ลบไฟล์ `GameDetails.md` ที่รูทโฟลเดอร์:** คงเหลือเฉพาะไฟล์ต้นฉบับ [**`markdowns/GameDetails.md`**](file:///d:/unity/My%20project/markdowns/GameDetails.md) เพื่อความเป็นระเบียบและไม่ซ้ำซ้อน
+
+---
+
+### 🔹 Session 59: Update Story & Narrative to Prime Minister Banquet Emergency
+- **`[STORY & LORE REVISION: PRIME MINISTER BANQUET EMERGENCY]`**
+  - **ปรับปรุงเนื้อเรื่องใน [`GameDetails.md`](file:///d:/unity/My%20project/markdowns/GameDetails.md):**
+    - **พล็อตหลัก (Main Plot):** หัวหน้าเชฟกำลังเดินทางไปปรุงอาหารมื้อสำคัญระดับชาติแด่ท่านนายกรัฐมนตรี แต่เกิดอุบัติเหตุน้ำมันรั่วไหลบนเส้นทาง ประกอบกับเวลาเปิดงานกระชั้นชิด เชฟจึงต้องกางครัวฉุกเฉิน ณ จุดเกิดเหตุ เร่งทำอาหารตาม ORDER แล้วฝากให้คนนำส่งรีบวิ่งไปเสิร์ฟให้ทันงานเลี้ยง
+    - **ตัวละครและอุปสรรค (Characters & Obstacles):** แมวไร้บ้านสองตัว (เจ้าส้มและเจ้าควัน) ได้กลิ่นเนื้อย่างจึงแอบย่องเข้ามาขโมยอาหาร/ถังดับเพลิง, คราบน้ำมันรั่วไหลทำให้พื้นลื่น, เตาฉุกเฉินไฟไหม้ง่าย, และเคาน์เตอร์เลื่อนตำแหน่งจากสภาพแวดล้อมที่ไม่อำนวย
+
+---
+
+### 🔹 Session 58: Comprehensive Game Details & Design Specifications Document
+- **`[GAME DESIGN, STORY & SYSTEM SPECIFICATIONS DOCUMENTATION]`**
+  - **จัดทำเอกสารฉบับสมบูรณ์ ([`GameDetails.md`](file:///d:/unity/My%20project/markdowns/GameDetails.md) และ [`GameDetails.md`](file:///d:/unity/My%20project/GameDetails.md)):**
+    - **หมวดที่ 1: การออกแบบตัวเกม (Game Design Overview):** แนวเกม 3D Fast-paced Cooking Simulation, ปรัชญาการออกแบบ Decoupled C# Events & Data-Driven ScriptableObjects, ลูปการเล่นหลักแบบ Mermaid Flowchart, ตารางปุ่มควบคุม Keyboard/Mouse/Gamepad ครบชุด
+    - **หมวดที่ 2: เนื้อเรื่องและปูมหลังของเกม (Story & Lore):** แต่งเรื่องราว *"ตำนานเชฟกระทะบินแห่งเกาะคาดา (The Legend of CaDaCook)"*, ปูมหลังเชฟคาดะ, เจ้าส้ม (Mikan) และเจ้าควัน (Smokey) สองแมวเหมียวจอมป่วน, นักวิจารณ์อาหาร VIP William, และคลื่นลมแห่งอ่าวคาดา
+    - **หมวดที่ 3: การออกแบบองค์ประกอบในเกม (Game Elements Design):** ตัวละครเชฟและ Procedural Animation ของแมว Neko Cat 3D, ฉากครัว 2 ธีม (Cozy Indoor Kitchen & Beach Raft Kitchen with Ocean Tilt), รายละเอียดเคาน์เตอร์ทั้ง 7 ชนิด, ผังลำดับขั้นวัตถุดิบและสูตรเบอร์เกอร์
+    - **หมวดที่ 4: ตรรกะและระบบการทำงานภายในเกม (Game Logic & System Mechanics):** แผนผัง FSM 3 ระบบ (Game State, Stove Cooking/Burning, Cat AI), อัลกอริทึม Set-Based Recipe Matching, ระบบคอมโบและตัดเกรด 3-Star Rating
+    - **หมวดที่ 5: องค์ประกอบพิเศษและจุดเด่น (Special Features & Innovations):** ระบบอุปสรรคไดนามิก 6 ชนิด, ถังดับเพลิง 3D Interactive พร้อมพ่นละอองโฟมขาวจริงและป้าย Billboard, ระบบเสียงรอบทิศทาง 3D Spatial SFX 8 หมวดหมู่, และมาตรฐาน Zero GC Allocation ใน Unity 6
+  - **อัปเดตสารบัญนำทางโครงการใน [`README.md`](file:///d:/unity/My%20project/README.md)**
+
+---
+
+### 🔹 Session 57: Create Comprehensive Use Case Diagram & System Specifications for Research
+- **`[ACADEMIC USE CASE DIAGRAM & SPECIFICATIONS]`**
+  - **จัดทำเอกสารวิชาการ ([`USE_CASE_DIAGRAM.md`](file:///d:/unity/My%20project/markdowns/USE_CASE_DIAGRAM.md)):**
+    - แผนภาพ **Mermaid Use Case Diagram** แสดงความสัมพันธ์ `<<include>>`, `<<extend>>`, และ Actor Association อย่างเป็นระเบียบ
+    - แบ่ง 4 กลุ่มระบบย่อย (22 Use Cases):
+      1. ระบบเตรียมและปรุงอาหาร (Cooking & Kitchen Operations)
+      2. ระบบความปลอดภัยและจัดการอุปสรรค (Hazard & Environmental Control)
+      3. ระบบออเดอร์และประเมินผลคะแนน (Orders, Score & Rating)
+      4. ระบบควบคุมการเล่นและเมนู (Game Control & Interface)
+    - ตาราง **Use Case Specifications Table** ครบถ้วนทั้ง Pre-condition, Post-condition, Actors, และ Description เหมาะสำหรับนำไปใช้อ้างอิงในรายงานวิจัยและวิทยานิพนธ์
 
 ---
 
