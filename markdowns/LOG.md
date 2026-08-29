@@ -55,18 +55,27 @@
 | **Session 45: Fix CS0414 Unused Field lockBlendShapes in FreeCharacterCustomizerWindow.cs** | ลบตัวแปรฟิลด์ `lockBlendShapes` ที่ไม่ได้ถูกนำไปใช้งานใน [`FreeCharacterCustomizerWindow.cs`](file:///d:/unity/My%20project/Assets/FREE/Pack_FREE_PartyCharacters/Editor/FreeCharacterCustomizerWindow.cs) เคลียร์ Warning CS0414 สะอาด 100% | [`FreeCharacterCustomizerWindow.cs`](file:///d:/unity/My%20project/Assets/FREE/Pack_FREE_PartyCharacters/Editor/FreeCharacterCustomizerWindow.cs) |
 | **Session 46: Fix CS0414 Unused Field watchingCharacter in FreeCharacterCustomizerWindow.cs** | ลบตัวแปรฟิลด์ `watchingCharacter` ที่ไม่ได้ถูกนำไปใช้งานใน [`FreeCharacterCustomizerWindow.cs`](file:///d:/unity/My%20project/Assets/FREE/Pack_FREE_PartyCharacters/Editor/FreeCharacterCustomizerWindow.cs) เคลียร์ Warning CS0414 สะอาด 100% | [`FreeCharacterCustomizerWindow.cs`](file:///d:/unity/My%20project/Assets/FREE/Pack_FREE_PartyCharacters/Editor/FreeCharacterCustomizerWindow.cs) |
 | **Session 47: Add 2nd Moving Counter Obstacle to Kitchen** | เพิ่มเคาน์เตอร์เลื่อนตำแหน่งอีก 1 ตัว (รวมเป็น 2 ตัวในครัว) โดยปรับปรุง [`MovingCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/MovingCounter.cs) ให้รองรับการปรับแต่งทิศทาง/ความเร็วแยกรายตัว และอัปเดต [`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs) ให้ติดตั้งเคาน์เตอร์เคลื่อนที่ 2 จุด (แกน X ซ้าย-ขวา และแกน Z หน้า-หลัง) เพิ่มความท้าทายในครัว | [`MovingCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/MovingCounter.cs), [`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs) |
+| **Session 48: Implement VIP Critic Orders, Tip & Combo Streak, and 3-Star Rating System** | 1. พัฒนาระบบลูกค้า VIP ใน [`DeliveryManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/DeliveryManager.cs) และ [`DeliveryManagerSingleUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/DeliveryManagerSingleUI.cs) (การ์ดทอง, เวลานับถอยหลัง 25s, คะแนน 3x, โบนัสเวลา +12s) 2. สร้างระบบ Tip & Combo Streak พร้อม [`ComboUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ComboUI.cs) ตัวคูณ 1.5x -> 2.0x 3. พัฒนาระบบดาว 3 ระดับ (1-3 Stars) พร้อมสรุปผลสถิติบน [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs) | [`DeliveryManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/DeliveryManager.cs), [`DeliveryManagerSingleUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/DeliveryManagerSingleUI.cs), [`DeliveryManagerUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/DeliveryManagerUI.cs), [`ComboUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ComboUI.cs), [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs), [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs), [`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs) |
+| **Session 49: Pure ASCII UI Polish for VIP Card, Combo Streak, 3-Star Dashboard & 10s Timer** | 1. ปรับปรุงการ์ด VIP ใน [`DeliveryManagerSingleUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/DeliveryManagerSingleUI.cs) ให้เป็นข้อความบรรทัดเดียว `[VIP 3X] Name` และย้ายหลอดเวลาไม่ให้ทับไอคอนวัตถุดิบ 2. ปรับข้อความของ [`ComboUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ComboUI.cs), [`DeliveryManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/DeliveryManager.cs), และ [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs) เป็น Pure ASCII 100% กำจัดกล่องสี่เหลี่ยม `□` ทั้งหมด 3. ขยายเวลาแสดง Dashboard สรุปผลก่อนกลับ Menu จาก 5s เป็น 10s พร้อมเวลานับถอยหลังเรียลไทม์ | [`DeliveryManagerSingleUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/DeliveryManagerSingleUI.cs), [`ComboUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ComboUI.cs), [`DeliveryManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/DeliveryManager.cs), [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs) |
+| **Session 50: Change How to Play Tutorial Screen to Press Any Button to Start Immediately** | ปรับปรุง [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) และ [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) เปลี่ยนจากการนับถอยหลัง 15 วินาที เป็นการแสดงข้อความกระพริบ `HOW TO PLAY - >>> PRESS ANY BUTTON TO START <<<` และเพิ่มฟังก์ชัน `StartGameImmediately()` ให้เริ่มเล่นเกมได้ทันทีเมื่อผู้เล่นกดปุ่มใดๆ บนคีย์บอร์ด เมาส์ หรือจอยสติ๊ก | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs), [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) |
+| **Session 51: Move Combo Streak UI Overhead Above Player with Orange Text & No Background** | ปรับปรุง [`ComboUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ComboUI.cs) ให้ติดตามตำแหน่งบนหัวผู้เล่น (Overhead Tracking `+2.3m`), ลบพื้นหลังสีดำออกทั้งหมด (Transparent), และเปลี่ยนข้อความเป็นตัวอักษรสีส้มสดใส (`#FF4500` / `#FF7700` / `#FFA500`) สะดุดตา ไม่บดบัง HUD | [`ComboUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ComboUI.cs) |
+| **Session 52: Clean Layout Overhaul for GameOverUI & 3-Star Rating Dashboard** | ปรับปรุง [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs) ซ่อน Label เก่าใน Scene (`Recipes Delivered`), รีเซ็ต LocalScale `2.67x` เดิมที่ขยายข้อความจนล้นจอ, และจัดตำแหน่ง Title `GAME OVER!` (ด้านบน `y: 250`) กับ Dashboard สรุปผล (`y: -40`) ให้แสดงผลคมชัด ไม่ทับซ้อน 100% | [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs) |
+| **Session 53: Position Combo Streak UI Beside Clock UI on HUD with Orange Text & Zero Background** | ย้ายตำแหน่ง [`ComboUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ComboUI.cs) จากตำแหน่งบนตัวละครมาไว้ที่มุมบนขวาข้างๆ UI นาฬิกาจับเวลา (`anchoredPosition: -155f, -50f`), ลบพื้นหลังสีดำออกทั้งหมด (โปร่งใส 100%), และใช้ตัวอักษรสีส้มสดใส (`#FF7700` / `#FFA500` / `#FF4500`) แก้ปัญหาข้อความคอมโบทับซ้อนกับปุ่มหยิบถังดับเพลิง | [`ComboUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ComboUI.cs) |
+| **Session 54: Enlarge GameOver 3-Star Rating Dashboard Typography & Layout Dimensions** | ขยายขนาดข้อความและแดชบอร์ดใน [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs): 1. Header `GAME OVER!` (84pt, y: 290) 2. ระบบดาว 3 ระดับและฉายา (44pt) 3. คะแนนรวม `FINAL SCORE` (62pt สีทอง) 4. สถิติจานที่ส่งและคอมโบ (32pt) 5. เวลานับถอยหลัง (24pt) พร้อมขยายกรอบแดชบอร์ดเป็น 1350x520px ใหญ่ ชัดเจน เต็มตา | [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs) |
+| **Session 55: Fix Standalone Build Aspect Ratio Distortion & Stretched Visuals** | แก้ปัญหาภาพเกมที่ build ออกมาบวม/ยืดไม่สมส่วน: 1. ปรับค่าเริ่มต้นของเกมใน [`ProjectSettings.asset`](file:///d:/unity/My%20project/ProjectSettings/ProjectSettings.asset) จาก 1024x768 (สัดส่วน 4:3) เป็น 1920x1080 (สัดส่วน 16:9 Full HD) 2. ปรับค่า `MatchWidthOrHeight` ของ `CanvasScaler` ใน [`GameScene.unity`](file:///d:/unity/My%20project/Assets/Scenes/GameScene.unity) และ [`MainMenuScene.unity`](file:///d:/unity/My%20project/Assets/Scenes/MainMenuScene.unity) เป็น 0.5 (Balanced Aspect Ratio) ให้ UI สเกลสมดุลทุกหน้าจอ | [`ProjectSettings.asset`](file:///d:/unity/My%20project/ProjectSettings/ProjectSettings.asset), [`GameScene.unity`](file:///d:/unity/My%20project/Assets/Scenes/GameScene.unity), [`MainMenuScene.unity`](file:///d:/unity/My%20project/Assets/Scenes/MainMenuScene.unity) |
+| **Session 56: Update .gitignore & .antigravityignore with Complete Unity 6 Ignore Rules** | อัปเดตไฟล์ [`.gitignore`](file:///d:/unity/My%20project/.gitignore) และ [`.antigravityignore`](file:///d:/unity/My%20project/.antigravityignore) ให้ครอบคลุมโฟลเดอร์ผลลัพธ์การ Build (`DEMO-*/`, `DEMO-KaDaCooked/`, `WindowsBuild/`, `WebGLBuild/`), ไฟล์แคช Library/Temp/Obj/PackageCache, IDEs, และไฟล์ระบบ OS อย่างครบถ้วน ปลอดภัย 100% | [`.gitignore`](file:///d:/unity/My%20project/.gitignore), [`.antigravityignore`](file:///d:/unity/My%20project/.antigravityignore) |
 
 ---
 
 ## 📝 รายละเอียดการปรับปรุงระบบล่าสุด (Recent Active Sessions)
 
-### 🔹 Session 47: Add 2nd Moving Counter Obstacle to Kitchen
-- **`[DYNAMIC DUAL MOVING COUNTERS]`**
-  - **ปรับปรุงระบบเลื่อนเคาน์เตอร์ ([`MovingCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/MovingCounter.cs)):** เพิ่มเมธอด `Setup(Vector3 offset, float speed, float phaseOffset)` ให้สามารถกำหนดทิศทางการเลื่อน ความเร็ว และจังหวะหน่วงเวลาแบบแยกอิสระในแต่ละตัวได้
-  - **ติดตั้งเคาน์เตอร์เลื่อน 2 ตัว ([`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs)):**
-    - **ตัวที่ 1:** เลื่อนตามแนวนอน (ซ้าย-ขวา `X: 2.2m`, ความเร็ว `1.6f`)
-    - **ตัวที่ 2:** เลื่อนตามแนวลึก (หน้า-หลัง `Z: 1.8m`, ความเร็ว `1.4f`, ออฟเซ็ตจังหวะ `0.7s`)
-  - สิ่งของ จาน และวัตถุดิบบนเคาน์เตอร์จะเคลื่อนที่ตามตำแหน่งเคาน์เตอร์อย่างราบรื่น ผู้เล่นสามารถวางและหยิบอาหารจากเคาน์เตอร์เคลื่อนที่ทั้ง 2 ตัวได้ตามปกติ
+### 🔹 Session 56: Update .gitignore & .antigravityignore with Complete Unity 6 Ignore Rules
+- **`[GITIGNORE & ANTIGRAVITYIGNORE COMPREHENSIVE UPDATE]`**
+  - **อัปเดตไฟล์ [`.gitignore`](file:///d:/unity/My%20project/.gitignore):**
+    - เพิ่มกฎการละเว้นโฟลเดอร์ Standalone Build (`DEMO-*/`, `DEMO-KaDaCooked/`, `WindowsBuild/`, `WebGLBuild/`, `StandaloneWindows64/`, `*.apk`, `*.aab`, `*.unitypackage`)
+    - กฎครอบคลุมไฟล์ Temporary, Cache (`Library/`, `Temp/`, `Obj/`, `PackageCache/`), IDE (`.vs/`, `.vscode/`, `.idea/`, `.agents/`, `.gemini/`), และไฟล์ระบบ OS (`.DS_Store`, `Thumbs.db`)
+  - **อัปเดตไฟล์ [`.antigravityignore`](file:///d:/unity/My%20project/.antigravityignore):**
+    - กรองไฟล์ Asset Binary ขนาดใหญ่ (`.unity`, `.prefab`, `.fbx`, `.png`, `.jpg`, `.mp3`, `.wav` ฯลฯ) เพื่อให้ AI Agent ค้นหาโค้ดและทำงานได้รวดเร็ว แม่นยำ ไม่เสีย Token
 
 ---
 
@@ -76,35 +85,9 @@
 - [x] **Unity C# Best Practices:** ยึดหลัก Decoupled Architecture ผ่าน C# Events และ ScriptableObjects
 - [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
 - [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
+- [x] **Pure ASCII Standard:** ข้อความ UI ทั้งหมดใช้ตัวอักษรและสัญลักษณ์สากล คมชัด 100% ไม่เกิดกล่องสี่เหลี่ยม `□`
 - [x] **Beginner-Friendly Documentation:** จัดทำเอกสารและคำอธิบายเป็นภาษาไทย เข้าใจง่าย ละเอียด และถูกต้องตรงตามโปรเจกต์ 100%
 ---
-
-## 🔒 Security & Code Standards Checklist
-- [x] **No Direct DB Mutations:** ไม่มีการรันคำสั่ง SQL หรือปรับแต่งฐานข้อมูลโดยตรง
-- [x] **No Auto Git Push:** ไม่มีการรันคำสั่ง `git commit` หรือ `git push` (ผู้ใช้เป็นผู้ควบคุมเอง)
-- [x] **Unity C# Best Practices:** ยึดหลัก Decoupled Architecture ผ่าน C# Events และ ScriptableObjects
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Beginner-Friendly Documentation:** จัดทำเอกสารและคำอธิบายเป็นภาษาไทย เข้าใจง่าย ละเอียด และถูกต้องตรงตามโปรเจกต์ 100%
-
----
-
-## 🔒 Security & Code Standards Checklist
-- [x] **No Direct DB Mutations:** ไม่มีการรันคำสั่ง SQL หรือปรับแต่งฐานข้อมูลโดยตรง
-- [x] **No Auto Git Push:** ไม่มีการรันคำสั่ง `git commit` หรือ `git push` (ผู้ใช้เป็นผู้ควบคุมเอง)
-- [x] **Unity C# Best Practices:** ยึดหลัก Decoupled Architecture ผ่าน C# Events และ ScriptableObjects
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Beginner-Friendly Documentation:** จัดทำเอกสารและคำอธิบายเป็นภาษาไทย เข้าใจง่าย ละเอียด และถูกต้องตรงตามโปรเจกต์ 100%
 
 
 

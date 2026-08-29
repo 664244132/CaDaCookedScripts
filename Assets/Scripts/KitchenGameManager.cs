@@ -104,6 +104,20 @@ public class KitchenGameManager : MonoBehaviour
         return state == State.CountdownToStart;
     }
 
+    /// <summary>
+    /// เริ่มเกมทันทีเมื่อผู้เล่นกดปุ่มใดๆ ในหน้า How to Play
+    /// </summary>
+    public void StartGameImmediately()
+    {
+        if (state == State.CountdownToStart || state == State.WaitingToStart)
+        {
+            state = State.GamePlaying;
+            gamePlayingTimer = gamePlayingTimerMax;
+            OnStateChanged?.Invoke(this, EventArgs.Empty);
+            Debug.Log("[KitchenGameManager] Game Started Immediately via Key Press!");
+        }
+    }
+
     public float GetCountdownToStartTimer()
     {
         return countdownToStartTimer;
@@ -117,6 +131,23 @@ public class KitchenGameManager : MonoBehaviour
     public float GetGamePlayingTimerNormalized()
     {
         return 1 - (gamePlayingTimer / gamePlayingTimerMax);
+    }
+
+    /// <summary>
+    /// เพิ่มเวลาเล่นในเกม (เช่น ได้รับโบนัสเวลาจากออเดอร์ VIP)
+    /// </summary>
+    public void AddGamePlayingTime(float bonusSeconds)
+    {
+        if (state == State.GamePlaying)
+        {
+            gamePlayingTimer += bonusSeconds;
+            Debug.Log($"[KitchenGameManager] Bonus Time Added: +{bonusSeconds}s (Current: {gamePlayingTimer:F1}s)");
+        }
+    }
+
+    public float GetGamePlayingTimer()
+    {
+        return gamePlayingTimer;
     }
 
     private float lastTogglePauseTime;

@@ -10,6 +10,7 @@
 .vscode/
 .idea/
 .gradle/
+.plastic/
 *.suo
 *.user
 *.userprefs
@@ -23,6 +24,11 @@
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
+DEMO-*/
+DEMO-KaDaCooked/
+WindowsBuild/
+WebGLBuild/
+StandaloneWindows64/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 [Mm]emoryCaptures/
@@ -51,6 +57,8 @@
 *.svd
 *.class
 sysinfo.txt
+*.log
+*.stackdump
 
 # 4. Unity Meta Files (Contain only GUIDs, not useful for code understanding and clutters searches)
 *.meta
@@ -125,3 +133,5 @@ sysinfo.txt
 *.pdf
 *.doc
 *.docx
+*.apk
+*.aab

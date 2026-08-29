@@ -5,7 +5,7 @@ using UnityEngine.UI;
 /// <summary>
 /// GameStartCountdownUI: หน้าต่างสอนเล่น (How to Play Tutorial Overlay)
 /// ใช้ตัวอักษร ASCII สากล 100% ปราศจาก Unicode พิเศษ เพื่อรับประกันไม่มีกล่องสี่เหลี่ยมตกหล่น
-/// มีกล่องเตือนพิเศษสีส้มเด่นชัดเรื่องถังดับเพลิงและแมว พร้อมนับถอยหลัง 15 วินาที
+/// มีกล่องเตือนพิเศษสีส้มเด่นชัดเรื่องถังดับเพลิงและแมว พร้อมปุ่มกดเริ่มเกมได้ทันที (Press Any Button to Start)
 /// </summary>
 public class GameStartCountdownUI : MonoBehaviour
 {
@@ -25,7 +25,10 @@ public class GameStartCountdownUI : MonoBehaviour
 
     private void Start()
     {
-        KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+        if (KitchenGameManager.Instance != null)
+        {
+            KitchenGameManager.Instance.OnStateChanged += KitchenGameManager_OnStateChanged;
+        }
 
         Hide();
     }
@@ -82,7 +85,7 @@ public class GameStartCountdownUI : MonoBehaviour
         Image bgImage = tutorialPanelObject.AddComponent<Image>();
         bgImage.color = new Color(0.02f, 0.02f, 0.04f, 0.97f);
 
-        // 2. กล่องหัวเรื่อง & เวลานับถอยหลัง (Header & Countdown Banner)
+        // 2. กล่องหัวเรื่อง & ข้อความเริ่มเกม (Header & Press Any Button Banner)
         GameObject headerObj = new GameObject("TutorialHeader");
         headerObj.transform.SetParent(tutorialPanelObject.transform, false);
         RectTransform headerRect = headerObj.AddComponent<RectTransform>();
@@ -90,13 +93,14 @@ public class GameStartCountdownUI : MonoBehaviour
         headerRect.anchorMax = new Vector2(0.5f, 1f);
         headerRect.pivot = new Vector2(0.5f, 1f);
         headerRect.anchoredPosition = new Vector2(0, -20f);
-        headerRect.sizeDelta = new Vector2(1500f, 90f);
+        headerRect.sizeDelta = new Vector2(1600f, 90f);
 
         tutorialHeaderCountdownText = headerObj.AddComponent<TextMeshProUGUI>();
-        tutorialHeaderCountdownText.fontSize = 44;
+        tutorialHeaderCountdownText.fontSize = 42;
         tutorialHeaderCountdownText.alignment = TextAlignmentOptions.Center;
         tutorialHeaderCountdownText.color = Color.white;
         tutorialHeaderCountdownText.fontStyle = FontStyles.Bold;
+        tutorialHeaderCountdownText.text = "<b>HOW TO PLAY   -   <color=#FFD700>>>> PRESS ANY BUTTON TO START <<<</color></b>";
 
         // 3. คอลัมน์ซ้าย: ปุ่มควบคุม (Controls Column - กว้าง 720px)
         GameObject leftColObj = new GameObject("LeftColumn_Controls");
@@ -206,13 +210,45 @@ public class GameStartCountdownUI : MonoBehaviour
 
     private void Update()
     {
-        if (!KitchenGameManager.Instance.IsCountdownToStartActive()) return;
+        if (KitchenGameManager.Instance == null || !KitchenGameManager.Instance.IsCountdownToStartActive()) return;
 
-        int remainingSeconds = Mathf.CeilToInt(KitchenGameManager.Instance.GetCountdownToStartTimer());
+        // แสดงข้อความกระพริบสวยงามชวนให้กดปุ่มเริ่มเกม
+        float pulse = Mathf.PingPong(Time.unscaledTime * 3.5f, 1f);
+        string promptColor = pulse > 0.4f ? "#FFD700" : "#FFFFFF";
+
         if (tutorialHeaderCountdownText != null)
         {
-            tutorialHeaderCountdownText.text = $"<b>HOW TO PLAY  -  GAME STARTS IN : {remainingSeconds}</b>";
+            tutorialHeaderCountdownText.text = $"<b>HOW TO PLAY   -   <color={promptColor}>>>> PRESS ANY BUTTON TO START <<<</color></b>";
         }
+
+        // ตรวจจับการกดปุ่มใดๆ เพื่อเริ่มเกมทันที
+        if (CheckAnyInputPressed())
+        {
+            KitchenGameManager.Instance.StartGameImmediately();
+        }
+    }
+
+    /// <summary>
+    /// ตรวจจับการกดปุ่มใดๆ จากคีย์บอร์ด เมาส์ หรือจอยสติ๊ก
+    /// </summary>
+    private bool CheckAnyInputPressed()
+    {
+        // 1. ตรวจจับผ่าน Input เก่า (Keyboard / Mouse)
+        if (Input.anyKeyDown) return true;
+
+        // 2. ตรวจจับผ่าน Unity New Input System
+        if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.anyKey.wasPressedThisFrame) return true;
+        if (UnityEngine.InputSystem.Mouse.current != null && (UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame || UnityEngine.InputSystem.Mouse.current.rightButton.wasPressedThisFrame)) return true;
+        if (UnityEngine.InputSystem.Gamepad.current != null)
+        {
+            var gp = UnityEngine.InputSystem.Gamepad.current;
+            if (gp.buttonSouth.wasPressedThisFrame || gp.buttonNorth.wasPressedThisFrame || gp.buttonEast.wasPressedThisFrame || gp.buttonWest.wasPressedThisFrame || gp.startButton.wasPressedThisFrame)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void Show()

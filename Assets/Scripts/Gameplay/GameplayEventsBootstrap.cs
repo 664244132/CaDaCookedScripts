@@ -62,7 +62,10 @@ public class GameplayEventsBootstrap : MonoBehaviour
         try { SetupKitchenRaftTilt(); Debug.Log("✅ [2.5] Raft Kitchen Wave Tilt Initialized!"); }
         catch (Exception ex) { Debug.LogError($"❌ [2.5] Raft Tilt Error: {ex.Message}"); }
 
-        Debug.Log("🎉 CaDaCook: All 5 Gameplay Systems (2.1 - 2.5) are ACTIVE & RUNNING!");
+        try { SetupComboUISystem(); Debug.Log("✅ Combo & Tip Streak UI Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ Combo UI Error: {ex.Message}"); }
+
+        Debug.Log("🎉 CaDaCook: All Gameplay Systems & UI are ACTIVE & RUNNING!");
     }
 
     // ==========================================
@@ -490,6 +493,23 @@ public class GameplayEventsBootstrap : MonoBehaviour
                     mainCam.transform.parent.gameObject.AddComponent<RaftKitchenTilt>();
                 }
             }
+        }
+    }
+
+    // ==========================================
+    // 2.6 COMBO & TIP STREAK HUD
+    // ==========================================
+    private void SetupComboUISystem()
+    {
+        if (FindFirstObjectByType<ComboUI>() == null)
+        {
+            Canvas mainCanvas = FindFirstObjectByType<Canvas>();
+            GameObject comboObj = new GameObject("ComboHUD");
+            if (mainCanvas != null)
+            {
+                comboObj.transform.SetParent(mainCanvas.transform, false);
+            }
+            comboObj.AddComponent<ComboUI>();
         }
     }
 }
