@@ -14,48 +14,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentVersion: 1.01
   subtype: kitchenchaos
-  lastShownTimestamp: 1783335935
+  lastShownTimestamp: 1787973974
   lastUpdateResponse:
     version: 1.01
     versionUrl: https://unitycodemonkey.com
-  checkedLastUpdateTimestamp: 1783335935
+  checkedLastUpdateTimestamp: 1787973974
   lastQOTDResponse:
-    questionId: 319
-    questionText: 'What is the Color on the SpriteRenderer after running this code?
-
-      <p>Color
-      myColor = Color.red;</p>
-
-      <p>spriteRenderer.color = myColor;</p>
-
-      <p>myColor
-      = Color.blue;</p>'
-    answerA: Red
-    answerB: Blue
-    answerC: Don't Know
-    answerD: 
+    questionId: 337
+    questionText: Which namespace do we need to use File.WriteAllText()?
+    answerA: using System;
+    answerB: using UnityEngine;
+    answerC: using System.IO;
+    answerD: using UnityEngine.UI;
     answerE: 
-  lastQotdTimestamp: 1783335935
+  lastQotdTimestamp: 1787973974
   lastDynamicHeaderResponse:
-    topImageUrl: https://codemonkeyexternal.blob.core.windows.net/external/Misc/summer2025CodeMonkeyBundle.png
-    topText: Get 80% OFF on ALL my Courses and Games!!!
+    topImageUrl: https://codemonkeyexternal.blob.core.windows.net/external/Misc/summer2025CodeMonkeyBundle_EndsSoon.png
+    topText: Get 80% OFF on ALL my Courses and Games!!! (ENDS AUGUST)
     topLink: summerbundle
     bottomText: DONT MISS the latest important trends, sign up for my FREE Weekly
       Newsletter!
     bottomLink: gamedevreport
-  lastDynamicHeaderTimestamp: 1783335935
+  lastDynamicHeaderTimestamp: 1787973974
   websiteLatestMessage:
     text: <a href="https://cmonkey.co/freecourses">Check out all my FREE courses!
       Click here!</a>
-  websiteLatestMessageTimestamp: 1783335935
+  websiteLatestMessageTimestamp: 1787973974
   websiteLatestVideos:
     videos:
-    - youTubeId: ngQCio7raFY
-      title: Apparently Indie devs are NOT dead?
-    - youTubeId: C9iHZDlnXdk
-      title: BEST NEW Visual Assets to INSPIRE YOU! (APRIL 2026)
-    - youTubeId: v2E2OkAYjs4
-      title: How to make $50 MILLION Indie Game (MECCHA CHAMELEON)
-    - youTubeId: YMZSa1CzQGk
-      title: TOP 10 NEW Systems and Tools JUNE 2026! | Unity Asset Store
-  websiteLatestVideosTimestamp: 1783335935
+    - youTubeId: 2QKVo8m5ozQ
+      title: The MYTH of the Overnight Game Success! ($10 mil DOESN'T happen like
+        that)
+    - youTubeId: VZCaQSzsGwU
+      title: TOP 10 FREE NEW Assets AUGUST 2026!
+    - youTubeId: Hwpbh2fDPlE
+      title: The SECRET WEAPON making Unity 7 AWESOME - CoreCLR Explained
+    - youTubeId: xsQTCKSHte8
+      title: TOP 10 NEW Games, Made with Unity! (JULY 2026)
+  websiteLatestVideosTimestamp: 1787973974
