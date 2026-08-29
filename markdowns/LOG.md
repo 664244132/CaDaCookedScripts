@@ -43,15 +43,28 @@
 | **Session 33: Supersize Fire Extinguisher UI Banner & Scale Boost** | ขยายขนาด UI Canvas สเกลขึ้น 1.5 เท่า (`Scale = 0.016f`, Font Size 30-34, ความกว้างกล่อง 360px) ทำให้ป้ายคำสั่ง `[E] PICK UP` และ `[F] HOLD TO SPRAY` / `[E] DROP` ใหญ่โต ชัดเจน สว่างตา มองเห็นได้ทันทีจากมุมกล้องสูง | [`FireExtinguisher.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/FireExtinguisher.cs) |
 | **Session 34: Fix CS0618 TextMeshPro enableWordWrapping Deprecation** | เปลี่ยนจาก `enableWordWrapping = false` เป็น `textWrappingMode = TextWrappingModes.NoWrap` ใน [`FireExtinguisher.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/FireExtinguisher.cs) เคลียร์ Warning CS0618 สะอาด 100% | [`FireExtinguisher.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/FireExtinguisher.cs) |
 | **Session 35: Set Meat Burning Duration to Exactly 5 Seconds** | ปรับเวลาที่เนื้อสุกจะไหม้เป็น 5 วินาทีตรงตาม requirement โดยแก้ไข `burningTimerMax: 5` ใน [`MeatPattyCooked-MeatPattyBurned.asset`](file:///d:/unity/My%20project/Assets/Scenes/ScriptableObjects/BurningRecipeSO/MeatPattyCooked-MeatPattyBurned.asset) และปรับการนับเวลาใน [`StoveCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Counters/StoveCounter.cs) ให้นับ 1:1 เรียลไทม์ 5.0 วินาทีพอดี | [`MeatPattyCooked-MeatPattyBurned.asset`](file:///d:/unity/My%20project/Assets/Scenes/ScriptableObjects/BurningRecipeSO/MeatPattyCooked-MeatPattyBurned.asset), [`StoveCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Counters/StoveCounter.cs) |
+| **Session 36: GameOver Auto-Return to MainMenu (5s) & Reduce Meat Burning Time to 3s** | 1. อัปเดต [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs) ให้เริ่ม Coroutine หน่วงเวลา 5.0 วินาทีหลังจากแสดงคะแนน แล้วพาผู้เล่นเปลี่ยน Scene กลับสู่ `MainMenuScene` อัตโนมัติ 2. ปรับลดเวลาที่เนื้อจะไหม้กลับเป็น 3 วินาทีใน [`MeatPattyCooked-MeatPattyBurned.asset`](file:///d:/unity/My%20project/Assets/Scenes/ScriptableObjects/BurningRecipeSO/MeatPattyCooked-MeatPattyBurned.asset) ตรงตาม Requirement 100% | [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs), [`MeatPattyCooked-MeatPattyBurned.asset`](file:///d:/unity/My%20project/Assets/Scenes/ScriptableObjects/BurningRecipeSO/MeatPattyCooked-MeatPattyBurned.asset) |
+| **Session 37: 8-Second How to Play Tutorial Screen on Countdown** | 1. เพิ่มระยะเวลานับถอยหลังเริ่มเกมเป็น 8 วินาทีใน [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) 2. สร้างหน้าต่างสอนเล่นแบบเต็มจอ พื้นหลังสีดำ ตัวอักษรสีขาว อธิบายปุ่มควบคุม (`WASD`, `E`, `F`, `ESC`), วิธีทำอาหาร/เสิร์ฟ, และวิธีรับมืออุปสรรคในครัว (ไฟไหม้/คราบน้ำมัน) ใน [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs), [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) |
+| **Session 38: Fix Tutorial Layout Squishing with 2-Column Wide Formatting** | แก้ไขปัญหาตัวอักษรบีบอัดเป็นแถวแนวยาวโดยขยาย Root `RectTransform` ให้เต็มจอ 100% และจัดเลย์เอาต์ 2 คอลัมน์กว้างสบายตา (ซ้าย: ปุ่มควบคุม 620px, ขวา: วิธีทำอาหารและอุปสรรค 700px) ใน [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) ตัวหนังสือคมชัด อ่านง่าย 100% | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) |
+| **Session 39: 10-Second Countdown & Universal Crisp Typography on Tutorial Screen** | 1. ปรับเพิ่มเวลานับถอยหลังเริ่มเกมเป็น 10 วินาทีใน [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) 2. อัปเดตข้อความในหน้าสอนเล่นของ [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) เป็นตัวอักษรสากล คมชัด 100% ปราศจากปัญหากล่องสี่เหลี่ยม `□` จาก Font Missing | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs), [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) |
+| **Session 40: Enlarge Tutorial Content Font Size & Layout Dimensions** | ขยายขนาดตัวอักษรของหน้าสอนเล่นขึ้นเป็น 25-32pt, ขยาย Header เป็น 44pt, และขยายความกว้างของคอลัมน์ซ้าย-ขวาเป็น 740px และ 840px ใน [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) เต็มตา ชัดเจน อ่านง่ายขึ้นเป็นพิเศษ | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) |
+| **Session 41: Add Prominent Warning for Fire Extinguisher & Cat Theft** | เพิ่มกล่องข้อความเตือนพิเศษตัวหนาสีทอง/แดง/เขียว ใน [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs): *"DO NOT place Extinguisher on counters! Cats will STEAL it! Always press [ E ] to DROP on the FLOOR!"* ชัดเจน เด่นสะดุดตา | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) |
+| **Session 42: 15s Countdown, Orange Warning Box Panel & 100% Pure ASCII Typography Fix** | 1. ปรับเพิ่มเวลานับถอยหลังเป็น 15 วินาทีใน [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) 2. สร้างกล่องเตือนพิเศษสีส้มเด่นชัด (`#FFA500`) กว้าง 1500px 3. ปรับโครงสร้างข้อความทั้งหมดเป็น Pure ASCII (`-`, `*`, `[!]`) กำจัด Unicode Emojis เพื่อรับประกันไม่มีกล่องสี่เหลี่ยมตกหล่น 100% ใน [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs), [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) |
 
 ---
 
 ## 📝 รายละเอียดการปรับปรุงระบบล่าสุด (Recent Active Sessions)
 
-### 🔹 Session 35: Set Meat Burning Duration to Exactly 5 Seconds
-- **`[BURNING DURATION REQUIREMENTS COMPLIANCE]`**
-  - [`MeatPattyCooked-MeatPattyBurned.asset`](file:///d:/unity/My%20project/Assets/Scenes/ScriptableObjects/BurningRecipeSO/MeatPattyCooked-MeatPattyBurned.asset): ปรับค่า `burningTimerMax` เป็น `5` วินาที
-  - [`StoveCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Counters/StoveCounter.cs): ปรับการนับ `burningTimer += Time.deltaTime;` ให้นับตามเวลาจริง 1:1 ได้ระยะเวลาก่อนเนื้อไหม้ที่ **5.0 วินาที** ตรงตาม requirements 100% โดยไม่มีการแก้ไขส่วนอื่นนอกเหนือจากที่กำหนด
+### 🔹 Session 42: 15s Countdown, Orange Warning Box Panel & 100% Pure ASCII Typography Fix
+- **`[15S TIMER, ORANGE WARNING PANEL & PURE ASCII FIX]`**
+  - **ขยายเวลานับถอยหลังเป็น 15 วินาที ([`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs)):** ตั้งค่า `countdownToStartTimer = 15f` ให้ผู้เล่นมีเวลา 15 วินาทีเต็มในการศึกษาระบบ
+  - **กล่องข้อความเตือนเด่นชัดสีส้ม ([`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs)):**
+    - แผ่นพื้นหลังเตือนโทนสีส้มเข้มตัดขอบ ขนาดกว้าง `1500px` เด่นชัดด้านล่าง
+    - ข้อความเตือนตัวหนาสีส้มสดใส (`#FFA500` / `#FFD700`):
+      - `[ ! ] IMPORTANT WARNING : FIRE EXTINGUISHER`
+      - `* DO NOT place Fire Extinguisher on counters! The CATS will STEAL it!`
+      - `* Always press [ E ] to DROP Extinguisher safely on the FLOOR!`
+  - **กำจัดปัญหากล่องสี่เหลี่ยมและตัวอักษรอ่านไม่ออก 100%:** ขจัด Unicode Emojis (`⚠️`, `🎮`, `🍳`) และสัญลักษณ์พิเศษ (`•`, `—`) ที่ฟอนต์ SDF ไม่รองรับออกทั้งหมด โดยใช้ Pure ASCII ที่คมชัด สมบูรณ์แบบทุกตัวอักษร
 
 ---
 
@@ -59,6 +72,10 @@
 - [x] **No Direct DB Mutations:** ไม่มีการรันคำสั่ง SQL หรือปรับแต่งฐานข้อมูลโดยตรง
 - [x] **No Auto Git Push:** ไม่มีการรันคำสั่ง `git commit` หรือ `git push` (ผู้ใช้เป็นผู้ควบคุมเอง)
 - [x] **Unity C# Best Practices:** ยึดหลัก Decoupled Architecture ผ่าน C# Events และ ScriptableObjects
+- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
+- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
+- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
+- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
 - [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
 - [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
 - [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
