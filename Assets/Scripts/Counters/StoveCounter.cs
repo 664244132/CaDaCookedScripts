@@ -75,7 +75,7 @@ public class StoveCounter : BaseCounter, IHasProgress
                     }
                     break;
                 case State.Fried:
-                    burningTimer += Time.deltaTime * 2.2f;
+                    burningTimer += Time.deltaTime;
 
                     OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
                     {

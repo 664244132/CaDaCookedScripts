@@ -9,6 +9,23 @@ using UnityEngine.UI;
 /// </summary>
 public class GameplayEventsBootstrap : MonoBehaviour
 {
+    // ==========================================
+    // PLAYABLE CAMERA BOUNDS (ขอบเขตพื้นที่เล่นในมุมกล้องผู้เล่น)
+    // ==========================================
+    public const float PLAYABLE_MIN_X = -6.14f;
+    public const float PLAYABLE_MAX_X = 6.68f;
+    public const float PLAYABLE_MIN_Z = -4.16f;
+    public const float PLAYABLE_MAX_Z = 3.97f;
+
+    public static Vector3 ClampToPlayableBounds(Vector3 pos, float y = 0f)
+    {
+        return new Vector3(
+            Mathf.Clamp(pos.x, PLAYABLE_MIN_X, PLAYABLE_MAX_X),
+            y,
+            Mathf.Clamp(pos.z, PLAYABLE_MIN_Z, PLAYABLE_MAX_Z)
+        );
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void OnSceneLoaded()
     {
@@ -22,17 +39,30 @@ public class GameplayEventsBootstrap : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("🍳 CaDaCook: Initializing High-Frequency 60-Second Gameplay Systems...");
+        Debug.Log("🍳 CaDaCook: [1/6] Initializing Gameplay Systems...");
 
-        SetupRushHourSystem();
-        SetupFireHazardAndExtinguisher();
-        SetupMultipleSlipperyFloors();
-        SetupMultiplePotholeTraps();
-        SetupKitchenCatNPC();
-        SetupMovingCounters();
-        SetupKitchenRaftTilt();
+        try { SetupRushHourSystem(); Debug.Log("✅ [2.3] Rush Hour System Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [2.3] Rush Hour Error: {ex.Message}"); }
 
-        Debug.Log("✅ CaDaCook: All High-Frequency Gameplay Systems Initialized Successfully!");
+        try { SetupFireHazardAndExtinguisher(); Debug.Log("✅ [2.1] Fire Hazard & Extinguisher Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [2.1] Fire Hazard Error: {ex.Message}"); }
+
+        try { SetupMultipleSlipperyFloors(); Debug.Log("✅ [2.2] Slippery Floors (4 Puddles) Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [2.2] Slippery Floor Error: {ex.Message}"); }
+
+        try { SetupMultiplePotholeTraps(); Debug.Log("✅ [2.2] Pothole Traps Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [2.2] Pothole Trap Error: {ex.Message}"); }
+
+        try { SetupKitchenCatNPC(); Debug.Log("✅ [2.4] Kitchen Cat NPCs (2 Cats) Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [2.4] Cat NPC Error: {ex.Message}"); }
+
+        try { SetupMovingCounters(); Debug.Log("✅ [2.5] Moving Counters Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [2.5] Moving Counter Error: {ex.Message}"); }
+
+        try { SetupKitchenRaftTilt(); Debug.Log("✅ [2.5] Raft Kitchen Wave Tilt Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [2.5] Raft Tilt Error: {ex.Message}"); }
+
+        Debug.Log("🎉 CaDaCook: All 5 Gameplay Systems (2.1 - 2.5) are ACTIVE & RUNNING!");
     }
 
     // ==========================================
@@ -95,65 +125,141 @@ public class GameplayEventsBootstrap : MonoBehaviour
     }
 
     // ==========================================
-    // 2.1 FIRE HAZARD & EXTINGUISHER
+    // 2.1 FIRE HAZARD, RANDOM FIRE & EXTINGUISHER
     // ==========================================
     private void SetupFireHazardAndExtinguisher()
     {
-        StoveCounter[] stoves = FindObjectsByType<StoveCounter>(FindObjectsSortMode.None);
-        foreach (StoveCounter stove in stoves)
+        // 1. ติดตั้ง RandomFireManager สำหรับสุ่มเกิดไฟไหม้ตามเคาน์เตอร์
+        if (FindFirstObjectByType<RandomFireManager>() == null)
         {
-            FireHazard hazard = stove.GetComponent<FireHazard>();
+            GameObject randomFireObj = new GameObject("RandomFireManager");
+            randomFireObj.transform.SetParent(transform);
+            randomFireObj.AddComponent<RandomFireManager>();
+        }
+
+        // 2. ติดตั้ง FireHazard & Visuals ให้กับทุกเคาน์เตอร์ในครัว
+        BaseCounter[] allCounters = FindObjectsByType<BaseCounter>(FindObjectsSortMode.None);
+        foreach (BaseCounter counter in allCounters)
+        {
+            FireHazard hazard = counter.GetComponent<FireHazard>();
             if (hazard == null)
             {
-                hazard = stove.gameObject.AddComponent<FireHazard>();
+                hazard = counter.gameObject.AddComponent<FireHazard>();
             }
 
-            if (stove.transform.Find("FireVisual") == null)
+            // สร้าง Fire Visual จาก VFXPACK_FIRE_WALLCOEUR (VFX_Fire)
+            if (counter.transform.Find("FireVisual") == null)
             {
-                GameObject fireVisual = new GameObject("FireVisual");
-                fireVisual.transform.SetParent(stove.transform, false);
-                fireVisual.transform.localPosition = new Vector3(0, 1.2f, 0);
-
-                Light fireLight = fireVisual.AddComponent<Light>();
-                fireLight.color = new Color(1f, 0.4f, 0.05f);
-                fireLight.intensity = 4f;
-                fireLight.range = 6f;
-
-                GameObject flame = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                flame.transform.SetParent(fireVisual.transform, false);
-                flame.transform.localScale = new Vector3(0.6f, 1.0f, 0.6f);
-                if (flame.TryGetComponent(out Collider col)) Destroy(col);
-
-                Material flameMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-                flameMat.color = new Color(1f, 0.3f, 0f, 0.95f);
-                if (flameMat.HasProperty("_EmissionColor"))
+                GameObject firePrefab = Resources.Load<GameObject>("VFX_Fire");
+                GameObject fireVisual;
+                if (firePrefab != null)
                 {
-                    flameMat.EnableKeyword("_EMISSION");
-                    flameMat.SetColor("_EmissionColor", new Color(1f, 0.5f, 0f) * 3f);
+                    fireVisual = Instantiate(firePrefab, counter.transform);
+                    fireVisual.name = "FireVisual";
+                    fireVisual.transform.localPosition = new Vector3(0, 1.25f, 0);
+                    fireVisual.transform.localScale = Vector3.one * 0.75f;
                 }
-                flame.GetComponent<MeshRenderer>().material = flameMat;
+                else
+                {
+                    fireVisual = new GameObject("FireVisual");
+                    fireVisual.transform.SetParent(counter.transform, false);
+                    fireVisual.transform.localPosition = new Vector3(0, 1.2f, 0);
+                }
+
+                Light fireLight = fireVisual.GetComponent<Light>();
+                if (fireLight == null)
+                {
+                    fireLight = fireVisual.AddComponent<Light>();
+                }
+                fireLight.color = new Color(1f, 0.45f, 0.1f);
+                fireLight.intensity = 3.5f;
+                fireLight.range = 5f;
+                fireLight.shadows = LightShadows.None; // ปิดเงาเพื่อไม่ให้เปลือง URP Shadow Atlas
+
+                // ปิดเงาของหลอดไฟทุกดวงใน Prefab VFX
+                Light[] allLights = fireVisual.GetComponentsInChildren<Light>(true);
+                foreach (var l in allLights)
+                {
+                    l.shadows = LightShadows.None;
+                }
+
+                // ลบ Collider ออก
+                Collider[] cols = fireVisual.GetComponentsInChildren<Collider>();
+                foreach (var c in cols) Destroy(c);
 
                 fireVisual.SetActive(false);
             }
+
+            // สร้าง Locked Visual (ควันดำ VFX_BlackSmoke เมื่อดับไฟไม่ทัน)
+            if (counter.transform.Find("LockedVisual") == null)
+            {
+                GameObject smokePrefab = Resources.Load<GameObject>("VFX_BlackSmoke");
+                GameObject lockedVisual;
+                if (smokePrefab != null)
+                {
+                    lockedVisual = Instantiate(smokePrefab, counter.transform);
+                    lockedVisual.name = "LockedVisual";
+                    lockedVisual.transform.localPosition = new Vector3(0, 1.15f, 0);
+                    lockedVisual.transform.localScale = Vector3.one * 0.6f;
+                }
+                else
+                {
+                    lockedVisual = new GameObject("LockedVisual");
+                    lockedVisual.transform.SetParent(counter.transform, false);
+                    lockedVisual.transform.localPosition = new Vector3(0, 1.1f, 0);
+                }
+
+                // สัญลักษณ์เตือนสีแดงด้านบน
+                GameObject lockIcon = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                lockIcon.name = "LockIcon";
+                lockIcon.transform.SetParent(lockedVisual.transform, false);
+                lockIcon.transform.localPosition = new Vector3(0, 0.4f, 0);
+                lockIcon.transform.localScale = new Vector3(0.35f, 0.35f, 0.35f);
+                if (lockIcon.TryGetComponent(out Collider colIcon)) Destroy(colIcon);
+
+                Material redIconMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+                redIconMat.color = Color.red;
+                if (redIconMat.HasProperty("_EmissionColor"))
+                {
+                    redIconMat.EnableKeyword("_EMISSION");
+                    redIconMat.SetColor("_EmissionColor", Color.red * 2.5f);
+                }
+                lockIcon.GetComponent<MeshRenderer>().material = redIconMat;
+
+                // ลบ Collider ออก
+                Collider[] cols = lockedVisual.GetComponentsInChildren<Collider>();
+                foreach (var c in cols) Destroy(c);
+
+                lockedVisual.SetActive(false);
+            }
         }
 
-        // ถังดับเพลิงสีแดง วางไว้ใกล้เคาน์เตอร์
+        // 3. ถังดับเพลิงสีแดง วางไว้ข้างๆ จุดเริ่มต้นของผู้เล่น (Player Starting Area)
         if (FindFirstObjectByType<FireExtinguisher>() == null)
         {
             GameObject extObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             extObj.name = "FireExtinguisher";
             extObj.transform.localScale = new Vector3(0.35f, 0.55f, 0.35f);
             
-            Vector3 spawnPos = new Vector3(1.2f, 0.4f, 0f);
-            if (stoves.Length > 0)
+            // วางตรงจุดเริ่มต้นข้างตัวผู้เล่น อยู่ในขอบเขตมุมมองกล้อง (X: -6.14 ถึง 6.68, Z: -4.16 ถึง 3.97)
+            Vector3 playerPos = new Vector3(0f, 0f, 1f);
+            Player player = FindFirstObjectByType<Player>();
+            if (player != null)
             {
-                spawnPos = stoves[0].transform.position + new Vector3(1.4f, 0f, 0f);
-                spawnPos.y = 0.4f;
+                playerPos = player.transform.position;
             }
+
+            Vector3 spawnPos = playerPos + new Vector3(0.75f, 0f, -0.3f);
+            spawnPos = ClampToPlayableBounds(spawnPos, 0.35f);
             extObj.transform.position = spawnPos;
 
             Material redMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
             redMat.color = new Color(0.9f, 0.05f, 0.05f);
+            if (redMat.HasProperty("_EmissionColor"))
+            {
+                redMat.EnableKeyword("_EMISSION");
+                redMat.SetColor("_EmissionColor", new Color(0.9f, 0.1f, 0.1f) * 0.5f);
+            }
             extObj.GetComponent<MeshRenderer>().material = redMat;
 
             GameObject topNozzle = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -167,14 +273,23 @@ public class GameplayEventsBootstrap : MonoBehaviour
     }
 
     // ==========================================
-    // 2.2 MULTIPLE SLIPPERY FLOORS (คราบน้ำมัน 2 จุด)
+    // 2.2 MULTIPLE SLIPPERY FLOORS (คราบน้ำมัน 4 จุดทั่วครัว)
     // ==========================================
     private void SetupMultipleSlipperyFloors()
     {
         if (FindObjectsByType<SlipperyFloor>(FindObjectsSortMode.None).Length == 0)
         {
-            CreateOilPuddle("OilPuddle_Central", new Vector3(0f, 0.02f, 0.2f), new Vector3(2.8f, 0.01f, 2.8f));
-            CreateOilPuddle("OilPuddle_Aisle", new Vector3(-2.0f, 0.02f, 1.8f), new Vector3(2.2f, 0.01f, 2.2f));
+            // 1. กลางห้องครัว (Central Junction)
+            CreateOilPuddle("OilPuddle_Central", ClampToPlayableBounds(new Vector3(0f, 0f, 0.2f), 0.01f), new Vector3(2.8f, 0.01f, 2.8f));
+            
+            // 2. ทางเดินฝั่งซ้าย (หน้าเตาและเขียง)
+            CreateOilPuddle("OilPuddle_LeftAisle", ClampToPlayableBounds(new Vector3(-2.2f, 0f, 1.4f), 0.01f), new Vector3(2.4f, 0.01f, 2.4f));
+
+            // 3. ทางเดินฝั่งขวา (หน้าจุดส่งอาหาร)
+            CreateOilPuddle("OilPuddle_RightAisle", ClampToPlayableBounds(new Vector3(2.2f, 0f, 1.2f), 0.01f), new Vector3(2.4f, 0.01f, 2.4f));
+
+            // 4. ทางเดินด้านหน้า
+            CreateOilPuddle("OilPuddle_FrontAisle", ClampToPlayableBounds(new Vector3(0f, 0f, -1.8f), 0.01f), new Vector3(2.6f, 0.01f, 2.6f));
         }
     }
 
@@ -185,12 +300,22 @@ public class GameplayEventsBootstrap : MonoBehaviour
         oilPuddle.transform.position = pos;
         oilPuddle.transform.localScale = scale;
 
-        Material oilMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-        oilMat.color = new Color(0.1f, 0.1f, 0.12f, 0.9f);
-        oilPuddle.GetComponent<MeshRenderer>().material = oilMat;
+        // ลบ Collider ทรงแคปซูลของ Cylinder เดิมออก แล้วใส่ BoxCollider ที่มีความสูงครอบคลุม
+        if (oilPuddle.TryGetComponent(out Collider defaultCol))
+        {
+            Destroy(defaultCol);
+        }
 
-        Collider col = oilPuddle.GetComponent<Collider>();
-        col.isTrigger = true;
+        BoxCollider boxCol = oilPuddle.AddComponent<BoxCollider>();
+        boxCol.isTrigger = true;
+        boxCol.center = new Vector3(0, 50f, 0); // ครอบคลุมความสูงเหนือพื้น
+        boxCol.size = new Vector3(1.0f, 100f, 1.0f);
+
+        Material oilMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+        oilMat.color = new Color(0.08f, 0.08f, 0.1f, 0.95f);
+        if (oilMat.HasProperty("_Smoothness")) oilMat.SetFloat("_Smoothness", 0.95f);
+        if (oilMat.HasProperty("_Metallic")) oilMat.SetFloat("_Metallic", 0.85f);
+        oilPuddle.GetComponent<MeshRenderer>().material = oilMat;
 
         oilPuddle.AddComponent<SlipperyFloor>();
     }
@@ -202,8 +327,8 @@ public class GameplayEventsBootstrap : MonoBehaviour
     {
         if (FindObjectsByType<PotholeTrap>(FindObjectsSortMode.None).Length == 0)
         {
-            CreatePotholeTrap("Pothole_Left", new Vector3(-1.8f, 0.01f, -1.2f), 1.3f);
-            CreatePotholeTrap("Pothole_Right", new Vector3(2.2f, 0.01f, -1.0f), 1.3f);
+            CreatePotholeTrap("Pothole_Left", ClampToPlayableBounds(new Vector3(-1.8f, 0f, -1.2f), 0.01f), 1.3f);
+            CreatePotholeTrap("Pothole_Right", ClampToPlayableBounds(new Vector3(2.2f, 0f, -1.0f), 0.01f), 1.3f);
         }
     }
 
@@ -225,56 +350,89 @@ public class GameplayEventsBootstrap : MonoBehaviour
     }
 
     // ==========================================
-    // 2.4 KITCHEN CAT NPCS (แมว 2 ตัว สลับกันป่วนครัว)
+    // 2.4 KITCHEN CAT NPCS (โมเดล Neko Cat Free Edition 3D)
     // ==========================================
     private void SetupKitchenCatNPC()
     {
         if (FindObjectsByType<KitchenCatNPC>(FindObjectsSortMode.None).Length == 0)
         {
-            // แมวส้ม (Orange Cat) ทางฝั่งขวา
-            CreateCatNPC("Cat_Orange", new Vector3(3.2f, 0f, -2.2f), new Color(0.95f, 0.55f, 0.15f));
+            // แมวส้ม 3D (Neko Cat 01) ทางฝั่งขวา
+            CreateNekoCat("Cat_NekoOrange", "Neko Cat 01", new Vector3(3.2f, 0f, -2.2f), new Color(0.95f, 0.55f, 0.15f));
 
-            // แมวเทา (Gray Cat) ทางฝั่งซ้าย
-            CreateCatNPC("Cat_Gray", new Vector3(-3.2f, 0f, 1.8f), new Color(0.45f, 0.45f, 0.48f));
+            // แมวเทา 3D (Neko Cat 02) ทางฝั่งซ้าย
+            CreateNekoCat("Cat_NekoGrey", "Neko Cat 02", new Vector3(-3.2f, 0f, 1.8f), new Color(0.45f, 0.45f, 0.48f));
         }
     }
 
-    private void CreateCatNPC(string name, Vector3 pos, Color catColor)
+    private void CreateNekoCat(string name, string prefabResourceName, Vector3 pos, Color fallbackColor)
     {
-        GameObject catObj = new GameObject(name);
-        catObj.transform.position = pos;
+        GameObject catPrefab = Resources.Load<GameObject>(prefabResourceName);
+        GameObject catObj = null;
 
-        GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-        body.name = "CatBody";
-        body.transform.SetParent(catObj.transform, false);
-        body.transform.localPosition = new Vector3(0, 0.35f, 0);
-        body.transform.localRotation = Quaternion.Euler(90, 0, 0);
-        body.transform.localScale = new Vector3(0.45f, 0.45f, 0.6f);
-        if (body.TryGetComponent(out Collider bCol)) Destroy(bCol);
+        if (catPrefab != null)
+        {
+            catObj = Instantiate(catPrefab);
+            catObj.name = name;
+            catObj.transform.position = pos;
+            catObj.transform.localScale = Vector3.one * 0.35f; // ย่อขนาดตัวให้เป็นลูกแมวน้อยน่ารัก ตัวเล็กกะทัดรัด
+        }
+        else
+        {
+            // Fallback กรณีหา Prefab ไม่เจอ
+            catObj = new GameObject(name);
+            catObj.transform.position = pos;
+            catObj.transform.localScale = Vector3.one * 0.35f;
 
-        GameObject head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        head.name = "CatHead";
-        head.transform.SetParent(catObj.transform, false);
-        head.transform.localPosition = new Vector3(0, 0.65f, 0.35f);
-        head.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-        if (head.TryGetComponent(out Collider hCol)) Destroy(hCol);
+            GameObject body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = "CatBody";
+            body.transform.SetParent(catObj.transform, false);
+            body.transform.localPosition = new Vector3(0, 0.35f, 0);
+            body.transform.localRotation = Quaternion.Euler(90, 0, 0);
+            body.transform.localScale = new Vector3(0.45f, 0.45f, 0.6f);
+            if (body.TryGetComponent(out Collider bCol)) Destroy(bCol);
 
-        Material catMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-        catMat.color = catColor;
-        body.GetComponent<MeshRenderer>().material = catMat;
-        head.GetComponent<MeshRenderer>().material = catMat;
+            GameObject head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            head.name = "CatHead";
+            head.transform.SetParent(catObj.transform, false);
+            head.transform.localPosition = new Vector3(0, 0.65f, 0.35f);
+            head.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            if (head.TryGetComponent(out Collider hCol)) Destroy(hCol);
 
-        CapsuleCollider catCol = catObj.AddComponent<CapsuleCollider>();
-        catCol.center = new Vector3(0, 0.4f, 0);
-        catCol.radius = 0.35f;
-        catCol.height = 0.8f;
+            Material catMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+            catMat.color = fallbackColor;
+            body.GetComponent<MeshRenderer>().material = catMat;
+            head.GetComponent<MeshRenderer>().material = catMat;
+        }
 
-        // จุดสำหรับคาบอาหาร
-        GameObject holdObj = new GameObject("HoldPoint");
-        holdObj.transform.SetParent(catObj.transform, false);
-        holdObj.transform.localPosition = new Vector3(0, 0.7f, 0.5f);
+        // ติดตั้ง Collider สำหรับตรวจจับการเข้าใกล้
+        if (!catObj.TryGetComponent(out Collider _))
+        {
+            CapsuleCollider catCol = catObj.AddComponent<CapsuleCollider>();
+            catCol.center = new Vector3(0, 0.25f, 0);
+            catCol.radius = 0.25f;
+            catCol.height = 0.5f;
+        }
 
-        catObj.AddComponent<KitchenCatNPC>();
+        // ติดตั้งจุดคาบอาหาร HoldPoint ด้านหน้าปากแมว
+        Transform holdPoint = catObj.transform.Find("HoldPoint");
+        if (holdPoint == null)
+        {
+            GameObject holdObj = new GameObject("HoldPoint");
+            holdObj.transform.SetParent(catObj.transform, false);
+            holdObj.transform.localPosition = new Vector3(0, 0.45f, 0.4f);
+        }
+
+        // ติดตั้งระบบแอนิเมชันเดิน-วิ่งส่ายหางดุ๊กดิ๊ก
+        if (!catObj.TryGetComponent(out CatProceduralAnimator _))
+        {
+            catObj.AddComponent<CatProceduralAnimator>();
+        }
+
+        // ติดตั้งสมอง AI ของแมวขโมยของ
+        if (!catObj.TryGetComponent(out KitchenCatNPC _))
+        {
+            catObj.AddComponent<KitchenCatNPC>();
+        }
     }
 
     // ==========================================

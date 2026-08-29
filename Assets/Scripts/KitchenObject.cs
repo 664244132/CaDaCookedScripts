@@ -20,14 +20,21 @@ public class KitchenObject : MonoBehaviour
 
         this.kitchenObjectParent = kitchenObjectParent;
 
-        if (kitchenObjectParent.HasKitchenObject())
+        if (kitchenObjectParent != null)
         {
-            Debug.LogError("IKitchenObjectParent Counter already Full of object");
-        }
-        kitchenObjectParent.SetKitchenObject(this);
+            if (kitchenObjectParent.HasKitchenObject())
+            {
+                Debug.LogError("IKitchenObjectParent Counter already Full of object");
+            }
+            kitchenObjectParent.SetKitchenObject(this);
 
-        transform.parent = kitchenObjectParent.GetKitchenObjectFollowTranform();
-        transform.localPosition = Vector3.zero;
+            transform.parent = kitchenObjectParent.GetKitchenObjectFollowTranform();
+            transform.localPosition = Vector3.zero;
+        }
+        else
+        {
+            transform.parent = null;
+        }
     }
 
     public IKitchenObjectParent GetKitchenObjectParent()

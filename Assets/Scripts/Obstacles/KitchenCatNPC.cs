@@ -28,7 +28,7 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     [SerializeField] private Transform exitPoint;
 
     private State state;
-    private ClearCounter targetCounter;
+    private BaseCounter targetCounter;
     private KitchenObject carriedKitchenObject;
     private Vector3 targetPosition;
     private Vector3 spawnPosition;
@@ -133,15 +133,15 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
 
     private void FindTargetCounter()
     {
-        ClearCounter[] counters = FindObjectsByType<ClearCounter>(FindObjectsSortMode.None);
-        foreach (ClearCounter counter in counters)
+        BaseCounter[] counters = FindObjectsByType<BaseCounter>(FindObjectsSortMode.None);
+        foreach (BaseCounter counter in counters)
         {
             if (counter.HasKitchenObject())
             {
                 targetCounter = counter;
                 state = State.WalkingToCounter;
                 OnCatMeow?.Invoke(this, EventArgs.Empty);
-                Debug.Log("🐱 KitchenCat: Targeted food on counter! Sneaking in...");
+                Debug.Log($"🐱 KitchenCat: Targeted food on [{counter.name}]! Sneaking in...");
                 return;
             }
         }

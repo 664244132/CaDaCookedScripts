@@ -33,6 +33,13 @@ public class KitchenGameManager : MonoBehaviour
     private void Start()
     {
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
+
+        // รับประกันการติดตั้งและเริ่มทำงานของระบบ 2.1 - 2.5 เสมอ
+        if (FindFirstObjectByType<GameplayEventsBootstrap>() == null)
+        {
+            GameObject bootstrapObj = new GameObject("--- GAMEPLAY SYSTEMS BOOTSTRAP ---");
+            bootstrapObj.AddComponent<GameplayEventsBootstrap>();
+        }
     }
 
     private void OnDestroy()

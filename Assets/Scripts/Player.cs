@@ -32,6 +32,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     // --- Obstacle & Effect Variables ---
     private bool isSlipping;
     private float slipTimer;
+    private float slipCooldownTimer;
     private float slipSpeedMultiplier = 1f;
     private float spinSpeed;
     private Vector3 slipMomentum;
@@ -67,21 +68,59 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     {
         if (!KitchenGameManager.Instance.IsGamePlaying()) return;
 
+        // 1. หากผู้เล่นกำลังถือถังดับเพลิงอยู่ และกด E -> ทำการทิ้งถังดับเพลิงลงพื้น (หรือวางบนเคาน์เตอร์ถ้าว่าง)
+        if (HasKitchenObject() && GetKitchenObject() is FireExtinguisher heldExtinguisher)
+        {
+            if (selectedCounter != null && !selectedCounter.HasKitchenObject())
+            {
+                selectedCounter.Interact(this);
+            }
+            else
+            {
+                Vector3 dropPos = transform.position + transform.forward * 0.85f;
+                heldExtinguisher.DropToFloor(dropPos);
+            }
+            return;
+        }
+
+        // 2. ปฏิสัมพันธ์กับเคาน์เตอร์ที่เลือก
         if (selectedCounter != null)
         {
+            if (selectedCounter.TryGetComponent(out FireHazard fireHazard) && (fireHazard.IsBurning() || fireHazard.IsLockedOut()))
+            {
+                Debug.Log("🚫 Counter is Burning or Locked Out! Cannot interact!");
+                return;
+            }
+
             selectedCounter.Interact(this);
             return;
         }
 
-        // ตรวจจับการหยิบถังดับเพลิงที่วางอยู่บนพื้น
+        // 3. ตรวจจับการหยิบถังดับเพลิงที่วางอยู่บนพื้นด้วยปุ่ม E
         if (!HasKitchenObject())
         {
-            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 2.5f))
+            FireExtinguisher[] allExts = FindObjectsByType<FireExtinguisher>(FindObjectsSortMode.None);
+            FireExtinguisher closestExt = null;
+            float closestDist = 2.5f;
+
+            foreach (FireExtinguisher ext in allExts)
             {
-                if (hit.collider.TryGetComponent(out FireExtinguisher ext) && ext.GetKitchenObjectParent() == null)
+                if (ext.GetKitchenObjectParent() == null)
                 {
-                    ext.SetKitchenObjectParent(this);
+                    float dist = Vector3.Distance(transform.position, ext.transform.position);
+                    if (dist < closestDist)
+                    {
+                        closestDist = dist;
+                        closestExt = ext;
+                    }
                 }
+            }
+
+            if (closestExt != null)
+            {
+                closestExt.SetKitchenObjectParent(this);
+                Debug.Log("🧯 Player: Picked up FireExtinguisher with [E]!");
+                return;
             }
         }
     }
@@ -90,15 +129,20 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     {
         if (!KitchenGameManager.Instance.IsGamePlaying()) return;
 
-        // หากผู้เล่นถือถังดับเพลิงอยู่ ให้กดฉีดพ่นสารดับเพลิง
+        // หากผู้เล่นถือถังดับเพลิงอยู่ และกด F -> พ่นละอองขาวดับเพลิง
         if (HasKitchenObject() && GetKitchenObject() is FireExtinguisher fireExtinguisher)
         {
-            fireExtinguisher.StartSpraying(transform.forward);
+            fireExtinguisher.TriggerSprayPulse(transform.forward);
             return;
         }
 
         if (selectedCounter != null)
         {
+            if (selectedCounter.TryGetComponent(out FireHazard fireHazard) && (fireHazard.IsBurning() || fireHazard.IsLockedOut()))
+            {
+                return;
+            }
+
             selectedCounter.InteractAlternate(this);
         }
     }
@@ -108,6 +152,25 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         UpdateObstacleTimers();
         HandleMovement();
         HandleInteractions();
+        HandleExtinguisherContinuousSpray();
+    }
+
+    /// <summary>
+    /// ตรวจจับการกดค้างปุ่ม F เพื่อพ่นละอองดับเพลิงต่อเนื่อง
+    /// </summary>
+    private void HandleExtinguisherContinuousSpray()
+    {
+        if (HasKitchenObject() && GetKitchenObject() is FireExtinguisher fireExt)
+        {
+            if (Input.GetKey(KeyCode.F))
+            {
+                fireExt.StartSpraying(transform.forward);
+            }
+            else
+            {
+                fireExt.StopSpraying();
+            }
+        }
     }
 
     private void UpdateObstacleTimers()
@@ -115,11 +178,17 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         if (slipTimer > 0f)
         {
             slipTimer -= Time.deltaTime;
-            if (slipTimer <= 0f && !isSlipping)
+            if (slipTimer <= 0f)
             {
+                isSlipping = false;
                 slipSpeedMultiplier = 1f;
                 slipMomentum = Vector3.zero;
             }
+        }
+
+        if (slipCooldownTimer > 0f)
+        {
+            slipCooldownTimer -= Time.deltaTime;
         }
 
         if (slowTimer > 0f)
@@ -179,27 +248,33 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         // หากกำลังลื่นไถล
         if (isSlipping || slipTimer > 0f)
         {
-            currentSpeed *= slipSpeedMultiplier;
+            currentSpeed = moveSpeed * slipSpeedMultiplier;
+
             if (moveDir != Vector3.zero)
             {
-                slipMomentum = Vector3.Lerp(slipMomentum, moveDir, Time.deltaTime * 3f);
+                slipMomentum = Vector3.Lerp(slipMomentum, moveDir, Time.deltaTime * 2.5f);
             }
+            else if (slipMomentum == Vector3.zero)
+            {
+                slipMomentum = transform.forward;
+            }
+
             moveDir = slipMomentum.normalized;
 
             // หมุนตัวเชฟตอนลื่นไถล
-            transform.Rotate(Vector3.up, spinSpeed * Time.deltaTime);
+            transform.Rotate(Vector3.up, spinSpeed * Time.deltaTime, Space.World);
         }
 
         float moveDistance = currentSpeed * Time.deltaTime;
         float playerRadius = 0.5f;
         float playerHeight = 2.0f;
-        bool canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDir, moveDistance);
+        bool canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDir, moveDistance, ~0, QueryTriggerInteraction.Ignore);
 
         if (!canMove && moveDir != Vector3.zero)
         {
             // ตรวจจับการเดินสไลด์ตามแนวแกน X
             Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
-            canMove = moveDir.x != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance);
+            canMove = moveDir.x != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance, ~0, QueryTriggerInteraction.Ignore);
             if (canMove)
             {
                 moveDir = moveDirX;
@@ -208,7 +283,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
             {
                 // ตรวจจับการเดินสไลด์ตามแนวแกน Z
                 Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
-                canMove = moveDir.z != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirZ, moveDistance);
+                canMove = moveDir.z != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirZ, moveDistance, ~0, QueryTriggerInteraction.Ignore);
                 if (canMove)
                 {
                     moveDir = moveDirZ;
@@ -221,7 +296,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
             transform.position += moveDir * currentSpeed * Time.deltaTime;
         }
 
-        isWalking = inputVector != Vector2.zero;
+        isWalking = inputVector != Vector2.zero || isSlipping || slipTimer > 0f;
 
         // หมุนตัวตามทิศทางปกติถ้าไม่ได้ลื่นไถล
         if (!isSlipping && slipTimer <= 0f && moveDir != Vector3.zero)
@@ -232,15 +307,14 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     }
 
     // --- Obstacle Public API ---
-    public void SetSlipping(bool slipping, float multiplier, float duration, float spin)
+    public void TriggerSlipImpulse(float speedMultiplier = 1.5f, float duration = 0.45f, float spin = 360f)
     {
-        if (!this.isSlipping && slipping)
-        {
-            Debug.Log("🛢️ Player: Stepped on Oil! Slipping and spinning!");
-        }
+        if (slipCooldownTimer > 0f || slipTimer > 0f) return; // ป้องกันการลื่นซ้ำซ้อนไม่หยุด
 
-        this.isSlipping = slipping;
-        this.slipSpeedMultiplier = multiplier;
+        Debug.Log("🛢️ Player: Slipped on Oil briefly!");
+        this.slipCooldownTimer = 1.0f; // Cooldown 1 วินาทีก่อนที่จะลื่นรอบใหม่
+        this.slipTimer = duration;     // ลื่นแค่ 0.45 วินาทีพอดีๆ
+        this.slipSpeedMultiplier = speedMultiplier;
         this.spinSpeed = spin;
 
         Vector2 inputVector = gameInput.GetMovementVectorNormalized();
@@ -248,16 +322,26 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         {
             this.slipMomentum = new Vector3(inputVector.x, 0, inputVector.y).normalized;
         }
-        else if (slipMomentum == Vector3.zero)
+        else
         {
             this.slipMomentum = transform.forward;
         }
     }
 
+    public void SetSlipping(bool slipping, float multiplier, float duration, float spin)
+    {
+        if (slipping)
+        {
+            TriggerSlipImpulse(multiplier, duration, spin);
+        }
+    }
+
     public void TriggerSlipDecay(float duration)
     {
-        this.isSlipping = false;
-        this.slipTimer = duration;
+        if (slipTimer > 0.25f)
+        {
+            slipTimer = 0.25f;
+        }
     }
 
     public void ApplySlowEffect(float multiplier, float duration)

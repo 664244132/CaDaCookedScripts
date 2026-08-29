@@ -9,7 +9,6 @@ public class MovingCounter : MonoBehaviour
     [Header("Movement Settings")]
     [SerializeField] private Vector3 moveOffset = new Vector3(3.0f, 0f, 0f); // ระยะที่เลื่อนไป
     [SerializeField] private float moveSpeed = 2.2f;                      // ความเร็วในการเลื่อนไป-กลับ
-    [SerializeField] private bool moveOnX = true;
 
     private Vector3 startPosition;
     private Vector3 targetPosition;
