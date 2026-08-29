@@ -28,8 +28,11 @@ public class FireExtinguisher : KitchenObject
     private TextMeshProUGUI promptText;
     private Camera targetCamera;
 
+    private static Shader cachedSafeShader;
+
     private void Awake()
     {
+        EnsureVisuals();
         EnsureCollider();
         InitializeWhiteMistSpray();
         InitializePromptUI();
@@ -37,6 +40,7 @@ public class FireExtinguisher : KitchenObject
 
     private void Start()
     {
+        EnsureVisuals();
         targetCamera = Camera.main;
         if (targetCamera == null)
         {
@@ -47,6 +51,107 @@ public class FireExtinguisher : KitchenObject
         {
             sprayParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
+    }
+
+    /// <summary>
+    /// รับประกันว่าโมเดล 3D ของถังดับเพลิง (ตัวถังสีแดง + หัวฉีดทรงสี่เหลี่ยมสีเทา + ท่อปลายหัวฉีดสีดำ)
+    /// ถูกสร้างและลง Material ครบถ้วน ไม่หายไปเมื่อ Build เกม Standalone
+    /// </summary>
+    public void EnsureVisuals()
+    {
+        // 1. ตัวถังทรงกระบอกสีแดง (Red Cylinder Body)
+        MeshRenderer bodyRenderer = GetComponent<MeshRenderer>();
+        if (bodyRenderer != null)
+        {
+            bodyRenderer.material = GetSafeMaterial(new Color(0.9f, 0.05f, 0.05f), 0.5f, 0.6f);
+        }
+
+        // 2. หัวฉีดทรงสี่เหลี่ยมสีเทา (Grey Top Nozzle)
+        Transform nozzleTransform = transform.Find("TopNozzle");
+        if (nozzleTransform == null)
+        {
+            // ตรวจสอบชื่อเดิมถ้ามี
+            foreach (Transform child in transform)
+            {
+                if (child.name.Contains("Nozzle") || child.name.Contains("Cube"))
+                {
+                    nozzleTransform = child;
+                    nozzleTransform.name = "TopNozzle";
+                    break;
+                }
+            }
+        }
+
+        if (nozzleTransform == null)
+        {
+            GameObject nozzleObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            nozzleObj.name = "TopNozzle";
+            nozzleObj.transform.SetParent(transform, false);
+            nozzleObj.transform.localPosition = new Vector3(0, 1.05f, 0.2f);
+            nozzleObj.transform.localScale = new Vector3(0.32f, 0.28f, 0.55f);
+            if (nozzleObj.TryGetComponent(out Collider c)) Destroy(c);
+            nozzleTransform = nozzleObj.transform;
+        }
+
+        MeshRenderer nozzleRenderer = nozzleTransform.GetComponent<MeshRenderer>();
+        if (nozzleRenderer != null)
+        {
+            nozzleRenderer.material = GetSafeMaterial(new Color(0.68f, 0.70f, 0.74f), 0.85f, 0.85f);
+        }
+
+        // 3. ท่อปลายหัวฉีดสีดำ (Black Nozzle Tip)
+        Transform tipTransform = transform.Find("NozzleTip");
+        if (tipTransform == null)
+        {
+            GameObject tipObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            tipObj.name = "NozzleTip";
+            tipObj.transform.SetParent(transform, false);
+            tipObj.transform.localPosition = new Vector3(0, 1.05f, 0.5f);
+            tipObj.transform.localRotation = Quaternion.Euler(90f, 0, 0);
+            tipObj.transform.localScale = new Vector3(0.12f, 0.15f, 0.12f);
+            if (tipObj.TryGetComponent(out Collider tc)) Destroy(tc);
+            tipTransform = tipObj.transform;
+        }
+
+        MeshRenderer tipRenderer = tipTransform.GetComponent<MeshRenderer>();
+        if (tipRenderer != null)
+        {
+            tipRenderer.material = GetSafeMaterial(new Color(0.12f, 0.12f, 0.15f), 0.5f, 0.5f);
+        }
+    }
+
+    /// <summary>
+    /// สร้าง Material ที่ปลอดภัยสำหรับทั้ง Editor และ Standalone Build โดยดึง Shader จาก Scene Object หาก Shader.Find คืนค่า null
+    /// </summary>
+    public static Material GetSafeMaterial(Color color, float metallic = 0.5f, float smoothness = 0.5f)
+    {
+        if (cachedSafeShader == null)
+        {
+            // 1. ค้นหา URP Lit หรือ Standard
+            cachedSafeShader = Shader.Find("Universal Render Pipeline/Lit");
+            if (cachedSafeShader == null) cachedSafeShader = Shader.Find("Standard");
+
+            // 2. หากรันใน Build แล้ว Shader.Find คืนค่า null ให้ยืม Shader จาก MeshRenderer ที่มีอยู่ใน Scene
+            if (cachedSafeShader == null)
+            {
+                MeshRenderer[] renderers = FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None);
+                foreach (var r in renderers)
+                {
+                    if (r.sharedMaterial != null && r.sharedMaterial.shader != null)
+                    {
+                        cachedSafeShader = r.sharedMaterial.shader;
+                        break;
+                    }
+                }
+            }
+        }
+
+        Material mat = new Material(cachedSafeShader != null ? cachedSafeShader : Shader.Find("Sprites/Default"));
+        mat.color = color;
+        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+        if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", metallic);
+        if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", smoothness);
+        return mat;
     }
 
     /// <summary>

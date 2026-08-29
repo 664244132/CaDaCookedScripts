@@ -50,21 +50,23 @@
 | **Session 40: Enlarge Tutorial Content Font Size & Layout Dimensions** | ขยายขนาดตัวอักษรของหน้าสอนเล่นขึ้นเป็น 25-32pt, ขยาย Header เป็น 44pt, และขยายความกว้างของคอลัมน์ซ้าย-ขวาเป็น 740px และ 840px ใน [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) เต็มตา ชัดเจน อ่านง่ายขึ้นเป็นพิเศษ | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) |
 | **Session 41: Add Prominent Warning for Fire Extinguisher & Cat Theft** | เพิ่มกล่องข้อความเตือนพิเศษตัวหนาสีทอง/แดง/เขียว ใน [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs): *"DO NOT place Extinguisher on counters! Cats will STEAL it! Always press [ E ] to DROP on the FLOOR!"* ชัดเจน เด่นสะดุดตา | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) |
 | **Session 42: 15s Countdown, Orange Warning Box Panel & 100% Pure ASCII Typography Fix** | 1. ปรับเพิ่มเวลานับถอยหลังเป็น 15 วินาทีใน [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) 2. สร้างกล่องเตือนพิเศษสีส้มเด่นชัด (`#FFA500`) กว้าง 1500px 3. ปรับโครงสร้างข้อความทั้งหมดเป็น Pure ASCII (`-`, `*`, `[!]`) กำจัด Unicode Emojis เพื่อรับประกันไม่มีกล่องสี่เหลี่ยมตกหล่น 100% ใน [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs) | [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs), [`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs) |
+| **Session 43: Fix Fire Extinguisher 3D Visuals & Missing Top Nozzle in Standalone Build** | เพิ่มเมธอด `EnsureVisuals()` และ `GetSafeMaterial()` ใน [`FireExtinguisher.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/FireExtinguisher.cs) และปรับ [`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs) ให้ลง Material สีเทาเงิน (`#ADC0D0`) ให้กับหัวฉีด `TopNozzle` และท่อปลายสีดำ `NozzleTip` พร้อมระบบ Fallback ดึง Shader จาก Scene ป้องกันโมเดลหัวฉีดหายเมื่อทำการ Build เกม Standalone | [`FireExtinguisher.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/FireExtinguisher.cs), [`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs) |
+| **Session 44: Fix CS0618 Obsolete FindObjectOfType Deprecation in Editor Scripts** | เปลี่ยนจาก `Object.FindObjectOfType` ที่ล้าสมัยเป็น `Object.FindFirstObjectByType` ใน [`GameSceneUIDesigner.cs`](file:///d:/unity/My%20project/Assets/Editor/GameSceneUIDesigner.cs) และ [`MainMenuGenerator.cs`](file:///d:/unity/My%20project/Assets/Editor/MainMenuGenerator.cs) เคลียร์ Warning CS0618 สะอาด 100% | [`GameSceneUIDesigner.cs`](file:///d:/unity/My%20project/Assets/Editor/GameSceneUIDesigner.cs), [`MainMenuGenerator.cs`](file:///d:/unity/My%20project/Assets/Editor/MainMenuGenerator.cs) |
+| **Session 45: Fix CS0414 Unused Field lockBlendShapes in FreeCharacterCustomizerWindow.cs** | ลบตัวแปรฟิลด์ `lockBlendShapes` ที่ไม่ได้ถูกนำไปใช้งานใน [`FreeCharacterCustomizerWindow.cs`](file:///d:/unity/My%20project/Assets/FREE/Pack_FREE_PartyCharacters/Editor/FreeCharacterCustomizerWindow.cs) เคลียร์ Warning CS0414 สะอาด 100% | [`FreeCharacterCustomizerWindow.cs`](file:///d:/unity/My%20project/Assets/FREE/Pack_FREE_PartyCharacters/Editor/FreeCharacterCustomizerWindow.cs) |
+| **Session 46: Fix CS0414 Unused Field watchingCharacter in FreeCharacterCustomizerWindow.cs** | ลบตัวแปรฟิลด์ `watchingCharacter` ที่ไม่ได้ถูกนำไปใช้งานใน [`FreeCharacterCustomizerWindow.cs`](file:///d:/unity/My%20project/Assets/FREE/Pack_FREE_PartyCharacters/Editor/FreeCharacterCustomizerWindow.cs) เคลียร์ Warning CS0414 สะอาด 100% | [`FreeCharacterCustomizerWindow.cs`](file:///d:/unity/My%20project/Assets/FREE/Pack_FREE_PartyCharacters/Editor/FreeCharacterCustomizerWindow.cs) |
+| **Session 47: Add 2nd Moving Counter Obstacle to Kitchen** | เพิ่มเคาน์เตอร์เลื่อนตำแหน่งอีก 1 ตัว (รวมเป็น 2 ตัวในครัว) โดยปรับปรุง [`MovingCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/MovingCounter.cs) ให้รองรับการปรับแต่งทิศทาง/ความเร็วแยกรายตัว และอัปเดต [`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs) ให้ติดตั้งเคาน์เตอร์เคลื่อนที่ 2 จุด (แกน X ซ้าย-ขวา และแกน Z หน้า-หลัง) เพิ่มความท้าทายในครัว | [`MovingCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/MovingCounter.cs), [`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs) |
 
 ---
 
 ## 📝 รายละเอียดการปรับปรุงระบบล่าสุด (Recent Active Sessions)
 
-### 🔹 Session 42: 15s Countdown, Orange Warning Box Panel & 100% Pure ASCII Typography Fix
-- **`[15S TIMER, ORANGE WARNING PANEL & PURE ASCII FIX]`**
-  - **ขยายเวลานับถอยหลังเป็น 15 วินาที ([`KitchenGameManager.cs`](file:///d:/unity/My%20project/Assets/Scripts/KitchenGameManager.cs)):** ตั้งค่า `countdownToStartTimer = 15f` ให้ผู้เล่นมีเวลา 15 วินาทีเต็มในการศึกษาระบบ
-  - **กล่องข้อความเตือนเด่นชัดสีส้ม ([`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs)):**
-    - แผ่นพื้นหลังเตือนโทนสีส้มเข้มตัดขอบ ขนาดกว้าง `1500px` เด่นชัดด้านล่าง
-    - ข้อความเตือนตัวหนาสีส้มสดใส (`#FFA500` / `#FFD700`):
-      - `[ ! ] IMPORTANT WARNING : FIRE EXTINGUISHER`
-      - `* DO NOT place Fire Extinguisher on counters! The CATS will STEAL it!`
-      - `* Always press [ E ] to DROP Extinguisher safely on the FLOOR!`
-  - **กำจัดปัญหากล่องสี่เหลี่ยมและตัวอักษรอ่านไม่ออก 100%:** ขจัด Unicode Emojis (`⚠️`, `🎮`, `🍳`) และสัญลักษณ์พิเศษ (`•`, `—`) ที่ฟอนต์ SDF ไม่รองรับออกทั้งหมด โดยใช้ Pure ASCII ที่คมชัด สมบูรณ์แบบทุกตัวอักษร
+### 🔹 Session 47: Add 2nd Moving Counter Obstacle to Kitchen
+- **`[DYNAMIC DUAL MOVING COUNTERS]`**
+  - **ปรับปรุงระบบเลื่อนเคาน์เตอร์ ([`MovingCounter.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/MovingCounter.cs)):** เพิ่มเมธอด `Setup(Vector3 offset, float speed, float phaseOffset)` ให้สามารถกำหนดทิศทางการเลื่อน ความเร็ว และจังหวะหน่วงเวลาแบบแยกอิสระในแต่ละตัวได้
+  - **ติดตั้งเคาน์เตอร์เลื่อน 2 ตัว ([`GameplayEventsBootstrap.cs`](file:///d:/unity/My%20project/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs)):**
+    - **ตัวที่ 1:** เลื่อนตามแนวนอน (ซ้าย-ขวา `X: 2.2m`, ความเร็ว `1.6f`)
+    - **ตัวที่ 2:** เลื่อนตามแนวลึก (หน้า-หลัง `Z: 1.8m`, ความเร็ว `1.4f`, ออฟเซ็ตจังหวะ `0.7s`)
+  - สิ่งของ จาน และวัตถุดิบบนเคาน์เตอร์จะเคลื่อนที่ตามตำแหน่งเคาน์เตอร์อย่างราบรื่น ผู้เล่นสามารถวางและหยิบอาหารจากเคาน์เตอร์เคลื่อนที่ทั้ง 2 ตัวได้ตามปกติ
 
 ---
 
@@ -74,21 +76,6 @@
 - [x] **Unity C# Best Practices:** ยึดหลัก Decoupled Architecture ผ่าน C# Events และ ScriptableObjects
 - [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
 - [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
-- [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
-- [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
 - [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน
 - [x] **Zero GC Alloc in Update:** หลีกเลี่ยงการสร้าง Object ขยะในลูป `Update()`
 - [x] **De Morgan's Laws & Early Return:** โครงสร้างเงื่อนไขแบนราบ อ่านง่าย สื่อความหมายชัดเจน

@@ -68,7 +68,7 @@ public class MainMenuGenerator : MonoBehaviour
         so.ApplyModifiedProperties();
         
         // 8. Ensure EventSystem exists
-        if (Object.FindObjectOfType<EventSystem>() == null)
+        if (Object.FindFirstObjectByType<EventSystem>() == null)
         {
             GameObject eventSystemGo = new GameObject("EventSystem");
             eventSystemGo.AddComponent<EventSystem>();

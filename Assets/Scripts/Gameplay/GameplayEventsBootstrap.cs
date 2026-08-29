@@ -253,20 +253,16 @@ public class GameplayEventsBootstrap : MonoBehaviour
             spawnPos = ClampToPlayableBounds(spawnPos, 0.35f);
             extObj.transform.position = spawnPos;
 
-            Material redMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-            redMat.color = new Color(0.9f, 0.05f, 0.05f);
-            if (redMat.HasProperty("_EmissionColor"))
-            {
-                redMat.EnableKeyword("_EMISSION");
-                redMat.SetColor("_EmissionColor", new Color(0.9f, 0.1f, 0.1f) * 0.5f);
-            }
+            Material redMat = FireExtinguisher.GetSafeMaterial(new Color(0.9f, 0.05f, 0.05f), 0.5f, 0.6f);
             extObj.GetComponent<MeshRenderer>().material = redMat;
 
             GameObject topNozzle = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            topNozzle.name = "TopNozzle";
             topNozzle.transform.SetParent(extObj.transform, false);
-            topNozzle.transform.localPosition = new Vector3(0, 1.1f, 0.2f);
-            topNozzle.transform.localScale = new Vector3(0.3f, 0.3f, 0.6f);
+            topNozzle.transform.localPosition = new Vector3(0, 1.05f, 0.2f);
+            topNozzle.transform.localScale = new Vector3(0.32f, 0.28f, 0.55f);
             if (topNozzle.TryGetComponent(out Collider nozCol)) Destroy(nozCol);
+            topNozzle.GetComponent<MeshRenderer>().material = FireExtinguisher.GetSafeMaterial(new Color(0.68f, 0.70f, 0.74f), 0.85f, 0.85f);
 
             extObj.AddComponent<FireExtinguisher>();
         }
@@ -436,16 +432,38 @@ public class GameplayEventsBootstrap : MonoBehaviour
     }
 
     // ==========================================
-    // 2.5 MOVING COUNTER (เคาน์เตอร์เลื่อนเร็ว)
+    // 2.5 MOVING COUNTER (เคาน์เตอร์เลื่อนตำแหน่ง 2 ตัว)
     // ==========================================
     private void SetupMovingCounters()
     {
-        if (FindFirstObjectByType<MovingCounter>() == null)
+        MovingCounter[] existingMovingCounters = FindObjectsByType<MovingCounter>(FindObjectsSortMode.None);
+        if (existingMovingCounters.Length < 2)
         {
             ClearCounter[] counters = FindObjectsByType<ClearCounter>(FindObjectsSortMode.None);
-            if (counters.Length > 0)
+            System.Collections.Generic.List<ClearCounter> availableCounters = new System.Collections.Generic.List<ClearCounter>();
+            
+            foreach (var c in counters)
             {
-                counters[0].gameObject.AddComponent<MovingCounter>();
+                if (c.GetComponent<MovingCounter>() == null)
+                {
+                    availableCounters.Add(c);
+                }
+            }
+
+            // เคาน์เตอร์เลื่อนตัวที่ 1: เลื่อนตามแนวนอน (ซ้าย-ขวา)
+            if (existingMovingCounters.Length == 0 && availableCounters.Count > 0)
+            {
+                MovingCounter mc1 = availableCounters[0].gameObject.AddComponent<MovingCounter>();
+                mc1.Setup(new Vector3(2.2f, 0f, 0f), 1.6f, 0f);
+                availableCounters.RemoveAt(0);
+            }
+
+            // เคาน์เตอร์เลื่อนตัวที่ 2: เลื่อนตามแนวลึก (หน้า-หลัง) พร้อมจังหวะต่างกัน
+            if (FindObjectsByType<MovingCounter>(FindObjectsSortMode.None).Length < 2 && availableCounters.Count > 0)
+            {
+                int targetIndex = availableCounters.Count > 2 ? 2 : (availableCounters.Count - 1);
+                MovingCounter mc2 = availableCounters[targetIndex].gameObject.AddComponent<MovingCounter>();
+                mc2.Setup(new Vector3(0f, 0f, 1.8f), 1.4f, 0.7f);
             }
         }
     }

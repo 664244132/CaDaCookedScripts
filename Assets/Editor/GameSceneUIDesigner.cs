@@ -19,7 +19,7 @@ public class GameSceneUIDesigner
 
     private static void ApplyDeliveryManagerUI()
     {
-        DeliveryManagerUI deliveryUI = Object.FindObjectOfType<DeliveryManagerUI>(true);
+        DeliveryManagerUI deliveryUI = Object.FindFirstObjectByType<DeliveryManagerUI>(FindObjectsInactive.Include);
         if (deliveryUI != null)
         {
             RectTransform rect = deliveryUI.GetComponent<RectTransform>();
@@ -45,7 +45,7 @@ public class GameSceneUIDesigner
 
     private static void ApplyGamePlayingClockUI()
     {
-        GamePlayingClockUI clockUI = Object.FindObjectOfType<GamePlayingClockUI>(true);
+        GamePlayingClockUI clockUI = Object.FindFirstObjectByType<GamePlayingClockUI>(FindObjectsInactive.Include);
         if (clockUI != null)
         {
             RectTransform rect = clockUI.GetComponent<RectTransform>();
@@ -75,13 +75,13 @@ public class GameSceneUIDesigner
     {
         Color orange = new Color(1f, 0.65f, 0f);
         
-        GamePauseUI pauseUI = Object.FindObjectOfType<GamePauseUI>(true);
+        GamePauseUI pauseUI = Object.FindFirstObjectByType<GamePauseUI>(FindObjectsInactive.Include);
         if (pauseUI != null)
         {
             ApplyStyleToPopup(pauseUI.gameObject, orange);
         }
 
-        GameOverUI gameOverUI = Object.FindObjectOfType<GameOverUI>(true);
+        GameOverUI gameOverUI = Object.FindFirstObjectByType<GameOverUI>(FindObjectsInactive.Include);
         if (gameOverUI != null)
         {
             ApplyStyleToPopup(gameOverUI.gameObject, orange);
