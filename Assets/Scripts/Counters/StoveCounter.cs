@@ -22,12 +22,21 @@ public class StoveCounter : BaseCounter, IHasProgress
     }
     [SerializeField] private FryingRecipeSO[] fryingRecipeSOArray;
     [SerializeField] private BurningRecipeSO[] burningRecipeSOArray;
+    [SerializeField] private FireHazard fireHazard;
 
     private State state;
     private float fryingTimer;
     private FryingRecipeSO fryingRecipeSO;
     private float burningTimer;
     private BurningRecipeSO burningRecipeSO;
+
+    private void Awake()
+    {
+        if (fireHazard == null)
+        {
+            fireHazard = GetComponent<FireHazard>();
+        }
+    }
 
     private void Start()
     {
@@ -43,7 +52,7 @@ public class StoveCounter : BaseCounter, IHasProgress
                 case State.Idle:
                     break;
                 case State.Frying:
-                    fryingTimer += Time.deltaTime;
+                    fryingTimer += Time.deltaTime * 1.3f;
 
                     OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
                     {
@@ -66,7 +75,7 @@ public class StoveCounter : BaseCounter, IHasProgress
                     }
                     break;
                 case State.Fried:
-                    burningTimer += Time.deltaTime;
+                    burningTimer += Time.deltaTime * 2.2f;
 
                     OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
                     {
@@ -79,6 +88,11 @@ public class StoveCounter : BaseCounter, IHasProgress
                         KitchenObject.SpawnKitchenObject(burningRecipeSO.output, this);
 
                         state = State.Burned;
+
+                        if (fireHazard != null)
+                        {
+                            fireHazard.Ignite();
+                        }
 
                         OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
                         {
@@ -99,6 +113,11 @@ public class StoveCounter : BaseCounter, IHasProgress
 
     public override void Interact(Player player)
     {
+        if (fireHazard != null && fireHazard.IsBurning())
+        {
+            // ไม่สามารถหยิบของได้ขณะที่ไฟกำลังลุกไหม้ ต้องดับไฟก่อน
+            return;
+        }
         if (!HasKitchenObject())
         {
             if (player.HasKitchenObject())

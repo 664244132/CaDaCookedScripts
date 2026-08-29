@@ -19,9 +19,9 @@ public class KitchenGameManager : MonoBehaviour
 
     private State state;
     private float WaitingToStartTimer = 1f;
-    private float countdownToStartTimer = 5f;
+    private float countdownToStartTimer = 3f;
     private float gamePlayingTimer;
-    private float gamePlayingTimerMax = 80f;
+    private float gamePlayingTimerMax = 150f; // 2 นาที 30 วินาที
     private bool isGamePaused = false;
 
     private void Awake()
@@ -33,6 +33,14 @@ public class KitchenGameManager : MonoBehaviour
     private void Start()
     {
         GameInput.Instance.OnPauseAction += GameInput_OnPauseAction;
+    }
+
+    private void OnDestroy()
+    {
+        if (GameInput.Instance != null)
+        {
+            GameInput.Instance.OnPauseAction -= GameInput_OnPauseAction;
+        }
     }
 
     private void GameInput_OnPauseAction(object sender, EventArgs e)
@@ -103,9 +111,16 @@ public class KitchenGameManager : MonoBehaviour
         return 1 - (gamePlayingTimer / gamePlayingTimerMax);
     }
 
+    private float lastTogglePauseTime;
+
     public void TogglePauseGame()
     {
+        if (Time.unscaledTime - lastTogglePauseTime < 0.15f) return;
+        lastTogglePauseTime = Time.unscaledTime;
+
         isGamePaused = !isGamePaused;
+        Debug.Log("KitchenGameManager: TogglePauseGame - isGamePaused = " + isGamePaused);
+
         if (isGamePaused)
         {
             Time.timeScale = 0f;

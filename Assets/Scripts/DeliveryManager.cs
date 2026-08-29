@@ -1,7 +1,6 @@
-using NUnit.Framework;
-using UnityEngine;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class DeliveryManager : MonoBehaviour
 {
@@ -17,6 +16,7 @@ public class DeliveryManager : MonoBehaviour
     private float spawnRecipeTimerMax = 4f;
     private int waitingRecipesMax = 4;
     private int successfulRecipesAmount;
+    private int scoreMultiplier = 1;
 
     private void Awake()
     {
@@ -71,8 +71,7 @@ public class DeliveryManager : MonoBehaviour
                 if (plateContentsMatchesRecipe)
                 {
                     // player done correct delivery
-
-                    successfulRecipesAmount++;
+                    successfulRecipesAmount += scoreMultiplier;
                     waitingrecipeSOList.RemoveAt(i);
 
                     OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
@@ -84,12 +83,31 @@ public class DeliveryManager : MonoBehaviour
         // no matches found
         // did wrong
         OnRecipeFailed?.Invoke(this, EventArgs.Empty);
-
     }
 
     public void DeliverIncorrectRecipe()
     {
         OnRecipeFailed?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void SetScoreMultiplier(int multiplier)
+    {
+        this.scoreMultiplier = Mathf.Max(1, multiplier);
+    }
+
+    public int GetScoreMultiplier()
+    {
+        return scoreMultiplier;
+    }
+
+    public void SetSpawnRecipeTimerMax(float timerMax)
+    {
+        this.spawnRecipeTimerMax = Mathf.Max(1f, timerMax);
+    }
+
+    public float GetSpawnRecipeTimerMax()
+    {
+        return spawnRecipeTimerMax;
     }
 
     public List<RecipeSO> GetWaitingRecipeSPList()

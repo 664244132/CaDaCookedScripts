@@ -21,6 +21,43 @@ public class SoundManager : MonoBehaviour
         Player.Instance.OnPickedSomething += Player_OnPickedSomething;
         BaseCounter.OnAnyObjectPlaceHere += BaseCounter_OnAnyObjectPlaceHere;
         TrashCounter.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
+        FireHazard.OnAnyFireStarted += FireHazard_OnAnyFireStarted;
+        PotholeTrap.OnPlayerTripped += PotholeTrap_OnPlayerTripped;
+    }
+
+    private void OnDestroy()
+    {
+        if (DeliveryManager.Instance != null)
+        {
+            DeliveryManager.Instance.OnRecipeSuccess -= DeliveryManager_OnRecipeSuccess;
+            DeliveryManager.Instance.OnRecipeFailed -= DeliveryManager_OnRecipeFailed;
+        }
+        CuttingCounter.OnAnyCut -= CuttingCounter_OnAnyCut;
+        if (Player.Instance != null)
+        {
+            Player.Instance.OnPickedSomething -= Player_OnPickedSomething;
+        }
+        BaseCounter.OnAnyObjectPlaceHere -= BaseCounter_OnAnyObjectPlaceHere;
+        TrashCounter.OnAnyObjectTrashed -= TrashCounter_OnAnyObjectTrashed;
+        FireHazard.OnAnyFireStarted -= FireHazard_OnAnyFireStarted;
+        PotholeTrap.OnPlayerTripped -= PotholeTrap_OnPlayerTripped;
+    }
+
+    private void FireHazard_OnAnyFireStarted(object sender, System.EventArgs e)
+    {
+        if (audioClipRefsSO.warning != null && audioClipRefsSO.warning.Length > 0)
+        {
+            FireHazard fireHazard = sender as FireHazard;
+            PlaySound(audioClipRefsSO.warning, fireHazard != null ? fireHazard.transform.position : Vector3.zero);
+        }
+    }
+
+    private void PotholeTrap_OnPlayerTripped(object sender, System.EventArgs e)
+    {
+        if (Player.Instance != null)
+        {
+            PlaySound(audioClipRefsSO.objectDrop, Player.Instance.transform.position);
+        }
     }
 
     private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
