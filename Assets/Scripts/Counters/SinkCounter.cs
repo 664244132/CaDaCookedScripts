@@ -67,14 +67,38 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
             }
         }
 
+        // ค้นหาและผูก SelectedCounterVisual บนเคาน์เตอร์นี้ให้ชี้มาที่ SinkCounter ตัวใหม่อย่างถูกต้อง
+        SelectedCounterVisual visual = GetComponentInChildren<SelectedCounterVisual>();
+        if (visual != null)
+        {
+            visual.SetBaseCounter(this);
+        }
+
         UpdateCleanPlatesVisual();
         UpdateProgressHUD(0f, false);
     }
 
     private void LateUpdate()
     {
+        if (progressCanvasRoot == null) return;
+
+        // ตรวจสอบระยะห่างจากตัวผู้เล่น: หากอยู่ไกลเกิน 2.2 เมตร ให้ซ่อน UI เหมือนกับเคาน์เตอร์อื่นๆ ในครัว
+        Player player = Player.Instance;
+        if (player != null)
+        {
+            float dist = Vector3.Distance(transform.position, player.transform.position);
+            if (dist > 2.2f)
+            {
+                if (progressCanvasRoot.activeSelf)
+                {
+                    progressCanvasRoot.SetActive(false);
+                }
+                return;
+            }
+        }
+
         // ป้าย Progress Bar หันเข้าหากล้องเสมอ
-        if (progressCanvasRoot != null && targetCamera != null && progressCanvasRoot.activeSelf)
+        if (targetCamera != null && progressCanvasRoot.activeSelf)
         {
             progressCanvasRoot.transform.rotation = targetCamera.transform.rotation;
         }
@@ -153,6 +177,14 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
         // ทำงานเฉพาะเมื่อมีจานเปื้อนอยู่ในอ่างล้างจาน
         if (!HasKitchenObject()) return;
         if (!(GetKitchenObject() is DirtyPlateKitchenObject dirtyPlates)) return;
+
+        // Q1 ตัวเลือก A: ล็อคการกดขัดล้างทันทีเมื่อตะแกรงสะเด็ดน้ำเต็ม 4 ใบ ป้องกันจานหายในอากาศ 100%
+        if (cleanPlatesCount >= MAX_CLEAN_PLATES)
+        {
+            UpdateProgressHUD(0f, true);
+            Debug.Log("⚠️ [SinkCounter] Drying rack is FULL (4/4)! Pick up clean plates with [E] before scrubbing more.");
+            return;
+        }
 
         // กด [F] เพื่อขัดล้างจาน (Interactive Cleaning)
         currentScrubCount++;
@@ -251,11 +283,18 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
         {
             if (HasKitchenObject() && GetKitchenObject() is DirtyPlateKitchenObject dirty)
             {
-                promptLabelText.text = $"<color=#00E5FF><b>[F] SCRUB ({currentScrubCount}/{SCRUBS_PER_PLATE})</b></color>\n<size=75%>Plates in Sink: {dirty.GetPlatesCount()}</size>";
+                if (cleanPlatesCount >= MAX_CLEAN_PLATES)
+                {
+                    promptLabelText.text = $"<color=#FF9100><b>⚠️ RACK FULL! PICK UP [E]</b></color>\n<size=75%>Rack Full ({cleanPlatesCount}/{MAX_CLEAN_PLATES}) | Sink: {dirty.GetPlatesCount()}</size>";
+                }
+                else
+                {
+                    promptLabelText.text = $"<color=#00E5FF><b>[F] SCRUB ({currentScrubCount}/{SCRUBS_PER_PLATE})</b></color>\n<size=75%>Plates in Sink: {dirty.GetPlatesCount()} (Rack: {cleanPlatesCount}/{MAX_CLEAN_PLATES})</size>";
+                }
             }
             else if (cleanPlatesCount > 0)
             {
-                promptLabelText.text = $"<color=#76FF03><b>[E] PICK CLEAN PLATE</b></color>\n<size=75%>Clean Plates: {cleanPlatesCount}</size>";
+                promptLabelText.text = $"<color=#76FF03><b>[E] PICK CLEAN PLATE</b></color>\n<size=75%>Clean Plates: {cleanPlatesCount}/{MAX_CLEAN_PLATES}</size>";
             }
         }
     }

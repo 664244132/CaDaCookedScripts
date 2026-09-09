@@ -56,3 +56,29 @@ _Avoid_: Hunger meter, order duration
 A penalty state triggered when Customer Patience expires, marked by an alert red card on HUD; fulfilling this order awards base score only without combo streak or tip multipliers.
 _Avoid_: Expired order, failed diner
 
+### Dynamic Kitchen Procedural Generation
+
+**Counter Shuffling**:
+A procedural round-initialization mechanism that permutes workstation positions and orientations across valid kitchen grid slots each match.
+_Avoid_: Random counter, kitchen scramble
+
+**Collision-Free Counter Shuffling**:
+A mathematical 1-to-1 bijection guarantee ensuring distinct counter GameObjects map exclusively to unique, deduplicated kitchen slots (>= 0.8m apart) without coordinate overlap.
+_Avoid_: Counter stacking, duplicate spawn
+
+**Path Clearance Check**:
+A geometric swept-line raycast/distance verification ensuring moving workstation paths maintain >= 1.35m separation from all stationary counters and scene boundaries.
+_Avoid_: Counter sliding through wall, moving counter collision
+
+**Rack Full Lock**:
+A safety lockout mechanism on the Sink Counter that halts plate scrubbing when the clean drying rack reaches its 4-plate maximum capacity, preventing plate vaporization.
+_Avoid_: Sink jam, plate overflow
+
+**Angry Patience Timer**:
+A 20-second grace countdown initiated once an order enters the Angry Customer state; failure to serve within this window causes customer departure with a 50-point score penalty.
+_Avoid_: Rage quit timer, order timeout 2
+
+**Plate Scraping**:
+The action of clearing burned or unwanted ingredients from a Plate into the Trash Counter while preserving the clean dishware in the Chef's hands.
+_Avoid_: Plate disposal, dish trashing
+

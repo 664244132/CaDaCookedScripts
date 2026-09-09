@@ -4,12 +4,32 @@ public class SelectedCounterVisual : MonoBehaviour
 {
     [SerializeField] private BaseCounter baseCounter;
     [SerializeField] private GameObject[] visualGameObjectArray;
+    public void SetBaseCounter(BaseCounter baseCounter)
+    {
+        this.baseCounter = baseCounter;
+        if (Player.Instance != null && Player.Instance.GetSelectedCounter() == baseCounter && baseCounter != null)
+        {
+            Show();
+        }
+        else
+        {
+            Hide();
+        }
+    }
+
     private void Start()
     {
+        if (baseCounter == null)
+        {
+            baseCounter = GetComponentInParent<BaseCounter>();
+        }
+
         if (Player.Instance != null)
         {
             Player.Instance.OnSelectedCounterChanged += Player_OnSelectedCounterChanged;
         }
+
+        Hide();
     }
 
     private void OnDestroy()
@@ -22,7 +42,7 @@ public class SelectedCounterVisual : MonoBehaviour
 
     private void Player_OnSelectedCounterChanged(object sender, Player.OnSelectedCounterChangedEventArgs e)
     {
-        if (e.selectedCounter == baseCounter)
+        if (baseCounter != null && e.selectedCounter == baseCounter)
         {
             Show();
         }

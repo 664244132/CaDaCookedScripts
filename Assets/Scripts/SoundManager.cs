@@ -16,6 +16,7 @@ public class SoundManager : MonoBehaviour
     {
         DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
         DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
+        DeliveryManager.Instance.OnOrderAngry += DeliveryManager_OnOrderAngry;
         CuttingCounter.OnAnyCut += CuttingCounter_OnAnyCut;
         Player.Instance.OnPickedSomething += Player_OnPickedSomething;
         BaseCounter.OnAnyObjectPlaceHere += BaseCounter_OnAnyObjectPlaceHere;
@@ -30,6 +31,7 @@ public class SoundManager : MonoBehaviour
         {
             DeliveryManager.Instance.OnRecipeSuccess -= DeliveryManager_OnRecipeSuccess;
             DeliveryManager.Instance.OnRecipeFailed -= DeliveryManager_OnRecipeFailed;
+            DeliveryManager.Instance.OnOrderAngry -= DeliveryManager_OnOrderAngry;
         }
         CuttingCounter.OnAnyCut -= CuttingCounter_OnAnyCut;
         if (Player.Instance != null)
@@ -86,6 +88,16 @@ public class SoundManager : MonoBehaviour
     {
         DeliveryCounter deliveryCounter = DeliveryCounter.Instance;
         PlaySound(audioClipRefsSO.deliveryFail, deliveryCounter.transform.position);
+    }
+
+    private void DeliveryManager_OnOrderAngry(object sender, DeliveryManager.OnVIPOrderEventArgs e)
+    {
+        if (audioClipRefsSO != null && audioClipRefsSO.warning != null && audioClipRefsSO.warning.Length > 0)
+        {
+            Camera mainCam = Camera.main;
+            Vector3 soundPos = mainCam != null ? mainCam.transform.position : Vector3.zero;
+            PlaySound(audioClipRefsSO.warning, soundPos, 1.2f);
+        }
     }
 
     private void DeliveryManager_OnRecipeSuccess(object sender, System.EventArgs e)

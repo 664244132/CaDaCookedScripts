@@ -21,11 +21,12 @@ public class PlateCompleteVisual : MonoBehaviour
         if (plateKitchenObject != null)
         {
             plateKitchenObject.OnIngredientAdded += PlateKitchenObject_OnIngredientAdded;
+            plateKitchenObject.OnIngredientsCleared += PlateKitchenObject_OnIngredientsCleared;
         }
 
         foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in kitchenObjectSOGameObjectList)
         { 
-                kitchenObjectSOGameObject.gameObject.SetActive(false);
+            kitchenObjectSOGameObject.gameObject.SetActive(false);
         }
     }
 
@@ -34,6 +35,7 @@ public class PlateCompleteVisual : MonoBehaviour
         if (plateKitchenObject != null)
         {
             plateKitchenObject.OnIngredientAdded -= PlateKitchenObject_OnIngredientAdded;
+            plateKitchenObject.OnIngredientsCleared -= PlateKitchenObject_OnIngredientsCleared;
         }
     }
 
@@ -45,6 +47,14 @@ public class PlateCompleteVisual : MonoBehaviour
             {
                 kitchenObjectSOGameObject.gameObject.SetActive(true);
             }
+        }
+    }
+
+    private void PlateKitchenObject_OnIngredientsCleared(object sender, EventArgs e)
+    {
+        foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in kitchenObjectSOGameObjectList)
+        {
+            kitchenObjectSOGameObject.gameObject.SetActive(false);
         }
     }
 }

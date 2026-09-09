@@ -139,11 +139,11 @@ public class DeliveryManagerSingleUI : MonoBehaviour
                     backgroundImage.color = new Color(1f, 0.8f, 0.8f, 0.98f);
                 }
 
-                recipeNameText.text = $"<color=#E02020><b>[ANGRY]</b></color> <color=#200000>{currentOrderData.recipeSO.recipeName}</color>";
+                recipeNameText.text = $"<color=#E02020><b>[ANGRY {Mathf.CeilToInt(currentOrderData.angryTimer)}s]</b></color> <color=#200000>{currentOrderData.recipeSO.recipeName}</color>";
 
-                // หลอดเวลากลายเป็นสีแดงกะพริบเตือน
-                timerBarImage.color = Mathf.PingPong(Time.time * 6f, 1f) > 0.5f ? new Color(0.9f, 0.1f, 0.1f) : new Color(0.5f, 0.05f, 0.05f);
-                timerBarImage.rectTransform.anchorMax = new Vector2(1f, 1f); // คงหลอดเต็มไว้แสดงสถานะโกรธสีแดง
+                // หลอดเวลากลายเป็นสีแดงกะพริบเตือนและลดลงตามเวลา 20 วินาทีสุดท้าย
+                timerBarImage.color = Mathf.PingPong(Time.time * 6f, 1f) > 0.5f ? new Color(0.95f, 0.15f, 0.15f) : new Color(0.5f, 0.05f, 0.05f);
+                timerBarImage.rectTransform.anchorMax = new Vector2(ratio, 1f);
             }
             else
             {

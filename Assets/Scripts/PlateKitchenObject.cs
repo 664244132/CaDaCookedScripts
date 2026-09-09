@@ -44,8 +44,19 @@ public class PlateKitchenObject : KitchenObject
         }
     }
 
+    public event EventHandler OnIngredientsCleared;
+
     public List<KitchenObjectSO> GetKitchenObjectSOList()
     {
         return kitchenObjectSOList;
+    }
+
+    /// <summary>
+    /// เทวัตถุดิบและอาหารทั้งหมดออกจากจาน (เช่น เมื่อนำไปเทลงถังขยะ TrashCounter)
+    /// </summary>
+    public void ClearIngredients()
+    {
+        kitchenObjectSOList.Clear();
+        OnIngredientsCleared?.Invoke(this, EventArgs.Empty);
     }
 }

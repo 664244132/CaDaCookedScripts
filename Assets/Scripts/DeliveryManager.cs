@@ -19,6 +19,7 @@ public class DeliveryManager : MonoBehaviour
     public event EventHandler<OnVIPOrderEventArgs> OnVIPOrderSuccess;
     public event EventHandler<OnVIPOrderEventArgs> OnVIPOrderExpired;
     public event EventHandler<OnVIPOrderEventArgs> OnOrderAngry;
+    public event EventHandler OnAnyOrderAngry;
 
     public class OnComboChangedEventArgs : EventArgs
     {
@@ -42,6 +43,8 @@ public class DeliveryManager : MonoBehaviour
         public bool isAngry;
         public float orderTimer;
         public float orderTimerMax;
+        public float angryTimer;
+        public float angryTimerMax;
 
         public OrderData(RecipeSO recipeSO, bool isVIP, float duration)
         {
@@ -50,10 +53,18 @@ public class DeliveryManager : MonoBehaviour
             this.isAngry = false;
             this.orderTimerMax = duration;
             this.orderTimer = duration;
+            this.angryTimerMax = 20.0f; // Q2 ตัวเลือก A: หลอดความอดทนช่วงโกรธ 20 วินาทีสุดท้าย
+            this.angryTimer = 20.0f;
         }
 
         public float GetTimerNormalized()
         {
+            if (isAngry)
+            {
+                if (angryTimerMax <= 0f) return 0f;
+                return Mathf.Clamp01(angryTimer / angryTimerMax);
+            }
+
             if (orderTimerMax <= 0f) return 1f;
             return Mathf.Clamp01(orderTimer / orderTimerMax);
         }
@@ -117,13 +128,18 @@ public class DeliveryManager : MonoBehaviour
                 order.orderTimer -= Time.deltaTime;
                 if (order.orderTimer <= 0f)
                 {
-                    // ออเดอร์ VIP หมดเวลา!
-                    Debug.Log($"[DeliveryManager] VIP Order Expired: {order.recipeSO.recipeName}");
+                    // ออเดอร์ VIP หมดเวลา! ลูกค้าโกรธจัดและออกจากคิว
+                    order.isAngry = true;
+                    Debug.Log($"[DeliveryManager] 😡 VIP Order Expired & Customer Angry: {order.recipeSO.recipeName}");
                     waitingOrdersList.RemoveAt(i);
                     SyncBackwardCompatibilityList();
 
                     // รีเซ็ตคอมโบเมื่อปล่อยให้ออเดอร์ VIP หมดเวลา
                     ResetComboStreak();
+
+                    // ยิง Event ลูกค้าโกรธสำหรับออเดอร์ทุกประเภทที่หมดเวลา
+                    OnOrderAngry?.Invoke(this, new OnVIPOrderEventArgs { orderData = order });
+                    OnAnyOrderAngry?.Invoke(this, EventArgs.Empty);
 
                     OnVIPOrderExpired?.Invoke(this, new OnVIPOrderEventArgs { orderData = order });
                     OnRecipeFailed?.Invoke(this, EventArgs.Empty);
@@ -140,8 +156,33 @@ public class DeliveryManager : MonoBehaviour
                     {
                         order.isAngry = true;
                         order.orderTimer = 0f;
-                        Debug.Log($"[DeliveryManager] 😡 Customer is ANGRY for: {order.recipeSO.recipeName}! (No bonus points)");
+                        order.angryTimer = order.angryTimerMax;
+                        Debug.Log($"[DeliveryManager] 😡 Customer is ANGRY for: {order.recipeSO.recipeName}! (20s remaining before departure)");
+
+                        // ยิง Event ลูกค้าโกรธสำหรับออเดอร์ปกติ
                         OnOrderAngry?.Invoke(this, new OnVIPOrderEventArgs { orderData = order });
+                        OnAnyOrderAngry?.Invoke(this, EventArgs.Empty);
+                        OnRecipeFailed?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+                else
+                {
+                    // Q2 ตัวเลือก A: หลอดความอดทนช่วงโกรธ 20 วินาทีสุดท้าย (Angry Patience Timer)
+                    order.angryTimer -= Time.deltaTime;
+                    if (order.angryTimer <= 0f)
+                    {
+                        Debug.Log($"[DeliveryManager] 🚪 Angry customer left the restaurant! {order.recipeSO.recipeName} (-50 points, Queue Slot Freed)");
+                        waitingOrdersList.RemoveAt(i);
+                        SyncBackwardCompatibilityList();
+
+                        // หักคะแนนค่าปรับ 50 แต้ม (คะแนนต่ำสุดไม่ต่ำกว่า 0)
+                        totalScore = Mathf.Max(0, totalScore - 50);
+
+                        // รีเซ็ตคอมโบ
+                        ResetComboStreak();
+
+                        OnRecipeFailed?.Invoke(this, EventArgs.Empty);
+                        OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
                     }
                 }
             }

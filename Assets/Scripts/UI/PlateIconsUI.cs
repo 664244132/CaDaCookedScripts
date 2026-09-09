@@ -14,6 +14,7 @@ public class PlateIconsUI : MonoBehaviour
         if (plateKitchenObject != null)
         {
             plateKitchenObject.OnIngredientAdded += PlateKitchenObject_OnIngredientAdded;
+            plateKitchenObject.OnIngredientsCleared += PlateKitchenObject_OnIngredientsCleared;
         }
     }
 
@@ -22,10 +23,16 @@ public class PlateIconsUI : MonoBehaviour
         if (plateKitchenObject != null)
         {
             plateKitchenObject.OnIngredientAdded -= PlateKitchenObject_OnIngredientAdded;
+            plateKitchenObject.OnIngredientsCleared -= PlateKitchenObject_OnIngredientsCleared;
         }
     }
 
     private void PlateKitchenObject_OnIngredientAdded(object sender, PlateKitchenObject.OnIngredientAddedEventArgs e)
+    {
+        UpdateVisual();
+    }
+
+    private void PlateKitchenObject_OnIngredientsCleared(object sender, System.EventArgs e)
     {
         UpdateVisual();
     }

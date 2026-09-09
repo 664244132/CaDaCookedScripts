@@ -450,6 +450,11 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         });
     }
 
+    public BaseCounter GetSelectedCounter()
+    {
+        return selectedCounter;
+    }
+
     // --- IKitchenObjectParent Implementation ---
     public Transform GetKitchenObjectFollowTransform()
     {

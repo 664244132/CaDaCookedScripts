@@ -123,6 +123,55 @@
 - [CONTEXT.md](file:///c:/CaDaCooked/CaDaCookedScripts/CONTEXT.md):
   - บันทึกคำศัพท์ Domain Ubiquitous Language เพิ่มเติม: `Dirty Plate`, `Sink Counter`, `Customer Patience`, `Angry Customer`
 
+### 🔹 Session 66: Fix Hover Distance, Universal Angry Event & Procedural Counter Shuffling
+- [Assets/Scripts/SelectedCounterVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/SelectedCounterVisual.cs):
+  - แก้ไขบั๊กไฮไลท์ Hover ค้างเมื่ออยู่ไกล: เพิ่มเงื่อนไข `baseCounter != null && e.selectedCounter == baseCounter` เพื่อป้องกันกรณี `null == null`
+  - เพิ่มเมธอด `SetBaseCounter(BaseCounter)` และดึง Parent `GetComponentInParent<BaseCounter>()` อัตโนมัติใน `Start()`
+- [Assets/Scripts/Player.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Player.cs):
+  - เพิ่ม Getter `GetSelectedCounter()` ให้สคริปต์ภายนอกตรวจสอบเคาน์เตอร์ที่เลือกได้ทันที
+- [Assets/Scripts/Counters/SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs):
+  - ปรับระยะการทำงานของ UI อ่างล้างจานให้เท่ากับเคาน์เตอร์อื่น (2.2 เมตร): ซ่อน World Space Progress Canvas ทันทีเมื่อผู้เล่นอยู่ไกลเกิน 2.2 เมตร
+  - เชื่อมโยง `SelectedCounterVisual` บน GameObject เข้ากับ `SinkCounter` ทันทีใน `Start()`
+- [Assets/Scripts/DeliveryManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/DeliveryManager.cs):
+  - เพิ่ม Event `OnAnyOrderAngry` ให้ดักฟังสบายไร้ Generic Type
+  - เมื่อออเดอร์ประเภทใดก็ตามหมดเวลา (ทั้งออเดอร์ปกติและ VIP) ให้ยิง `OnOrderAngry`, `OnAnyOrderAngry`, และ `OnRecipeFailed` อย่างครบถ้วน
+- [Assets/Scripts/SoundManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/SoundManager.cs):
+  - ดักฟัง `DeliveryManager.OnOrderAngry` และเล่นเสียงเตือน `audioClipRefsSO.warning` ทันทีที่ลูกค้าเริ่มโกรธ
+- [Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs):
+  - **Random Sink Placement:** ปรับปรุง `SetupSinkCounterSystem()` ให้สุ่มเคาน์เตอร์ว่าง 1 ตัวจาก `ClearCounter` ทั้งหมด ไม่ซ้ำตำแหน่งเดิม
+  - **Procedural Counter Shuffling:** เพิ่มฟังก์ชัน `ShuffleKitchenCounters()` นำเคาน์เตอร์ทำอาหารทั้งหมด 24 ตัวในครัว (ตัดเฉพาะ DeliveryCounter ที่ติดช่องส่ง) มาสลับตำแหน่งและมุมหมุนแบบ Fisher-Yates Shuffle ทำให้ผังครัวสุ่มใหม่ทุกรอบการเล่น เพิ่มความสนุกและหลากหลายระดับขีดสุด!
+- [CONTEXT.md](file:///c:/CaDaCooked/CaDaCookedScripts/CONTEXT.md):
+  - บันทึกคำศัพท์: `Counter Shuffling`
+
+### 🔹 Session 67: Fix Counter Overlap in Randomization & Moving Counter Safe Path Clearance
+- [Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs):
+  - **Reordered Bootstrap Execution:** สลับลำดับใน `Start()` ให้เรียก `ShuffleKitchenCounters()` ก่อน `SetupSinkCounterSystem()` เพื่อให้การสุ่มสลับตำแหน่งกระทำบนเคาน์เตอร์ตั้งต้นที่สะอาดและเป็นอิสระต่อกัน 100%
+  - **Component Synchronization:** เปลี่ยน `Destroy(chosenCounter)` ใน `SetupSinkCounterSystem()` เป็น `DestroyImmediate(chosenCounter)` เพื่อขจัด Component เดิมออกแบบ Synchronous ป้องกันไม่ให้ `FindObjectsByType<BaseCounter>()` ตรวจพบ Component ซ้ำบน GameObject เดียวกัน
+  - **1-to-1 Bijection & Deduplication:** ใน `ShuffleKitchenCounters()` เพิ่ม `HashSet<GameObject> registeredGameObjects` และระบบตรวจเช็คระยะห่างสล็อต `Vector3.Distance >= 0.8f` รับประกันความถูกต้องทางคณิตศาสตร์ว่าเคาน์เตอร์ทุกตัวและสล็อตทุกตำแหน่งจะจับคู่แบบ 1 ต่อ 1 ปราศจากการสุ่มซ้อนทับกันอย่างแน่นอน
+  - **Collision-Free Moving Counters:** ใน `SetupMovingCounters()` เพิ่มฟังก์ชัน `IsPathClearOfCounters()` และ `DistancePointToLineSegment()` ตรวจสอบระยะปลอดภัย (อย่างน้อย 1.35 เมตร) ตลอดทั้งแนวการเคลื่อนที่ของ `MovingCounter` ไม่ให้เลื่อนไปชนหรือแทรกตัวทับเคาน์เตอร์ข้างเคียงในแถว
+- [CONTEXT.md](file:///c:/CaDaCooked/CaDaCookedScripts/CONTEXT.md):
+  - บันทึกคำศัพท์: `Collision-Free Counter Shuffling`, `Path Clearance Check`
+
+### 🔹 Session 68: Gameplay Loop Hardening - Rack Full Lock, Angry Patience & Plate Scraping
+- [Assets/Scripts/Counters/SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs):
+  - **Q1 Rack Full Lock:** ล็อคการกดขัดล้าง [F] ทันทีเมื่อตะแกรงสะเด็ดน้ำเต็ม 4 ใบ (`cleanPlatesCount >= MAX_CLEAN_PLATES`)
+  - แสดงป้ายเตือน `<color=#FF9100><b>⚠️ RACK FULL! PICK UP [E]</b></color>` บน World Space HUD ป้องกันบั๊กจานสะอาดสูญหายในอากาศ 100%
+- [Assets/Scripts/DeliveryManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/DeliveryManager.cs):
+  - **Q2 Angry Patience Timer (20s):** เพิ่มตัวแปร `angryTimer`, `angryTimerMax = 20.0f` ใน `OrderData`
+  - เมื่อออเดอร์เข้าสู่ `isAngry` จะเริ่มนับถอยหลัง 20 วินาทีสุดท้าย หากผู้เล่นยังไม่ส่งอาหาร ลูกค้าจะทนไม่ไหวและเดินออกจากร้านไป (`OnRecipeFailed`, หักคะแนน 50 แต้ม)
+  - ปลดล็อคคิวออเดอร์ที่เคยตันถาวร ทำให้เมนูใหม่และออเดอร์ VIP กรอบทองสามารถสุ่มเกิดเข้ามาได้อย่างต่อเนื่อง
+- [Assets/Scripts/UI/DeliveryManagerSingleUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/DeliveryManagerSingleUI.cs):
+  - แสดงเวลานับถอยหลังของสถานะโกรธเป็นตัวเลขวินาทีสด `[ANGRY {Xs}]` บนหัวการ์ด พร้อมหลอดเวลากะพริบสีแดงที่ลดลงตามจริง
+- [Assets/Scripts/PlateKitchenObject.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlateKitchenObject.cs):
+  - เพิ่ม Event `OnIngredientsCleared` และฟังก์ชัน `ClearIngredients()` สำหรับเทวัตถุดิบและอาหารทั้งหมดออกจากจาน
+- [Assets/Scripts/PlateCompleteVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlateCompleteVisual.cs) & [Assets/Scripts/UI/PlateIconsUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/PlateIconsUI.cs):
+  - ดักฟัง `OnIngredientsCleared` เพื่อซ่อนโมเดลอาหาร 3D และล้างไอคอนบนจานออกทันทีเมื่ออาหารบนจานถูกเททิ้ง
+- [Assets/Scripts/Counters/TrashCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/TrashCounter.cs):
+  - **Q3 Plate Scraping (Overcooked Standard):** เมื่อถือจานอาหารไปกดที่ถังขยะ จะเททิ้งเฉพาะอาหาร/วัตถุดิบข้างใน (`plate.ClearIngredients()`) โดยยังคงจานเปล่าไว้ในมือเชฟเสมอ
+  - ไม่อนุญาตให้ทิ้งจานเปล่าหรือจานเปื้อนลงถังขยะ ป้องกันการขาดแคลนจานอย่างถาวร
+- [CONTEXT.md](file:///c:/CaDaCooked/CaDaCookedScripts/CONTEXT.md):
+  - บันทึกคำศัพท์: `Rack Full Lock`, `Angry Patience Timer`, `Plate Scraping`
+
 ---
 
 ## 🔒 Security & Code Standards Checklist

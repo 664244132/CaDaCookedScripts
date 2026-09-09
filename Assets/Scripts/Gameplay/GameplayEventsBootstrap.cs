@@ -44,6 +44,18 @@ public class GameplayEventsBootstrap : MonoBehaviour
         try { SetupRushHourSystem(); Debug.Log("✅ [2.3] Rush Hour System Initialized!"); }
         catch (Exception ex) { Debug.LogError($"❌ [2.3] Rush Hour Error: {ex.Message}"); }
 
+        // สลับลำดับ: สุ่มสลับผังเคาน์เตอร์ตั้งต้นก่อน เพื่อให้ได้สล็อตที่สะอาดและจับคู่แบบ 1 ต่อ 1 ไร้การซ้อนทับ
+        try { ShuffleKitchenCounters(); Debug.Log("✅ [Step 3] Kitchen Counters Randomized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [Step 3] Shuffle Counters Error: {ex.Message}"); }
+
+        // ติดตั้ง SinkCounter บน ClearCounter ที่ถูกสุ่มมาในรอบนี้
+        try { SetupSinkCounterSystem(); Debug.Log("✅ [Step 2] Sink Counter System Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [Step 2] Sink Counter Error: {ex.Message}"); }
+
+        // ติดตั้ง MovingCounter เฉพาะเคาน์เตอร์ที่มีพื้นที่เลื่อนเปิดโล่ง ไม่ชนหรือซ้อนทับกับเคาน์เตอร์ข้างเคียง
+        try { SetupMovingCounters(); Debug.Log("✅ [2.5] Moving Counters Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [2.5] Moving Counter Error: {ex.Message}"); }
+
         try { SetupFireHazardAndExtinguisher(); Debug.Log("✅ [2.1] Fire Hazard & Extinguisher Initialized!"); }
         catch (Exception ex) { Debug.LogError($"❌ [2.1] Fire Hazard Error: {ex.Message}"); }
 
@@ -56,17 +68,11 @@ public class GameplayEventsBootstrap : MonoBehaviour
         try { SetupKitchenCatNPC(); Debug.Log("✅ [2.4] Kitchen Cat NPCs (2 Cats) Initialized!"); }
         catch (Exception ex) { Debug.LogError($"❌ [2.4] Cat NPC Error: {ex.Message}"); }
 
-        try { SetupMovingCounters(); Debug.Log("✅ [2.5] Moving Counters Initialized!"); }
-        catch (Exception ex) { Debug.LogError($"❌ [2.5] Moving Counter Error: {ex.Message}"); }
-
         try { SetupKitchenRaftTilt(); Debug.Log("✅ [2.5] Raft Kitchen Wave Tilt Initialized!"); }
         catch (Exception ex) { Debug.LogError($"❌ [2.5] Raft Tilt Error: {ex.Message}"); }
 
         try { SetupComboUISystem(); Debug.Log("✅ Combo & Tip Streak UI Initialized!"); }
         catch (Exception ex) { Debug.LogError($"❌ Combo UI Error: {ex.Message}"); }
-
-        try { SetupSinkCounterSystem(); Debug.Log("✅ [Step 2] Sink Counter System Initialized!"); }
-        catch (Exception ex) { Debug.LogError($"❌ [Step 2] Sink Counter Error: {ex.Message}"); }
 
         Debug.Log("🎉 CaDaCook: All Gameplay Systems & UI are ACTIVE & RUNNING!");
     }
@@ -438,40 +444,106 @@ public class GameplayEventsBootstrap : MonoBehaviour
     }
 
     // ==========================================
-    // 2.5 MOVING COUNTER (เคาน์เตอร์เลื่อนตำแหน่ง 2 ตัว)
+    // 2.5 MOVING COUNTER (เคาน์เตอร์เลื่อนตำแหน่ง ปลอดภัยไร้การชนหรือซ้อนทับ)
     // ==========================================
     private void SetupMovingCounters()
     {
         MovingCounter[] existingMovingCounters = FindObjectsByType<MovingCounter>(FindObjectsSortMode.None);
-        if (existingMovingCounters.Length < 2)
+        if (existingMovingCounters.Length >= 2) return;
+
+        BaseCounter[] allCounters = FindObjectsByType<BaseCounter>(FindObjectsSortMode.None);
+        ClearCounter[] clearCounters = FindObjectsByType<ClearCounter>(FindObjectsSortMode.None);
+
+        // ทิศทางและระยะทางการเลื่อนที่ต้องการทดสอบความปลอดภัย
+        Vector3[] candidateOffsets = new Vector3[]
         {
-            ClearCounter[] counters = FindObjectsByType<ClearCounter>(FindObjectsSortMode.None);
-            System.Collections.Generic.List<ClearCounter> availableCounters = new System.Collections.Generic.List<ClearCounter>();
-            
-            foreach (var c in counters)
+            new Vector3(1.6f, 0f, 0f),
+            new Vector3(-1.6f, 0f, 0f),
+            new Vector3(0f, 0f, 1.6f),
+            new Vector3(0f, 0f, -1.6f),
+            new Vector3(1.2f, 0f, 0f),
+            new Vector3(-1.2f, 0f, 0f),
+            new Vector3(0f, 0f, 1.2f),
+            new Vector3(0f, 0f, -1.2f),
+        };
+
+        int addedCount = existingMovingCounters.Length;
+        foreach (ClearCounter cc in clearCounters)
+        {
+            if (addedCount >= 2) break;
+            if (cc == null) continue;
+            if (cc.GetComponent<MovingCounter>() != null) continue;
+            if (cc.GetComponent<SinkCounter>() != null) continue;
+            if (cc.HasKitchenObject()) continue;
+
+            // ตรวจสอบหาทิศทางที่เปิดโล่ง ไม่ชนหรือซ้อนทับกับเคาน์เตอร์ตัวอื่น
+            Vector3 safeOffset = Vector3.zero;
+            bool foundSafeOffset = false;
+
+            foreach (Vector3 offset in candidateOffsets)
             {
-                if (c.GetComponent<MovingCounter>() == null)
+                if (IsPathClearOfCounters(cc.transform.position, offset, cc, allCounters))
                 {
-                    availableCounters.Add(c);
+                    safeOffset = offset;
+                    foundSafeOffset = true;
+                    break;
                 }
             }
 
-            // เคาน์เตอร์เลื่อนตัวที่ 1: เลื่อนตามแนวนอน (ซ้าย-ขวา)
-            if (existingMovingCounters.Length == 0 && availableCounters.Count > 0)
+            if (foundSafeOffset)
             {
-                MovingCounter mc1 = availableCounters[0].gameObject.AddComponent<MovingCounter>();
-                mc1.Setup(new Vector3(2.2f, 0f, 0f), 1.6f, 0f);
-                availableCounters.RemoveAt(0);
-            }
-
-            // เคาน์เตอร์เลื่อนตัวที่ 2: เลื่อนตามแนวลึก (หน้า-หลัง) พร้อมจังหวะต่างกัน
-            if (FindObjectsByType<MovingCounter>(FindObjectsSortMode.None).Length < 2 && availableCounters.Count > 0)
-            {
-                int targetIndex = availableCounters.Count > 2 ? 2 : (availableCounters.Count - 1);
-                MovingCounter mc2 = availableCounters[targetIndex].gameObject.AddComponent<MovingCounter>();
-                mc2.Setup(new Vector3(0f, 0f, 1.8f), 1.4f, 0.7f);
+                MovingCounter mc = cc.gameObject.AddComponent<MovingCounter>();
+                float speed = addedCount == 0 ? 1.5f : 1.3f;
+                float phase = addedCount == 0 ? 0f : 0.7f;
+                mc.Setup(safeOffset, speed, phase);
+                addedCount++;
+                Debug.Log($"🚀 [GameplayEventsBootstrap] Equipped MovingCounter on {cc.name} with safe offset: {safeOffset}");
             }
         }
+    }
+
+    /// <summary>
+    /// คำนวณระยะห่างระหว่างจุดกับเส้นตรง (Point to Line Segment Distance)
+    /// </summary>
+    private static float DistancePointToLineSegment(Vector3 point, Vector3 start, Vector3 end)
+    {
+        Vector3 segment = end - start;
+        float lengthSq = segment.sqrMagnitude;
+        if (lengthSq < 0.0001f) return Vector3.Distance(point, start);
+
+        float t = Mathf.Clamp01(Vector3.Dot(point - start, segment) / lengthSq);
+        Vector3 projection = start + t * segment;
+        return Vector3.Distance(point, projection);
+    }
+
+    /// <summary>
+    /// ตรวจสอบว่าเส้นทางการเคลื่อนที่ของเคาน์เตอร์เปิดโล่ง ไม่ชนหรือซ้อนทับกับเคาน์เตอร์อื่นในครัว
+    /// </summary>
+    private static bool IsPathClearOfCounters(Vector3 startPos, Vector3 offset, BaseCounter currentCounter, BaseCounter[] allCounters)
+    {
+        Vector3 endPos = startPos + offset;
+
+        // 1. ตรวจสอบขอบเขตพื้นที่เล่นให้อยู่ภายในมุมมองกล้อง
+        if (endPos.x < PLAYABLE_MIN_X + 0.6f || endPos.x > PLAYABLE_MAX_X - 0.6f ||
+            endPos.z < PLAYABLE_MIN_Z + 0.6f || endPos.z > PLAYABLE_MAX_Z - 0.6f)
+        {
+            return false;
+        }
+
+        // 2. ตรวจสอบระยะห่างจากเคาน์เตอร์อื่นทุกตัวตลอดทั้งเส้นทางการเลื่อน (ต้องห่างอย่างน้อย 1.35 เมตร)
+        float minAllowedDistance = 1.35f;
+        foreach (BaseCounter other in allCounters)
+        {
+            if (other == null || other == currentCounter || other.gameObject == currentCounter.gameObject) continue;
+
+            float dist = DistancePointToLineSegment(other.transform.position, startPos, endPos);
+            if (dist < minAllowedDistance)
+            {
+                return false; // ชนหรือซ้อนทับกับเคาน์เตอร์ตัวอื่น
+            }
+        }
+
+        return true;
     }
 
     // ==========================================
@@ -517,7 +589,7 @@ public class GameplayEventsBootstrap : MonoBehaviour
     }
 
     // ==========================================
-    // STEP 2: SINK COUNTER SYSTEM (อ่างล้างจาน)
+    // STEP 2: SINK COUNTER SYSTEM (อ่างล้างจานสุ่มตำแหน่งในแต่ละรอบ)
     // ==========================================
     private void SetupSinkCounterSystem()
     {
@@ -526,14 +598,21 @@ public class GameplayEventsBootstrap : MonoBehaviour
         ClearCounter[] allCounters = FindObjectsByType<ClearCounter>(FindObjectsSortMode.None);
         ClearCounter chosenCounter = null;
 
-        // เลือกเคาน์เตอร์ที่ว่าง ไม่เคลื่อนที่
+        // สุ่มเลือกเคาน์เตอร์โล่งที่ไม่เคลื่อนที่มา 1 ตัวเพื่อติดตั้งอ่างล้างจาน
+        System.Collections.Generic.List<ClearCounter> availableClearCounters = new System.Collections.Generic.List<ClearCounter>();
         foreach (ClearCounter counter in allCounters)
         {
+            if (counter == null) continue;
             if (counter.GetComponent<MovingCounter>() != null) continue;
             if (counter.HasKitchenObject()) continue;
 
-            chosenCounter = counter;
-            break;
+            availableClearCounters.Add(counter);
+        }
+
+        if (availableClearCounters.Count > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, availableClearCounters.Count);
+            chosenCounter = availableClearCounters[randomIndex];
         }
 
         if (chosenCounter != null)
@@ -541,9 +620,18 @@ public class GameplayEventsBootstrap : MonoBehaviour
             GameObject targetObj = chosenCounter.gameObject;
             Vector3 pos = targetObj.transform.position;
 
-            Destroy(chosenCounter);
-            targetObj.AddComponent<SinkCounter>();
-            Debug.Log($"🧼 [GameplayEventsBootstrap] Equipped SinkCounter at {pos}");
+            // ลบ ClearCounter เดิมออกทันทีแบบ Synchronous เพื่อไม่ให้มี Component ซ้ำซ้อน
+            DestroyImmediate(chosenCounter);
+            SinkCounter newSink = targetObj.AddComponent<SinkCounter>();
+
+            // เชื่อมโยง SelectedCounterVisual บนเคาน์เตอร์นี้ให้ชี้มาที่ SinkCounter ตัวใหม่ทันที
+            SelectedCounterVisual visual = targetObj.GetComponentInChildren<SelectedCounterVisual>();
+            if (visual != null)
+            {
+                visual.SetBaseCounter(newSink);
+            }
+
+            Debug.Log($"🧼 [GameplayEventsBootstrap] Equipped SinkCounter at random slot: {pos}");
         }
         else
         {
@@ -553,5 +641,74 @@ public class GameplayEventsBootstrap : MonoBehaviour
             sinkObj.AddComponent<SinkCounter>();
             Debug.Log($"🧼 [GameplayEventsBootstrap] Created standalone SinkCounter at {sinkObj.transform.position}");
         }
+    }
+
+    // ==========================================
+    // STEP 3: KITCHEN COUNTERS SHUFFLER (สุ่มสลับตำแหน่งเคาน์เตอร์ทั้งหมดในครัว)
+    // ==========================================
+    private struct CounterSlotPose
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+
+    private void ShuffleKitchenCounters()
+    {
+        BaseCounter[] allCounters = FindObjectsByType<BaseCounter>(FindObjectsSortMode.None);
+        System.Collections.Generic.List<BaseCounter> countersToShuffle = new System.Collections.Generic.List<BaseCounter>();
+        System.Collections.Generic.List<CounterSlotPose> slotList = new System.Collections.Generic.List<CounterSlotPose>();
+        System.Collections.Generic.HashSet<GameObject> registeredGameObjects = new System.Collections.Generic.HashSet<GameObject>();
+
+        foreach (BaseCounter counter in allCounters)
+        {
+            if (counter == null) continue;
+
+            // ยกเว้น DeliveryCounter เพราะต้องอยู่ประจำช่องส่งอาหารติดผนังเสมอ
+            if (counter is DeliveryCounter) continue;
+
+            // 1. ป้องกัน GameObject ซ้ำกันเด็ดขาด (ป้องกันการย้ายวัตถุตัวเดียวกันสองรอบ)
+            if (registeredGameObjects.Contains(counter.gameObject)) continue;
+
+            // 2. ตรวจสอบว่าตำแหน่งนี้ไม่ซ้ำกับสล็อตที่มีอยู่แล้ว (ระยะห่างขั้นต่ำ 0.8 เมตร)
+            bool isDuplicateSlot = false;
+            foreach (var slot in slotList)
+            {
+                if (Vector3.Distance(slot.position, counter.transform.position) < 0.8f)
+                {
+                    isDuplicateSlot = true;
+                    break;
+                }
+            }
+            if (isDuplicateSlot) continue;
+
+            // บันทึกเคาน์เตอร์และสล็อตคู่กันแบบ 1 ต่อ 1
+            registeredGameObjects.Add(counter.gameObject);
+            countersToShuffle.Add(counter);
+            slotList.Add(new CounterSlotPose
+            {
+                position = counter.transform.position,
+                rotation = counter.transform.rotation
+            });
+        }
+
+        if (countersToShuffle.Count <= 1) return;
+
+        // สุ่มสลับสล็อตตำแหน่งและทิศทางหันหน้า (Fisher-Yates Shuffle)
+        for (int i = slotList.Count - 1; i > 0; i--)
+        {
+            int randIndex = UnityEngine.Random.Range(0, i + 1);
+            CounterSlotPose temp = slotList[i];
+            slotList[i] = slotList[randIndex];
+            slotList[randIndex] = temp;
+        }
+
+        // มอบหมายตำแหน่งและมุมหันใหม่ให้กับเคาน์เตอร์แต่ละตัวแบบ 1 ต่อ 1 ปราศจากการซ้อนทับ 100%
+        for (int i = 0; i < countersToShuffle.Count; i++)
+        {
+            countersToShuffle[i].transform.position = slotList[i].position;
+            countersToShuffle[i].transform.rotation = slotList[i].rotation;
+        }
+
+        Debug.Log($"🎲 [GameplayEventsBootstrap] Shuffled {countersToShuffle.Count} kitchen counters into randomized slots without any overlap!");
     }
 }
