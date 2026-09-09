@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -67,7 +68,7 @@ public class DeliveryManagerSingleUI : MonoBehaviour
     public void SetOrderData(DeliveryManager.OrderData orderData)
     {
         currentOrderData = orderData;
-        SetRecipSO(orderData.recipeSO);
+        SetRecipeSO(orderData.recipeSO);
 
         EnsureTimerBarVisual();
 
@@ -80,7 +81,7 @@ public class DeliveryManagerSingleUI : MonoBehaviour
             }
 
             // บรรทัดเดียว คมชัด 100% ปราศจาก Unicode Emojis เพื่อแก้ปัญหาตัวอักษรกล่องสี่เหลี่ยม
-            recipeNameText.text = $"<color=#FFD700><b>[VIP 3X]</b></color> <color=#FFFFFF>{orderData.recipeSO.recipeName}</color>";
+            recipeNameText.text = UITheme.FormatVipRecipe(orderData.recipeSO.recipeName);
             recipeNameText.textWrappingMode = TextWrappingModes.NoWrap;
 
             if (timerBarRoot != null)
@@ -139,7 +140,7 @@ public class DeliveryManagerSingleUI : MonoBehaviour
                     backgroundImage.color = new Color(1f, 0.8f, 0.8f, 0.98f);
                 }
 
-                recipeNameText.text = $"<color=#E02020><b>[ANGRY {Mathf.CeilToInt(currentOrderData.angryTimer)}s]</b></color> <color=#200000>{currentOrderData.recipeSO.recipeName}</color>";
+                recipeNameText.text = UITheme.FormatAngryRecipe(currentOrderData.recipeSO.recipeName, Mathf.CeilToInt(currentOrderData.angryTimer));
 
                 // หลอดเวลากลายเป็นสีแดงกะพริบเตือนและลดลงตามเวลา 20 วินาทีสุดท้าย
                 timerBarImage.color = Mathf.PingPong(Time.time * 6f, 1f) > 0.5f ? new Color(0.95f, 0.15f, 0.15f) : new Color(0.5f, 0.05f, 0.05f);
@@ -172,21 +173,35 @@ public class DeliveryManagerSingleUI : MonoBehaviour
         }
     }
 
-    public void SetRecipSO(RecipeSO recipeSO)
+    public void SetRecipeSO(RecipeSO recipeSO)
     {
-        recipeNameText.text = recipeSO.recipeName;
+        if (recipeSO == null) return;
+        if (recipeNameText != null) recipeNameText.text = recipeSO.recipeName;
 
-        foreach (Transform child in iconContainer)
+        if (iconContainer != null)
         {
-            if (child == iconTemplate) continue;
-            Destroy(child.gameObject);
-        }
+            foreach (Transform child in iconContainer)
+            {
+                if (child == iconTemplate) continue;
+                Destroy(child.gameObject);
+            }
 
-        foreach (KitchenObjectSO kitchenObjectSO in recipeSO.kitchenObjectSOList)
-        {
-            Transform iconTransform = Instantiate(iconTemplate, iconContainer);
-            iconTransform.gameObject.SetActive(true);
-            iconTransform.GetComponent<Image>().sprite = kitchenObjectSO.sprite;
+            if (recipeSO.kitchenObjectSOList != null)
+            {
+                foreach (KitchenObjectSO kitchenObjectSO in recipeSO.kitchenObjectSOList)
+                {
+                    if (kitchenObjectSO == null) continue;
+                    Transform iconTransform = Instantiate(iconTemplate, iconContainer);
+                    iconTransform.gameObject.SetActive(true);
+                    if (iconTransform.TryGetComponent(out Image img))
+                    {
+                        img.sprite = kitchenObjectSO.sprite;
+                    }
+                }
+            }
         }
     }
+
+    [System.Obsolete("Typo in original API method name. Use SetRecipeSO instead.")]
+    public void SetRecipSO(RecipeSO recipeSO) => SetRecipeSO(recipeSO);
 }

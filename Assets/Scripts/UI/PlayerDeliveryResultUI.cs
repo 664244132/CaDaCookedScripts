@@ -16,9 +16,12 @@ public class PlayerDeliveryResultUI : MonoBehaviour
 
     private void Start()
     {
-        // รอรับสัญญาณตอนส่งอาหาร
-        DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
-        DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
+        // รอรับสัญญาณตอนส่งอาหาร พร้อม Null Guard ป้องกันข้อผิดพลาด
+        if (DeliveryManager.Instance != null)
+        {
+            DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
+            DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
+        }
 
         gameObject.SetActive(false);
     }

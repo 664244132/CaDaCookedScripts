@@ -5,8 +5,14 @@ public class PlateIconsSingleUI : MonoBehaviour
 {
     [SerializeField] private Image image;
 
-    public void SetKitchenOnjectSO(KitchenObjectSO kitchenObjectSO)
+    public void SetKitchenObjectSO(KitchenObjectSO kitchenObjectSO)
     {
-        image.sprite = kitchenObjectSO.sprite;
+        if (image != null && kitchenObjectSO != null)
+        {
+            image.sprite = kitchenObjectSO.sprite;
+        }
     }
+
+    [System.Obsolete("Typo in original API method name. Use SetKitchenObjectSO instead.")]
+    public void SetKitchenOnjectSO(KitchenObjectSO kitchenObjectSO) => SetKitchenObjectSO(kitchenObjectSO);
 }

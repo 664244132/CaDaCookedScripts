@@ -35,7 +35,7 @@
               │
               ├──► (กด Pause -> Main Menu ใน GamePauseUI.cs) ──┐
               │                                                ▼
-              └──► (จบเกม 5 วินาที ใน GameOverUI.cs) ──► [ LoadingScene ] ──► [ MainMenuScene ]
+              └──► (จบเกม 10 วินาที พร้อมจัดอันดับดาวเชฟ ใน GameOverUI.cs) ──► [ LoadingScene ] ──► [ MainMenuScene ]
 ```
 
 ---
@@ -43,55 +43,79 @@
 ## 🍳 3. เจาะลึกระบบเกมเพลย์และสคริปต์หลัก (Core Game Systems)
 
 ### 3.1 ระบบตัวละครและการควบคุม (Player & Input)
-- [Player.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Player.cs): ควบคุมการเคลื่อนที่ 3 มิติ, การหมุนตัว, การ Raycast ตรวจจับเคาน์เตอร์ตรงหน้าด้วย countersLayerMask, การหยิบ-วางวัตถุดิบ, และระบบรองรับอุปสรรค (ลื่นไถลน้ำมัน TriggerSlipImpulse, การฉีดถังดับเพลิง [F] HOLD TO SPRAY, และการทิ้งถังลงพื้น [E] DROP)
-- [PlayerAnimator.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlayerAnimator.cs): ส่งค่า IsWalking ไปยัง Animator Controller
+- [Player.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Player.cs): ควบคุมการเคลื่อนที่ 3 มิติ, การหมุนตัว, การ Raycast ตรวจจับเคาน์เตอร์ตรงหน้าด้วย `countersLayerMask`, การหยิบ-วางวัตถุดิบ, และระบบรองรับอุปสรรค:
+  - **Dash Mechanic:** พุ่งตัวด้วยความเร็วสูง 22m/s นาน 0.16s (คูลดาวน์ 1.0s) พร้อมระบบ CapsuleCast ตรวจจับสิ่งกีดขวาง และละอองฝุ่นควันขาว (`CreateDashDustEffect()`) รองรับปุ่ม `[Spacebar]`, Gamepad South (A) และ Right Bumper (RB)
+  - **Slide Bonus:** หากแดชบนคราบน้ำมัน `SlipperyFloor` จะได้รับแรงผลักสไลด์พุ่งตัวต่อเนื่องอย่างรวดเร็ว
+  - **Fire Extinguisher Interaction:** หยิบ/วางถังดับเพลิงด้วย `[E]`, กดค้าง `[F]` (HOLD TO SPRAY) เพื่อพ่นละอองขาวดับไฟข้างหน้าผ่าน `gameInput.IsInteractAlternatePressed()`
+- [PlayerAnimator.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlayerAnimator.cs): ส่งค่า IsWalking ไปยัง Animator Controller พร้อม Fallback Guard ป้องกัน NRE
 - [PlayerSounds.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlayerSounds.cs): เล่นเสียงฝีเท้าตามจังหวะก้าวเดิน
-- [GameInput.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/GameInput.cs): ตัวห่อหุ้ม New Input System (PlayerInputActions) กระจาย Action เป็น C# Events
+- [GameInput.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/GameInput.cs): ตัวห่อหุ้ม New Input System (PlayerInputActions) กระจาย Action เป็น C# Events (`OnInteractAction`, `OnInteractAlternateAction`, `OnDashAction`, `OnPauseAction`)
 - [PlayerInputActions.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/PlayerInputActions.cs): C# Wrapper ของไฟล์ Input Action Asset
 
 ### 3.2 ระบบเคาน์เตอร์ครัว (Modular Kitchen Counters)
 เคาน์เตอร์ทุกชนิดสืบทอดมาจากคลาสฐาน [BaseCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/BaseCounter.cs):
 - **[ClearCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/ClearCounter.cs):** เคาน์เตอร์ว่างสำหรับวางพักวัตถุดิบ หรือรวมวัตถุดิบลงบนจาน
 - **[ContainerCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/ContainerCounter.cs):** เคาน์เตอร์จ่ายวัตถุดิบดิบไม่จำกัด พร้อม [ContainerCounterVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/ContainerCounterVisual.cs) แสดงอนิเมชันเปิด-ปิดฝาตู้
-- **[CuttingCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/CuttingCounter.cs):** เขียงหั่นอาหาร รองรับ IHasProgress และส่งอีเวนต์ OnCut ร่วมกับ [CuttingCounterVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/CuttingCounterVisual.cs)
-- **[StoveCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/StoveCounter.cs):** กระทะทอด/เตาปรุงอาหาร มี Finite State Machine 4 สเตต (Idle, Frying, Fried, Burned) และเชื่อมต่อกับ [StoveCounterVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/StoveCounterVisual.cs) และ [StoveCounterSound.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/StoveCounterSound.cs)
-- **[PlatesCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/PlatesCounter.cs):** เคาน์เตอร์ผลิตจานอัตโนมัติตามช่วงเวลา พร้อม [PlatesCounterVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/PlatesCounterVisual.cs) แสดงโมเดลจานซ้อนทับกัน
-- **[DeliveryCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/DeliveryCounter.cs):** เคาน์เตอร์ส่งอาหาร ตรวจสอบสูตรกับ DeliveryManager
-- **[TrashCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/TrashCounter.cs):** ถังขยะสำหรับทำลายวัตถุดิบทิ้ง
-- **[SelectedCounterVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/SelectedCounterVisual.cs):** ขอบเรืองแสงสีขาวรอบเคาน์เตอร์ที่ผู้เล่นกำลังหันหน้าเข้าหา
+- **[CuttingCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/CuttingCounter.cs):** เขียงหั่นอาหาร รองรับ IHasProgress และส่งอีเวนต์ OnCut ร่วมกับ [CuttingCounterVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/CuttingCounterVisual.cs) มีระบบ Cutting Extrication Guard รีเซ็ตความคืบหน้าหากวัตถุดิบถูกขโมย
+- **[StoveCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/StoveCounter.cs):** กระทะทอด/เตาปรุงอาหาร มี Finite State Machine 4 สเตต (Idle, Frying, Fried, Burned) พร้อม Stove Extrication Recovery รีเซ็ตสถานะและเสียงฉ่าทันทีเมื่อวัตถุถูกเคลื่อนย้ายออกนอกลูป
+- **[PlatesCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/PlatesCounter.cs):** แท่นวางจานสะอาดเริ่มต้น 4 ใบ จำกัดเพดานสูงสุด 4 ใบ ตัดระบบเกิดจานอัตโนมัติออกเพื่อบังคับ Loop ล้างจานที่สมบูรณ์แบบ รองรับการนำกองจานสะอาดมาเติมคืน และแสดงป้าย 3D `⚠️ NO PLATES!` เมื่อจานหมด
+- **[SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs):** สเตชั่นล้างจานสแตนเลสเชิงพาณิชย์ (Commercial Stainless Steel Sink Station):
+  - โครงสร้างสมจริง: หลุมอ่างลึก ซี่ตะแกรงสะเด็ดน้ำ ก๊อกน้ำสปริงคอห่าน ฟองสบู่ ป้ายชื่อ 3D `🧼 SINK STATION`
+  - ตรรกะล้างจาน: วางจานเปื้อนลงในอ่าง แล้วกด `[F]` (InteractAlternate) 4 ครั้งต่อ 1 ใบเพื่อขัดล้าง
+  - Rack Full Lock: ล็อคการล้างเมื่อตะแกรงสะเด็ดน้ำเต็ม 4 ใบ พร้อมเตือนให้ยกออก
+  - Batch Retrieval: กด `[E]` เพื่อยกกองจานสะอาดทั้งหมด (1–4 ใบ) ไปเติมที่แท่นวางจานในเที่ยวเดียว
+- **[DeliveryCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/DeliveryCounter.cs):** เคาน์เตอร์ส่งอาหาร ตรวจสอบสูตรกับ DeliveryManager และสะสมจานเปื้อน (`dirtyPlatesAmount` สูงสุด 4 ใบ) ส่งคืนให้เชฟนำไปล้าง
+- **[TrashCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/TrashCounter.cs):** ถังขยะสำหรับเททิ้งเฉพาะอาหารบนจาน (Plate Scraping) โดยไม่ทำลายจานเปล่าทิ้งเด็ดขาด
+- **[SelectedCounterVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/SelectedCounterVisual.cs):** ขอบเรืองแสงสีขาวรอบเคาน์เตอร์ที่ผู้เล่นกำลังหันหน้าเข้าหา พร้อมระบบตรวจเช็ค Null ป้องกันไฮไลต์ค้าง
 
-### 3.3 ระบบออเดอร์, VIP Critic & Combo Streak
+#### 3.3 ระบบออเดอร์, VIP Critic, Customer Patience & Combo Streak
 - **[DeliveryManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/DeliveryManager.cs):** ตัวจัดการคิวออเดอร์ส่วนกลาง
   - **VIP Critic Orders:** มีโอกาสสุ่มเกิดออเดอร์ VIP กรอบสีทอง มีเวลานับถอยหลังจำกัด 25 วินาที หากส่งทันจะได้โบนัสคะแนน **3 เท่า (3X Score)** และต่อยอดคอมโบ
-  - **Combo Streak System:** ส่งอาหารสำเร็จต่อเนื่องโดยไม่ผิดพลาดหรือปล่อยให้ VIP หมดเวลา
+  - **Customer Patience & Angry State:**
+    - ออเดอร์ปกติมีหลอดความอดทน 55 วินาที หากเวลาหมดจะเข้าสู่สถานะ **Angry** (การ์ดแดงกระพริบ + เสียง Warning)
+    - เริ่มนับถอยหลัง 20 วินาทีสุดท้าย (`[ANGRY {Xs}]`) หากส่งทันในสถานะโกรธ จะได้เพียงคะแนนพื้นฐาน (100 แต้ม) โดยไม่ได้รับ Tip และไม่บวกตัวคูณคอมโบ
+    - หากปล่อยให้หมดเวลา 20 วินาที ลูกค้าจะเดินออกจากร้าน (`OnRecipeFailed`, หัก 50 แต้ม) เพื่อปลดล็อคคิวให้ออเดอร์ใหม่เข้ามาได้
+  - **Combo Streak System:** ส่งอาหารสำเร็จต่อเนื่องโดยไม่ผิดพลาดหรือปล่อยให้ออเดอร์หมดเวลา
     - Streak >= 3: ได้รับตัวคูณคะแนน 1.5x
     - Streak >= 5: ได้รับตัวคูณคะแนน 2.0x (Super Combo)
-- **[ComboUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/ComboUI.cs):** แสดงสถานะ Combo Streak ข้างนาฬิกาจับเวลา ตัวอักษรสีส้มสดใส คมชัด ไร้พื้นหลังสีดำ
-- **[DeliveryManagerUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/DeliveryManagerUI.cs) & [DeliveryManagerSingleUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/DeliveryManagerSingleUI.cs):** แสดงการ์ดออเดอร์ที่มุมบนซ้าย พร้อมหลอดเวลานับถอยหลังของการ์ด VIP
+  - **Anti-Softlock Plate Conservation:** ไม่ว่าจะส่งออเดอร์ถูกหรือผิดสูตร เคาน์เตอร์ส่งจะคืนจานเปื้อนเข้าสู่ระบบเสมอ รับประกันจำนวนจานหมุนเวียนคงที่ 4 ใบ ปราศจากปัญหา Softlock
+- **[ComboUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/ComboUI.cs):** แสดงสถานะ Combo Streak ข้างนาฬิกาจับเวลา จัดรูปแบบผ่าน `UITheme.FormatSuperCombo()` และ `FormatStandardCombo()`
+- **[DeliveryManagerUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/DeliveryManagerUI.cs) & [DeliveryManagerSingleUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/DeliveryManagerSingleUI.cs):** แสดงการ์ดออเดอร์ที่มุมบนซ้าย พร้อมหลอดเวลานับถอยหลังแบบไดนามิก (เขียว >50% ➔ ส้ม 20-50% ➔ แดงกระพริบ <20%) และป้ายสถานะ `[ANGRY {Xs}]`
 - **[PlayerDeliveryResultUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/PlayerDeliveryResultUI.cs):** ป๊อปอัปแจ้งผลการส่งอาหาร (Success สีเขียว / Failed สีแดง)
 
 ### 3.4 ระบบอุปสรรคและเหตุการณ์ไดนามิก (Dynamic Events & Obstacles)
-- [GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs): จุดเริ่มต้นระบบอุปสรรคทั้งหมดในครัวอัตโนมัติ
+- [GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs): จุดเริ่มต้นระบบอุปสรรคทั้งหมดในครัวอัตโนมัติ:
+  - **Procedural Counter Shuffling:** สลับตำแหน่งเคาน์เตอร์ 24 ตัวในครัวแบบ Fisher-Yates Shuffle พร้อมตรวจสอบความปลอดภัย ไม่ให้เคาน์เตอร์ทับซ้อนกัน
+  - **Flank Staging Zone Setup:** จัดวางจุดเกิดและแนวลาดตระเวนของแมวทั้ง 2 ตัวประจำการริมทางเดินขอบครัวซ้าย-ขวา (`X = ±7.8f`)
 - [FireHazard.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/FireHazard.cs): จำลองไฟลุกไหม้บนเคาน์เตอร์ พร้อมเอฟเฟกต์ไฟ/ควันดำสมจริง หากดับไม่ทันเคาน์เตอร์จะถูกล็อคกลายเป็นสีดำ 5 วินาที
-- [FireExtinguisher.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/FireExtinguisher.cs): ถังดับเพลิง 3D พร้อมป้าย Billboard UI คมชัด [E] PICK UP, ถือแล้วกด [F] HOLD TO SPRAY พ่นละอองขาวดับไฟข้างหน้า, และ [E] DROP ทิ้งลงพื้น
-- [RandomFireManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/RandomFireManager.cs): สุ่มจุดเกิดไฟไหม้ตามเคาน์เตอร์ต่างๆ ทุกๆ 18-28 วินาที
-- [SlipperyFloor.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/SlipperyFloor.cs): คราบน้ำมัน 4 จุดทั่วครัว เชฟเหยียบแล้วจะลื่นไถล 0.45 วินาที พร้อมคูลดาวน์ป้องกันการติดลูป
-- [KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs) & [CatProceduralAnimator.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/CatProceduralAnimator.cs): แมวป่วนครัว 3D 2 ตัว (แมวส้ม/แมวเทา) แอบย่องเข้ามาคาบอาหารบนเคาน์เตอร์ และวิ่งหนีด้วยความเร็วสูง
-- [MovingCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/MovingCounter.cs): เคาน์เตอร์เลื่อนตำแหน่งอัตโนมัติขวางทางเดิน
+- [FireExtinguisher.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/FireExtinguisher.cs): ถังดับเพลิง 3D พร้อมป้าย Billboard UI [E] PICK UP, [F] HOLD TO SPRAY, และ [E] DROP พร้อมระบบ **15s Extinguisher Respawn** ดึงถังกลับจุดวางเดิมอัตโนมัติหากถูกทิ้งหรือตกหล่น
+- [RandomFireManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/RandomFireManager.cs): ระบบสุ่มจุดเกิดไฟไหม้พร้อมกัน **2 แห่งทั่วครัว (Dual Simultaneous Fire Outbreak)** ทุกๆ 12-20 วินาที โดยสุ่มเลือก 2 เคาน์เตอร์ที่ไม่ซ้ำกันเพื่อเพิ่มความท้าทายในการทำงานร่วมกัน พร้อมระบบ Cache ข้อมูลแบบ Zero GC Allocation ตามกฎ Rule 5 & 6
+- [SlipperyFloor.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/SlipperyFloor.cs): คราบน้ำมัน 4 จุดทั่วครัว เชฟเหยียบแล้วจะลื่นไถล 0.45 วินาที หาก Dash เข้าใส่จะได้รับ Slide Bonus พุ่งตัวยาว
+- [KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs) & [CatProceduralAnimator.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/CatProceduralAnimator.cs): แมวป่วนครัว 3D 2 ตัว (แมวส้ม/แมวเทา) แอบย่องเข้ามาคาบอาหารเดี่ยวๆ บนเคาน์เตอร์ (มี Blacklist ข้ามจานอาหารทุกชนิด) และวิ่งหนีด้วยความเร็วสูง สามารถเดินเข้าไปไล่ให้ตกใจทิ้งของได้ พร้อมระบบ:
+  - **Waypoint Patrol & Idle Sniffing Pause:** เดินตรวจตราตามจุด Waypoint รอบพื้นที่เกิดอย่างเป็นธรรมชาติ พร้อมหยุดยืนพัก/ดมกลิ่นตรวจตรา 1.5 - 3.5 วินาทีเป็นระยะ ไม่เดินรูดหรือไถลไปตามกำแพงล่องหน
+  - **Smooth Arrival & Steering:** ป้องกันการ Overshoot หรือสั่นกระตุกด้วยการคำนวณระยะก้าวพอดีจุดหมาย และหมุนตัวเลี้ยวอย่างนุ่มนวล
+  - **Pass-Through Collision & Height Lock:** ตั้งค่า Collider เป็น Trigger และ Kinematic ทั้งหมด ทำให้แมวสามารถเดินทะลุเคาน์เตอร์และสิ่งกีดขวางได้อย่างราบรื่น ไม่ติดขัด 100% เมื่อเข้าโหมดขโมยของ
+- [MovingCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/MovingCounter.cs): เคาน์เตอร์เลื่อนตำแหน่งอัตโนมัติขวางทางเดิน พร้อมระบบ Path Clearance ตรวจเช็คแนววิ่งไม่ให้ชนเคาน์เตอร์อื่น
 - [PotholeTrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/PotholeTrap.cs): หลุมดักสะดุดลดความเร็วเชฟ
 - [ConveyorBelt.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/ConveyorBelt.cs): สายพานเลื่อนวัตถุดิบและผลักตัวละคร
 - [RushHourManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/RushHourManager.cs) & [RushHourUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/RushHourUI.cs): ชั่วโมงเร่งด่วน สุ่มออเดอร์ถี่ขึ้น 2 เท่า และให้คะแนน 2 เท่า
 - [RaftKitchenTilt.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/RaftKitchenTilt.cs): จำลองคลื่นทะเลโยกเอียงห้องครัว
 
-### 3.5 ระบบ UI และการแสดงผล (User Interface)
-- **Screen-Space UI:**
+### 3.5 ระบบ UI, การจัดรูปแบบ และสไตล์ส่วนกลาง (User Interface & Centralized Theming)
+- **Centralized Theming & Design Tokens:**
+  - **[UITheme.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/UITheme.cs):** สไตล์ชีตกลางใน C# รวม Palette สี (Cyan, Orange, Amber, Red, Green, Gold, Silver, Bronze), วัตถุ `Color`, เมธอดจัดรูปแบบข้อความ TextMeshPro (`FormatCleanPlateBadge`, `FormatDirtyPlateBadge`, `FormatRackFullPrompt`, `FormatGameOverDashboard`, `FormatTutorialHeader`), และแคตตาล็อกพาธ Local Assets
+  - **[Assets/UITheme.css](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/UITheme.css):** ไฟล์ Design Tokens CSS กลางสำหรับ UI Toolkit ตามมาตรฐาน `CSSCodingGuide.md` ข้อ 9
+- **UI Toolkit (UXML / USS Separation):**
+  - [MainWindowFree.uxml](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/ChaosKitchen/New%20Unity%20Project/Assets/CodeMonkeyFree/Editor/MainWindowFree/MainWindowFree.uxml) & [MainWindowFree.uss](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/ChaosKitchen/New%20Unity%20Project/Assets/CodeMonkeyFree/Editor/MainWindowFree/MainWindowFree.uss): หน้าต่าง Editor แบบแยกโครงสร้างและ Stylesheet ชัดเจน 100% ปราศจาก Inline Styles
+  - [VideoTemplate.uxml](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/ChaosKitchen/New%20Unity%20Project/Assets/CodeMonkeyFree/Editor/Templates/VideoTemplate.uxml) & [VideoTemplate.uss](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/ChaosKitchen/New%20Unity%20Project/Assets/CodeMonkeyFree/Editor/Templates/VideoTemplate.uss), [CodeTemplate.uxml](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/ChaosKitchen/New%20Unity%20Project/Assets/CodeMonkeyFree/Editor/Templates/CodeTemplate.uxml), [TextTemplate.uxml](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/ChaosKitchen/New%20Unity%20Project/Assets/CodeMonkeyFree/Editor/Templates/TextTemplate.uxml)
+- **Screen-Space UI (UGUI & TextMeshPro):**
   - [MainMenuUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/MainMenuUI.cs): หน้าต่างเมนูเริ่มเกม
-  - [GameStartCountdownUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GameStartCountdownUI.cs): หน้านับถอยหลังและสอนเล่นแบบ 2 คอลัมน์กว้างสบายตา
+  - [GameStartCountdownUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GameStartCountdownUI.cs): หน้านับถอยหลังและสอนเล่นแบบ 2 คอลัมน์กว้างสบายตา พร้อมปุ่มกดข้ามเข้าเกมทันที
   - [GamePlayingClockUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GamePlayingClockUI.cs): หลอดวงกลมแสดงเวลาเล่น พร้อม Null Safety ป้องกัน NRE
   - [GamePauseUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GamePauseUI.cs): เมนูหยุดเกมพร้อมฟังก์ชัน Resume และ กลับเมนูหลัก
-  - [GameOverUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GameOverUI.cs): หน้าต่างสรุปคะแนนหลังจบเกม พร้อมกลับเมนูอัตโนมัติใน 5 วินาที
+  - [GameOverUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GameOverUI.cs): หน้าต่างสรุปผลคะแนน Dashboard แสดงการประเมินดาว (1-3 ดาว) ฉายาเชฟ (Master Executive Chef, Senior Sous Chef, Line Cook) และนับถอยหลัง 10 วินาทีเพื่อพาผู้เล่นกลับ MainMenuScene อัตโนมัติ
 - **World-Space UI:**
-  - [ProgressBarUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/ProgressBarUI.cs): แถบความคืบหน้าลอยเหนือเคาน์เตอร์หั่น/ทอด
+  - [ProgressBarUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/ProgressBarUI.cs): แถบความคืบหน้าลอยเหนือเคาน์เตอร์หั่น/ทอด/อ่างล้างจาน
   - [PlateIconsUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/PlateIconsUI.cs) & [PlateIconsSingleUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/PlateIconsSingleUI.cs): ไอคอนวัตถุดิบลอยเหนือจาน
   - [LookAtCamera.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/LookAtCamera.cs): จัดการมุมหัน Billboard เข้าหากล้องหลัก
 
@@ -103,24 +127,33 @@
 CaDaCook (Unity Project)/
 │
 ├── 📂 Assets/
+│   ├── 📜 UITheme.css                       # CSS Design Tokens กลางตาม CSSCodingGuide.md
 │   ├── 📂 Scenes/                           # MainMenuScene, GameScene, LoadingScene
 │   ├── 📂 Scripts/                          # ซอร์สโค้ด C# ทั้งหมด
-│   │   ├── 📂 Counters/                     # BaseCounter, ClearCounter, StoveCounter, CuttingCounter, ฯลฯ
+│   │   ├── 📂 Counters/                     # BaseCounter, ClearCounter, StoveCounter, CuttingCounter,
+│   │   │                                    # PlatesCounter, SinkCounter, DeliveryCounter, TrashCounter
 │   │   ├── 📂 Gameplay/                     # GameplayEventsBootstrap, RushHourManager, RaftKitchenTilt, RandomFireManager
 │   │   ├── 📂 Obstacles/                    # FireHazard, FireExtinguisher, SlipperyFloor, KitchenCatNPC,
 │   │   │                                    # CatProceduralAnimator, PotholeTrap, MovingCounter, ConveyorBelt
 │   │   ├── 📂 ScriptableObjects/            # RecipeSO, KitchenObjectSO, AudioClipRefsSO, CuttingRecipeSO, ฯลฯ
-│   │   ├── 📂 UI/                           # GamePauseUI, RushHourUI, DeliveryManagerUI, ComboUI, ProgressBarUI, ฯลฯ
-│   │   ├── 📜 DeliveryManager.cs            # คิวออเดอร์, VIP Critic, ระบบคอมโบและคะแนน
-│   │   ├── 📜 GameInput.cs                  # Unity Input System Event Wrapper
+│   │   ├── 📂 UI/                           # UITheme.cs, GamePauseUI, RushHourUI, DeliveryManagerUI, ComboUI,
+│   │   │                                    # GameOverUI, GameStartCountdownUI, ProgressBarUI, ฯลฯ
+│   │   ├── 📜 DeliveryManager.cs            # คิวออเดอร์, VIP Critic, Customer Patience, คอมโบและคะแนน
+│   │   ├── 📜 DirtyPlateKitchenObject.cs    # วัตถุกองจานเปื้อน (Stackable Dirty Plates 1..4 ใบ)
+│   │   ├── 📜 GameInput.cs                  # Unity Input System Event Wrapper (Move, Interact, Dash, Pause)
 │   │   ├── 📜 KitchenGameManager.cs         # ตัวควบคุม Game State และเวลาการเล่น
 │   │   ├── 📜 KitchenObject.cs              # ตัวแทนวัตถุดิบอาหาร
-│   │   ├── 📜 PlateKitchenObject.cs         # จัดการรายการวัตถุดิบบนจาน
-│   │   ├── 📜 Player.cs                     # ตัวควบคุมเชฟหลักและอุปสรรค
+│   │   ├── 📜 PlateKitchenObject.cs         # วัตถุจานอาหารและกองจานสะอาด (Stackable Clean Plates 1..4 ใบ)
+│   │   ├── 📜 Player.cs                     # ตัวควบคุมเชฟหลัก, Dash, ดับไฟ, ลื่นน้ำมัน
 │   │   ├── 📜 SoundManager.cs               # ตัวจัดการเสียง SFX ทั้งหมด
 │   │   ├── 📜 Loader.cs                     # คลาสกลางควบคุมการโหลดฉาก
 │   │   ├── 📜 LoaderCallback.cs             # หน่วงเวลาสลับเฟรมการโหลดฉาก
 │   │   └── 📜 LookAtCamera.cs               # Billboard Effect หัน UI เข้าหากล้อง
+│   │
+│   ├── 📂 ChaosKitchen/                     # แพ็กเกจสื่อและเทมเพลต UI Toolkit
+│   │   └── 📂 New Unity Project/Assets/CodeMonkeyFree/
+│   │       ├── 📂 Editor/MainWindowFree/    # MainWindowFree.cs, MainWindowFree.uxml, MainWindowFree.uss
+│   │       └── 📂 Editor/Templates/         # VideoTemplate, CodeTemplate, TextTemplate (.uxml & .uss)
 │   │
 │   ├── 📂 Prefabs/                          # Counters, KitchenObjects, Neko Cat, UI Prefabs
 │   └── 📜 PlayerInputActions.cs             # Input Actions C# Wrapper
@@ -136,6 +169,7 @@ CaDaCook (Unity Project)/
 │   ├── 📜 DESIGN.md                         # Game Design Document & Dynamic Events
 │   ├── 📜 REFACTORCODE.md                   # กฎเหล็ก 15 ข้อสำหรับการพัฒนา C# Unity
 │   ├── 📜 CSharpCodingGuide.md              # คู่มือมาตรฐานการเขียน C# Unity
+│   ├── 📜 CSSCodingGuide.md                 # คู่มือมาตรฐานการเขียน CSS / USS
 │   ├── 📜 DeMorgansLaws.md                  # กฎ De Morgan's Laws & Early Return
 │   ├── 📜 DEBUG.md                          # คู่มือดีแบ๊กสำหรับ AI Agents
 │   ├── 📜 SECURITY.md                       # มาตรฐานความปลอดภัยของเกม

@@ -83,7 +83,7 @@ public class GameStartCountdownUI : MonoBehaviour
         panelRect.offsetMax = Vector2.zero;
 
         Image bgImage = tutorialPanelObject.AddComponent<Image>();
-        bgImage.color = new Color(0.02f, 0.02f, 0.04f, 0.97f);
+        bgImage.color = UITheme.ColorOverlayBackground;
 
         // 2. กล่องหัวเรื่อง & ข้อความเริ่มเกม (Header & Press Any Button Banner)
         GameObject headerObj = new GameObject("TutorialHeader");
@@ -100,7 +100,7 @@ public class GameStartCountdownUI : MonoBehaviour
         tutorialHeaderCountdownText.alignment = TextAlignmentOptions.Center;
         tutorialHeaderCountdownText.color = Color.white;
         tutorialHeaderCountdownText.fontStyle = FontStyles.Bold;
-        tutorialHeaderCountdownText.text = "<b>HOW TO PLAY   -   <color=#FFD700>>>> PRESS ANY BUTTON TO START <<<</color></b>";
+        tutorialHeaderCountdownText.text = UITheme.FormatTutorialHeader(true);
 
         // 3. คอลัมน์ซ้าย: ปุ่มควบคุม (Controls Column - กว้าง 720px)
         GameObject leftColObj = new GameObject("LeftColumn_Controls");
@@ -169,7 +169,7 @@ public class GameStartCountdownUI : MonoBehaviour
 
         // พื้นหลังกล่องเตือนโทนสีส้มเข้มตัดขอบ
         Image warnBg = warningPanelObj.AddComponent<Image>();
-        warnBg.color = new Color(0.25f, 0.11f, 0.01f, 0.95f);
+        warnBg.color = UITheme.ColorWarningBoxBackground;
 
         // ข้อความเตือนสีส้มสดใส
         GameObject warnTextObj = new GameObject("OrangeWarningText");
@@ -183,12 +183,9 @@ public class GameStartCountdownUI : MonoBehaviour
         orangeWarningText = warnTextObj.AddComponent<TextMeshProUGUI>();
         orangeWarningText.fontSize = 24;
         orangeWarningText.alignment = TextAlignmentOptions.Center;
-        orangeWarningText.color = new Color(1.0f, 0.65f, 0.0f); // Bright Orange (#FFA500)
+        orangeWarningText.color = UITheme.ColorWarningOrangeText;
         orangeWarningText.lineSpacing = 14f;
-        orangeWarningText.text =
-            "<b><size=28><color=#FFA500>[ ! ] IMPORTANT WARNING : FIRE EXTINGUISHER</color></size></b>\n" +
-            "<b><color=#FFA500>* DO NOT place Fire Extinguisher on counters! The CATS will STEAL it!</color></b>\n" +
-            "<b><color=#FFD700>* Always press [ E ] to DROP Extinguisher safely on the FLOOR!</color></b>";
+        orangeWarningText.text = UITheme.FormatTutorialWarningBox();
 
         // ซ่อนข้อความนับถอยหลังตัวเลขเดี่ยวเดิม
         if (countdownText != null)
@@ -216,11 +213,9 @@ public class GameStartCountdownUI : MonoBehaviour
 
         // แสดงข้อความกระพริบสวยงามชวนให้กดปุ่มเริ่มเกม
         float pulse = Mathf.PingPong(Time.unscaledTime * 3.5f, 1f);
-        string promptColor = pulse > 0.4f ? "#FFD700" : "#FFFFFF";
-
         if (tutorialHeaderCountdownText != null)
         {
-            tutorialHeaderCountdownText.text = $"<b>HOW TO PLAY   -   <color={promptColor}>>>> PRESS ANY BUTTON TO START <<<</color></b>";
+            tutorialHeaderCountdownText.text = UITheme.FormatTutorialHeader(pulse > 0.4f);
         }
 
         // ตรวจจับการกดปุ่มใดๆ เพื่อเริ่มเกมทันที
@@ -231,14 +226,11 @@ public class GameStartCountdownUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ตรวจจับการกดปุ่มใดๆ จากคีย์บอร์ด เมาส์ หรือจอยสติ๊ก
+    /// ตรวจจับการกดปุ่มใดๆ จากคีย์บอร์ด เมาส์ หรือจอยสติ๊กอย่างปลอดภัยตาม Rule 11
     /// </summary>
     private bool CheckAnyInputPressed()
     {
-        // 1. ตรวจจับผ่าน Input เก่า (Keyboard / Mouse)
-        if (Input.anyKeyDown) return true;
-
-        // 2. ตรวจจับผ่าน Unity New Input System
+        // 1. ตรวจจับผ่าน Unity New Input System เป็นลำดับแรก (Rule 11)
         if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.anyKey.wasPressedThisFrame) return true;
         if (UnityEngine.InputSystem.Mouse.current != null && (UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame || UnityEngine.InputSystem.Mouse.current.rightButton.wasPressedThisFrame)) return true;
         if (UnityEngine.InputSystem.Gamepad.current != null)
@@ -248,6 +240,16 @@ public class GameStartCountdownUI : MonoBehaviour
             {
                 return true;
             }
+        }
+
+        // 2. Fallback ปลอดภัยสำหรับ Legacy Input กรณีโปรเจกต์เปิดใช้งาน Both
+        try
+        {
+            if (Input.anyKeyDown) return true;
+        }
+        catch (System.InvalidOperationException)
+        {
+            // ป้องกันการ Throw Exception หากโปรเจกต์ตั้งค่า Input เป็น New Input System Package Only
         }
 
         return false;

@@ -136,7 +136,7 @@ public class DeliveryCounter : BaseCounter
             badgeText = badgeObj.AddComponent<TextMeshPro>();
             badgeText.fontSize = 2.8f;
             badgeText.alignment = TextAlignmentOptions.Center;
-            badgeText.color = new Color(1.0f, 0.4f, 0.15f); // สีส้มอมแดงเตือน
+            badgeText.color = UITheme.ColorWarningOrange;
             badgeText.fontStyle = FontStyles.Bold;
             badgeText.text = "";
 
@@ -197,7 +197,7 @@ public class DeliveryCounter : BaseCounter
         if (badgeRoot != null && badgeText != null)
         {
             badgeRoot.transform.localPosition = new Vector3(-0.35f, 1.4f + (dirtyPlatesAmount * PLATE_OFFSET_Y), 0.15f);
-            badgeText.text = $"DIRTY x{dirtyPlatesAmount}\n<color=#FFFF00><size=75%>[E] PICK UP</size></color>";
+            badgeText.text = UITheme.FormatDirtyPlateBadge(dirtyPlatesAmount);
             badgeRoot.SetActive(true);
         }
     }

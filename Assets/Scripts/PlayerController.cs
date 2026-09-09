@@ -1,32 +1,54 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
+/// <summary>
+/// สคริปต์ควบคุมตัวละครทดลอง (Standalone Experimental Player Controller)
+/// รองรับการเคลื่อนที่และการยิงปืนพื้นฐานสำหรับฉากทดสอบด้วย New Input System
+/// </summary>
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveSpeed = 5f;
-    public float rotationSpeed = 100f;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float rotationSpeed = 100f;
 
     [Header("Shooting Settings")]
-    public GameObject bulletPrefab; // Prefab กระสุน
-    public Transform firePoint;     // จุดปล่อยกระสุน
+    [SerializeField] private GameObject bulletPrefab; // Prefab กระสุน
+    [SerializeField] private Transform firePoint;     // จุดปล่อยกระสุน
 
-    void Update()
+    public float MoveSpeed => moveSpeed;
+    public float RotationSpeed => rotationSpeed;
+    public GameObject BulletPrefab => bulletPrefab;
+    public Transform FirePoint => firePoint;
+
+    private void Update()
     {
-        // --- การเคลื่อนที่ (Movement) ---
-        float horizontal = Input.GetAxis("Horizontal"); // A/D
-        float vertical = Input.GetAxis("Vertical");     // W/S
+        // Guard Clause: ตรวจสอบความปลอดภัยของฮาร์ดแวร์คีย์บอร์ด (Null Safety)
+        if (Keyboard.current == null) return;
+
+        // --- การเคลื่อนที่ (Movement ด้วย Unity New Input System) ---
+        float horizontal = 0f;
+        if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) horizontal += 1f;
+        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) horizontal -= 1f;
+
+        float vertical = 0f;
+        if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) vertical += 1f;
+        if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) vertical -= 1f;
 
         transform.Translate(Vector3.forward * vertical * moveSpeed * Time.deltaTime);
         transform.Rotate(Vector3.up * horizontal * rotationSpeed * Time.deltaTime);
 
-        // --- การยิงปืน (Shooting) ---
-        if (Input.GetButtonDown("Fire1"))
+        // --- การยิงปืน (Shooting: คลิกซ้ายเมาส์ หรือกด Spacebar หรือ Left Ctrl) ---
+        bool isShootPressed = (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) ||
+                              Keyboard.current.spaceKey.wasPressedThisFrame ||
+                              Keyboard.current.leftCtrlKey.wasPressedThisFrame;
+
+        if (isShootPressed)
         {
             Shoot();
         }
     }
 
-    void Shoot()
+    private void Shoot()
     {
         if (bulletPrefab != null && firePoint != null)
         {

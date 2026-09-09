@@ -76,8 +76,7 @@ public class DeliveryManagerUI : MonoBehaviour
             {
                 Transform recipeTransform = Instantiate(recipeTemplate, container);
                 recipeTransform.gameObject.SetActive(true);
-                DeliveryManagerSingleUI singleUI = recipeTransform.GetComponent<DeliveryManagerSingleUI>();
-                if (singleUI != null)
+                if (recipeTransform.TryGetComponent(out DeliveryManagerSingleUI singleUI))
                 {
                     singleUI.SetOrderData(orderData);
                     activeCardsList.Add(singleUI);
@@ -86,16 +85,19 @@ public class DeliveryManagerUI : MonoBehaviour
         }
         else
         {
-            // Fallback กรณีใช้ waitingrecipeSOList เดิม
-            foreach (RecipeSO recipeSO in DeliveryManager.Instance.GetWaitingRecipeSPList())
+            // Fallback กรณีใช้ waitingRecipeSOList เดิม พร้อม Null Guard เพื่อความปลอดภัย 100%
+            List<RecipeSO> fallbackList = DeliveryManager.Instance.GetWaitingRecipeSOList();
+            if (fallbackList != null && fallbackList.Count > 0)
             {
-                Transform recipeTransform = Instantiate(recipeTemplate, container);
-                recipeTransform.gameObject.SetActive(true);
-                DeliveryManagerSingleUI singleUI = recipeTransform.GetComponent<DeliveryManagerSingleUI>();
-                if (singleUI != null)
+                foreach (RecipeSO recipeSO in fallbackList)
                 {
-                    singleUI.SetRecipSO(recipeSO);
-                    activeCardsList.Add(singleUI);
+                    Transform recipeTransform = Instantiate(recipeTemplate, container);
+                    recipeTransform.gameObject.SetActive(true);
+                    if (recipeTransform.TryGetComponent(out DeliveryManagerSingleUI singleUI))
+                    {
+                        singleUI.SetRecipeSO(recipeSO);
+                        activeCardsList.Add(singleUI);
+                    }
                 }
             }
         }

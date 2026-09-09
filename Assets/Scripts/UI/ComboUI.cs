@@ -89,12 +89,12 @@ public class ComboUI : MonoBehaviour
         if (streak >= 5)
         {
             // Super Combo 2.0x (ตัวอักษรสีส้มเพลิงสดใส)
-            comboText.text = $"<size=26><color=#FF4500><b>>>> SUPER COMBO x{streak} <<<</b></color></size>\n<size=20><color=#FFA500><b>BONUS x{multiplier:F1} SCORE!</b></color></size>";
+            comboText.text = UITheme.FormatSuperCombo(streak, multiplier);
         }
         else
         {
             // Combo 1.5x (ตัวอักษรสีส้มทองสดใส)
-            comboText.text = $"<size=24><color=#FF7700><b>[ COMBO x{streak} ]</b></color></size>\n<size=19><color=#FFA500><b>BONUS x{multiplier:F1} SCORE!</b></color></size>";
+            comboText.text = UITheme.FormatStandardCombo(streak, multiplier);
         }
 
         punchScaleTimer = 0.35f;
@@ -156,7 +156,7 @@ public class ComboUI : MonoBehaviour
             comboText.fontStyle = FontStyles.Bold;
             comboText.color = new Color(1.0f, 0.55f, 0.0f); // Bright Orange
             comboText.textWrappingMode = TextWrappingModes.NoWrap;
-            comboText.text = "<size=24><color=#FF7700><b>[ COMBO x3 ]</b></color></size>\n<size=19><color=#FFA500><b>BONUS x1.5 SCORE!</b></color></size>";
+            comboText.text = UITheme.FormatStandardCombo(3, 1.5f);
         }
 
         originalScale = comboBannerObj.transform.localScale;

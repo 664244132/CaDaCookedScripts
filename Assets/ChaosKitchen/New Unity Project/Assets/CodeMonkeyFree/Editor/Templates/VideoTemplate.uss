@@ -1,3 +1,31 @@
+/* =========================================================================
+   VideoTemplate.uss - UI Toolkit Stylesheet for Video Reference Template
+   Separated from VideoTemplate.uxml in accordance with CSSCodingGuide.md
+   ========================================================================= */
+
 .cursor-link {
     cursor: link;
+}
+
+.video-container {
+    flex-grow: 0;
+}
+
+.video-thumbnail {
+    flex-grow: 1;
+    align-items: center;
+    height: 150px;
+    min-height: 70px;
+    max-height: 150px;
+    margin: 5px;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url("project://database/Assets/ChaosKitchen/New Unity Project/Assets/CodeMonkeyFree/Textures/CodeMonkeyLogoSmallHeight.png?fileID=2800000&guid=7ddeb48e951f72446b79a79cc209e604&type=3#CodeMonkeyLogoSmallHeight");
+}
+
+.video-title {
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
 }

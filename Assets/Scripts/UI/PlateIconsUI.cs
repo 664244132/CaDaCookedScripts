@@ -49,7 +49,10 @@ public class PlateIconsUI : MonoBehaviour
         {
             Transform iconTransform = Instantiate(iconTemplate, transform);
             iconTransform.gameObject.SetActive(true);
-            iconTransform.GetComponent<PlateIconsSingleUI>().SetKitchenOnjectSO(kitchenObjectSO);
+            if (iconTransform.TryGetComponent(out PlateIconsSingleUI singleUI))
+            {
+                singleUI.SetKitchenObjectSO(kitchenObjectSO);
+            }
         }
     }
 }

@@ -27,11 +27,23 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     [SerializeField] private Transform kitchenObjectHoldPoint;
     [SerializeField] private Transform exitPoint;
 
+    [Header("Pass-Through Settings")]
+    [SerializeField] private bool canPassThroughObjects = true; // อนุญาตให้แมวเดินทะลุเคาน์เตอร์และวัตถุต่างๆ ได้ ไม่ติดขัด
+
+    [Header("Patrol & Idle Pause Settings")]
+    [SerializeField] private float arrivalThreshold = 0.25f;       // ระยะที่ถือว่าเดินถึงจุดหมาย
+    [SerializeField] private float minIdlePauseDuration = 1.5f;     // เวลาหยุดยืนดมกลิ่นตรวจตราขั้นต่ำ
+    [SerializeField] private float maxIdlePauseDuration = 3.5f;     // เวลาหยุดยืนดมกลิ่นตรวจตราสูงสุด
+    [SerializeField] private float patrolRadius = 2.0f;            // รัศมีการเดินลาดตระเวนรอบจุดเกิด
+
     private State state;
     private BaseCounter targetCounter;
     private KitchenObject carriedKitchenObject;
     private Vector3 targetPosition;
     private Vector3 spawnPosition;
+    private Vector3 currentPatrolWaypoint;
+    private float idlePauseTimer;
+    private bool isWaitingAtWaypoint;
     private float respawnTimer;
     private float fleeTimer;
     private BaseCounter[] cachedCounters;
@@ -40,6 +52,9 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     private void Awake()
     {
         spawnPosition = transform.position;
+
+        // ปรับแต่ง Collider และ Rigidbody ให้เป็น Trigger ทันทีที่โหลดออบเจกต์
+        EnsurePassThroughColliders();
 
         // ค้นหาหรือสร้าง HoldPoint สำหรับคาบวัตถุดิบ
         if (kitchenObjectHoldPoint == null)
@@ -62,8 +77,64 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     private void Start()
     {
         state = State.Idle;
+        if (spawnPosition == Vector3.zero)
+        {
+            spawnPosition = transform.position;
+        }
+
+        EnsurePassThroughColliders();
+
+        // สุ่ม Waypoint แรกและหยุดยืนดูลาดเลาก่อนเริ่มเดิน
+        currentPatrolWaypoint = spawnPosition;
+        isWaitingAtWaypoint = true;
+        idlePauseTimer = UnityEngine.Random.Range(minIdlePauseDuration, maxIdlePauseDuration);
+
         // Cache รายการเคาน์เตอร์ทั้งหมดในฉากไว้ล่วงหน้า เพื่อป้องกันการ FindObjectsByType ทุกเฟรมใน Update (Rule 5 & 6)
         cachedCounters = FindObjectsByType<BaseCounter>(FindObjectsSortMode.None);
+    }
+
+    /// <summary>
+    /// สุ่มเลือกจุดตรวจตราแห่งใหม่รอบจุดเกิดริมครัว
+    /// </summary>
+    private void PickNewPatrolWaypoint()
+    {
+        float randomOffsetX = UnityEngine.Random.Range(-0.6f, 0.6f);
+        float randomOffsetZ = UnityEngine.Random.Range(-patrolRadius, patrolRadius);
+        currentPatrolWaypoint = new Vector3(spawnPosition.x + randomOffsetX, spawnPosition.y, spawnPosition.z + randomOffsetZ);
+        isWaitingAtWaypoint = false;
+    }
+
+    /// <summary>
+    /// ปรับแต่ง Collider ทั้งหมดบนตัวแมวให้เป็น Trigger (isTrigger = true) และ Rigidbody ให้เป็น Kinematic
+    /// เพื่อให้แมวสามารถเดินทะลุผ่านเคาน์เตอร์ กำแพง และวัตถุต่างๆ ได้อย่างราบรื่น ไม่ติดขัด
+    /// </summary>
+    private void EnsurePassThroughColliders()
+    {
+        if (!canPassThroughObjects) return;
+
+        Collider[] colliders = GetComponentsInChildren<Collider>(true);
+        foreach (Collider col in colliders)
+        {
+            col.isTrigger = true;
+        }
+
+        if (TryGetComponent(out Rigidbody rb))
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+    }
+
+    /// <summary>
+    /// กำหนดพิกัดจุดเกิดและจุดเดินลาดตระเวนริมขอบจอ
+    /// </summary>
+    public void SetSpawnPosition(Vector3 pos)
+    {
+        spawnPosition = pos;
+        transform.position = pos;
+        currentPatrolWaypoint = pos;
+        isWaitingAtWaypoint = true;
+        idlePauseTimer = 1.0f;
     }
 
     private void Update()
@@ -133,17 +204,39 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
         }
     }
 
-    private void MoveTowards(Vector3 destination, float speed)
+    /// <summary>
+    /// เคลื่อนที่เข้าหาจุดหมายอย่างนุ่มนวล โดยไม่ Overshoot หรือสั่นกระตุก
+    /// คืนค่า true เมื่อเดินถึงจุดหมายแล้ว (ระยะห่างน้อยกว่า arrivalThreshold)
+    /// </summary>
+    private bool MoveTowards(Vector3 destination, float speed)
     {
-        Vector3 moveDir = (destination - transform.position);
-        moveDir.y = 0;
-        moveDir = moveDir.normalized;
+        Vector3 toDest = destination - transform.position;
+        toDest.y = 0;
+        float dist = toDest.magnitude;
 
-        transform.position += moveDir * speed * Time.deltaTime;
+        if (dist <= arrivalThreshold)
+        {
+            // ถึงจุดหมายแล้ว หยุดเดินสนิท
+            return true;
+        }
+
+        Vector3 moveDir = toDest / dist;
+        float step = Mathf.Min(speed * Time.deltaTime, dist);
+
+        Vector3 nextPos = transform.position + moveDir * step;
+        if (canPassThroughObjects)
+        {
+            // ล็อคระดับความสูงแกน Y ให้ตรงกับระดับพื้นเดิมเสมอ ป้องกันการลอยขึ้นไปบนหลังเคาน์เตอร์ขณะเดินทะลุ
+            nextPos.y = spawnPosition.y;
+        }
+
+        transform.position = nextPos;
         if (moveDir != Vector3.zero)
         {
-            transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * 15f);
+            transform.forward = Vector3.RotateTowards(transform.forward, moveDir, 10f * Time.deltaTime, 0f);
         }
+
+        return false;
     }
 
     private void FindTargetCounter()
@@ -178,9 +271,34 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
             }
         }
 
-        // หากยังไม่มีของบนเคาน์เตอร์ ให้เดินวนเวียนแถวทางเข้า
-        Vector3 wanderPos = spawnPosition + new Vector3(Mathf.Sin(Time.time * 2f) * 2f, 0, Mathf.Cos(Time.time * 2f) * 2f);
-        MoveTowards(wanderPos, walkSpeed * 0.6f);
+        // หากยังไม่มีของบนเคาน์เตอร์ ให้เดินตรวจตราตามจุด Waypoint หรือยืนดมกลิ่นพักตรวจตราอย่างเป็นธรรมชาติ
+        if (isWaitingAtWaypoint)
+        {
+            idlePauseTimer -= Time.deltaTime;
+
+            // ขณะหยุดยืนพัก ให้หันหน้ามองเข้าหาห้องครัวอย่างเป็นธรรมชาติ (เสมือนคอยสอดส่องว่ามีอะไรให้ขโมยไหม)
+            Vector3 kitchenDirection = (Vector3.zero - transform.position);
+            kitchenDirection.y = 0;
+            if (kitchenDirection != Vector3.zero)
+            {
+                transform.forward = Vector3.RotateTowards(transform.forward, kitchenDirection.normalized, 2f * Time.deltaTime, 0f);
+            }
+
+            if (idlePauseTimer <= 0f)
+            {
+                PickNewPatrolWaypoint();
+            }
+        }
+        else
+        {
+            // ค่อยๆ เดินไปยัง Waypoint ที่สุ่มไว้
+            bool arrived = MoveTowards(currentPatrolWaypoint, walkSpeed * 0.6f);
+            if (arrived)
+            {
+                isWaitingAtWaypoint = true;
+                idlePauseTimer = UnityEngine.Random.Range(minIdlePauseDuration, maxIdlePauseDuration);
+            }
+        }
     }
 
     private void StealFromCounter()
@@ -272,8 +390,12 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     private void RespawnCat()
     {
         transform.position = spawnPosition;
+        EnsurePassThroughColliders();
         state = State.Idle;
         fleeTimer = 0f;
+        isWaitingAtWaypoint = true;
+        idlePauseTimer = UnityEngine.Random.Range(minIdlePauseDuration, maxIdlePauseDuration);
+        PickNewPatrolWaypoint();
         Debug.Log("🐱 KitchenCat: Respawned back at the kitchen entrance!");
     }
 

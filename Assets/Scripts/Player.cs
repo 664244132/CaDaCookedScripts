@@ -22,6 +22,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     [SerializeField] private float moveSpeed = 8f;
     [SerializeField] private GameInput gameInput;
     [SerializeField] private LayerMask countersLayerMask;
+    [SerializeField] private LayerMask collisionsLayerMask = ~0; // ปรับแต่ง Layer การตรวจจับการชนตามกฎ Rule 10
     [SerializeField] private Transform kitchenObjectHoldPoint;
 
     [Header("Dash Mechanic Settings")]
@@ -63,9 +64,18 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void Start()
     {
-        gameInput.OnInteractAction += GameInput_OnInteractAction;
-        gameInput.OnInteractAlternateAction += GameInput_OnInteractAlternateAction;
-        gameInput.OnDashAction += GameInput_OnDashAction;
+        if (gameInput == null)
+        {
+            gameInput = GameInput.Instance;
+        }
+
+        if (gameInput != null)
+        {
+            gameInput.OnInteractAction += GameInput_OnInteractAction;
+            gameInput.OnInteractAlternateAction += GameInput_OnInteractAlternateAction;
+            gameInput.OnDashAction += GameInput_OnDashAction;
+        }
+
         CreateDashDustEffect();
     }
 
@@ -307,7 +317,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
             float playerR = 0.5f;
             float playerH = 2.0f;
 
-            bool canDash = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerH, playerR, dashDirection, dashMoveDistance, ~0, QueryTriggerInteraction.Ignore);
+            bool canDash = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerH, playerR, dashDirection, dashMoveDistance, collisionsLayerMask, QueryTriggerInteraction.Ignore);
             if (canDash)
             {
                 transform.position += dashDirection * dashMoveDistance;
@@ -357,13 +367,13 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         float moveDistance = currentSpeed * Time.deltaTime;
         float playerRadius = 0.5f;
         float playerHeight = 2.0f;
-        bool canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDir, moveDistance, ~0, QueryTriggerInteraction.Ignore);
+        bool canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDir, moveDistance, collisionsLayerMask, QueryTriggerInteraction.Ignore);
 
         if (!canMove && moveDir != Vector3.zero)
         {
             // ตรวจจับการเดินสไลด์ตามแนวแกน X
             Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
-            canMove = moveDir.x != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance, ~0, QueryTriggerInteraction.Ignore);
+            canMove = moveDir.x != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance, collisionsLayerMask, QueryTriggerInteraction.Ignore);
             if (canMove)
             {
                 moveDir = moveDirX;
@@ -372,7 +382,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
             {
                 // ตรวจจับการเดินสไลด์ตามแนวแกน Z
                 Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
-                canMove = moveDir.z != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirZ, moveDistance, ~0, QueryTriggerInteraction.Ignore);
+                canMove = moveDir.z != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirZ, moveDistance, collisionsLayerMask, QueryTriggerInteraction.Ignore);
                 if (canMove)
                 {
                     moveDir = moveDirZ;

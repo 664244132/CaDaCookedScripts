@@ -364,11 +364,11 @@ public class GameplayEventsBootstrap : MonoBehaviour
     {
         if (FindObjectsByType<KitchenCatNPC>(FindObjectsSortMode.None).Length == 0)
         {
-            // แมวส้ม 3D (Neko Cat 01) ทางฝั่งขวา
-            CreateNekoCat("Cat_NekoOrange", "Neko Cat 01", new Vector3(3.2f, 0f, -2.2f), new Color(0.95f, 0.55f, 0.15f));
+            // แมวส้ม 3D (Neko Cat 01) ประจำการริมขอบจอฝั่งขวา (Flank Staging Zone)
+            CreateNekoCat("Cat_NekoOrange", "Neko Cat 01", new Vector3(7.8f, 0f, 4.5f), new Color(0.95f, 0.55f, 0.15f));
 
-            // แมวเทา 3D (Neko Cat 02) ทางฝั่งซ้าย
-            CreateNekoCat("Cat_NekoGrey", "Neko Cat 02", new Vector3(-3.2f, 0f, 1.8f), new Color(0.45f, 0.45f, 0.48f));
+            // แมวเทา 3D (Neko Cat 02) ประจำการริมขอบจอฝั่งซ้าย (Flank Staging Zone)
+            CreateNekoCat("Cat_NekoGrey", "Neko Cat 02", new Vector3(-7.8f, 0f, 4.5f), new Color(0.45f, 0.45f, 0.48f));
         }
     }
 
@@ -412,13 +412,22 @@ public class GameplayEventsBootstrap : MonoBehaviour
             head.GetComponent<MeshRenderer>().material = catMat;
         }
 
-        // ติดตั้ง Collider สำหรับตรวจจับการเข้าใกล้
+        // ติดตั้ง Collider สำหรับตรวจจับการเข้าใกล้ (ตั้งค่าเป็น Trigger เพื่อให้เดินทะลุวัตถุได้ ไม่ติดขัด)
         if (!catObj.TryGetComponent(out Collider _))
         {
             CapsuleCollider catCol = catObj.AddComponent<CapsuleCollider>();
             catCol.center = new Vector3(0, 0.25f, 0);
             catCol.radius = 0.25f;
             catCol.height = 0.5f;
+            catCol.isTrigger = true;
+        }
+        else
+        {
+            // ปรับ Collider ที่มีอยู่เดิมให้เป็น Trigger ทั้งหมดเพื่อความราบรื่นในการเดินทะลุ
+            foreach (Collider col in catObj.GetComponentsInChildren<Collider>(true))
+            {
+                col.isTrigger = true;
+            }
         }
 
         // ติดตั้งจุดคาบอาหาร HoldPoint ด้านหน้าปากแมว
@@ -437,10 +446,11 @@ public class GameplayEventsBootstrap : MonoBehaviour
         }
 
         // ติดตั้งสมอง AI ของแมวขโมยของ
-        if (!catObj.TryGetComponent(out KitchenCatNPC _))
+        if (!catObj.TryGetComponent(out KitchenCatNPC catNPC))
         {
-            catObj.AddComponent<KitchenCatNPC>();
+            catNPC = catObj.AddComponent<KitchenCatNPC>();
         }
+        catNPC.SetSpawnPosition(pos);
     }
 
     // ==========================================

@@ -77,17 +77,17 @@
 ## 🖥️ 4. สถาปัตยกรรมระบบอินเทอร์เฟซผู้ใช้ (UI Architecture)
 
 1. **Screen-Space Canvas HUD:**
-   - [`GameStartCountdownUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameStartCountdownUI.cs): หน้าต่างสอนเล่น 15 วินาที พร้อมกล่องเตือนเด่นชัดสีส้ม (`#FFA500`)
-   - [`DeliveryManagerUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/DeliveryManagerUI.cs): แสดงรายการการ์ดออเดอร์
-   - [`RushHourUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/RushHourUI.cs): แสดงป้ายแจ้งเตือนชั่วโมงเร่งด่วน
-   - [`GamePlayingClockUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GamePlayingClockUI.cs): นาฬิกาจับเวลากลมถอยหลัง
-   - [`GamePauseUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GamePauseUI.cs): เมนูหยุดเกม (Resume, Main Menu พร้อม auto-focus และ reset timeScale)
-   - [`GameOverUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/GameOverUI.cs): สรุปยอดจานอาหารที่ส่งสำเร็จ และกลับสู่หน้าเมนูหลักอัตโนมัติใน 5 วินาที
+   - [`GameStartCountdownUI.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GameStartCountdownUI.cs): หน้าต่างสอนเล่น 15 วินาที พร้อมกล่องเตือนเด่นชัดสีส้ม (`#FFA500`)
+   - [`DeliveryManagerUI.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/DeliveryManagerUI.cs): แสดงรายการการ์ดออเดอร์
+   - [`RushHourUI.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/RushHourUI.cs): แสดงป้ายแจ้งเตือนชั่วโมงเร่งด่วน
+   - [`GamePlayingClockUI.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GamePlayingClockUI.cs): นาฬิกาจับเวลากลมถอยหลัง
+   - [`GamePauseUI.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GamePauseUI.cs): เมนูหยุดเกม (Resume, Main Menu พร้อม auto-focus และ reset timeScale)
+   - [`GameOverUI.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/GameOverUI.cs): สรุปยอดจานอาหารที่ส่งสำเร็จ และกลับสู่หน้าเมนูหลักอัตโนมัติใน 5 วินาที
 2. **World-Space Canvas:**
-   - [`ProgressBarUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/ProgressBarUI.cs): หลอดแสดงความคืบหน้าลอยเหนือเคาน์เตอร์
-   - [`PlateIconsUI.cs`](file:///d:/unity/My%20project/Assets/Scripts/UI/PlateIconsUI.cs): แสดงไอคอนวัตถุดิบบนจาน
-   - [`FireExtinguisher.cs`](file:///d:/unity/My%20project/Assets/Scripts/Obstacles/FireExtinguisher.cs): ป้ายคำสั่งลอยแบบ Billboard (`[E] PICK UP`, `[F] HOLD TO SPRAY`, `[E] DROP`)
-   - [`LookAtCamera.cs`](file:///d:/unity/My%20project/Assets/Scripts/LookAtCamera.cs): หมุนระนาบ Canvas เข้าหากล้องตลอดเวลา (Billboard)
+   - [`ProgressBarUI.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/ProgressBarUI.cs): หลอดแสดงความคืบหน้าลอยเหนือเคาน์เตอร์
+   - [`PlateIconsUI.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/PlateIconsUI.cs): แสดงไอคอนวัตถุดิบบนจาน
+   - [`FireExtinguisher.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/FireExtinguisher.cs): ป้ายคำสั่งลอยแบบ Billboard (`[E] PICK UP`, `[F] HOLD TO SPRAY`, `[E] DROP`)
+   - [`LookAtCamera.cs`](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/LookAtCamera.cs): หมุนระนาบ Canvas เข้าหากล้องตลอดเวลา (Billboard)
 
 ---
 

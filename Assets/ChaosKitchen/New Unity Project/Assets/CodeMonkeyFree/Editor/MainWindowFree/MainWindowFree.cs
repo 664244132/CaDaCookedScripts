@@ -148,50 +148,57 @@ namespace CodeMonkey.FreeWindow {
         public static void AddVideoReference(VisualTreeAsset videoTemplateVisualTreeAsset, VisualElement containerVisualElement, string imageUrl, string title, string url, VideoReferenceSettings videoReferenceSettings = null) {
             Sprite waitingSprite = null;
             VisualElement videoVisualElement = AddVideoReference(videoTemplateVisualTreeAsset, containerVisualElement, waitingSprite, title, url, videoReferenceSettings);
-
-            UnityWebRequest unityWebRequest = UnityWebRequestTexture.GetTexture(imageUrl);
-            unityWebRequest.SendWebRequest().completed += (AsyncOperation asyncOperation) => {
-                try {
-                    UnityWebRequestAsyncOperation unityWebRequestAsyncOperation = asyncOperation as UnityWebRequestAsyncOperation;
-
-                    if (unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ConnectionError ||
-                        unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.DataProcessingError ||
-                        unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ProtocolError) {
-                        // Error
-                        //onError(unityWebRequest.error);
-                    } else {
-                        DownloadHandlerTexture downloadHandlerTexture = unityWebRequest.downloadHandler as DownloadHandlerTexture;
-                        VisualElement imageVisualElement = videoVisualElement.Q<VisualElement>("image");
-                        imageVisualElement.style.backgroundImage = new StyleBackground(downloadHandlerTexture.texture);
-                    }
-                } catch (Exception) {
-                }
-                unityWebRequest.Dispose();
-            };
+            VisualElement imageVisualElement = videoVisualElement.Q<VisualElement>("image");
+            LoadTextureWithFallback(imageUrl, imageVisualElement);
         }
 
         private static void SetBackgroundImage(VisualElement visualElement, string imageUrl) {
+            LoadTextureWithFallback(imageUrl, visualElement);
+        }
+
+        private const string DEFAULT_FALLBACK_LOGO = "Assets/ChaosKitchen/New Unity Project/Assets/CodeMonkeyFree/Textures/CodeMonkeyLogoSmallHeight.png";
+
+        /// <summary>
+        /// DRY Helper: ดาวน์โหลด Texture ผ่าน WebRequest พร้อม Fallback ไปยัง Local Asset ในเครื่องเมื่อ Offline หรือเกิดข้อผิดพลาด
+        /// </summary>
+        private static void LoadTextureWithFallback(string imageUrl, VisualElement targetVisualElement, string fallbackAssetPath = DEFAULT_FALLBACK_LOGO) {
+            if (targetVisualElement == null) return;
+
             UnityWebRequest unityWebRequest = UnityWebRequestTexture.GetTexture(imageUrl);
             unityWebRequest.SendWebRequest().completed += (AsyncOperation asyncOperation) => {
                 try {
                     UnityWebRequestAsyncOperation unityWebRequestAsyncOperation = asyncOperation as UnityWebRequestAsyncOperation;
 
-                    if (unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ConnectionError ||
-                        unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.DataProcessingError ||
-                        unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ProtocolError) {
-                        // Error
-                        //Debug.Log("Error Contacting URL: " + unityWebRequest.error);
-                        //DownloadHandlerTexture downloadHandlerTexture = unityWebRequest.downloadHandler as DownloadHandlerTexture;
-                        //Debug.Log(downloadHandlerTexture.error);
-                        //onError(unityWebRequest.error);
-                    } else {
+                    bool isError = unityWebRequestAsyncOperation == null ||
+                                   unityWebRequestAsyncOperation.webRequest == null ||
+                                   unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ConnectionError ||
+                                   unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.DataProcessingError ||
+                                   unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ProtocolError;
+
+                    if (!isError) {
                         DownloadHandlerTexture downloadHandlerTexture = unityWebRequest.downloadHandler as DownloadHandlerTexture;
-                        visualElement.style.backgroundImage = new StyleBackground(downloadHandlerTexture.texture);
+                        if (downloadHandlerTexture != null && downloadHandlerTexture.texture != null) {
+                            targetVisualElement.style.backgroundImage = new StyleBackground(downloadHandlerTexture.texture);
+                            return;
+                        }
                     }
+
+                    // Fallback to local asset
+                    ApplyLocalFallback(targetVisualElement, fallbackAssetPath);
                 } catch (Exception) {
+                    ApplyLocalFallback(targetVisualElement, fallbackAssetPath);
+                } finally {
+                    unityWebRequest.Dispose();
                 }
-                unityWebRequest.Dispose();
             };
+        }
+
+        private static void ApplyLocalFallback(VisualElement targetVisualElement, string assetPath) {
+            if (targetVisualElement == null) return;
+            Texture2D fallbackTexture = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+            if (fallbackTexture != null) {
+                targetVisualElement.style.backgroundImage = new StyleBackground(fallbackTexture);
+            }
         }
 
         public static VisualElement AddVideoReference(VisualTreeAsset videoTemplateVisualTreeAsset, VisualElement containerVisualElement, Sprite sprite, string title, string url, VideoReferenceSettings videoReferenceSettings = null) {

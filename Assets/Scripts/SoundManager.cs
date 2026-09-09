@@ -14,11 +14,20 @@ public class SoundManager : MonoBehaviour
 
     private void Start()
     {
-        DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
-        DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
-        DeliveryManager.Instance.OnOrderAngry += DeliveryManager_OnOrderAngry;
+        if (DeliveryManager.Instance != null)
+        {
+            DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
+            DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
+            DeliveryManager.Instance.OnOrderAngry += DeliveryManager_OnOrderAngry;
+        }
+
         CuttingCounter.OnAnyCut += CuttingCounter_OnAnyCut;
-        Player.Instance.OnPickedSomething += Player_OnPickedSomething;
+
+        if (Player.Instance != null)
+        {
+            Player.Instance.OnPickedSomething += Player_OnPickedSomething;
+        }
+
         BaseCounter.OnAnyObjectPlaceHere += BaseCounter_OnAnyObjectPlaceHere;
         TrashCounter.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
         FireHazard.OnAnyFireStarted += FireHazard_OnAnyFireStarted;

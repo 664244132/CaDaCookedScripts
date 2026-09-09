@@ -72,7 +72,7 @@ public class DeliveryManager : MonoBehaviour
 
     [SerializeField] private RecipeListSO recipeListSO;
     private List<OrderData> waitingOrdersList;
-    private List<RecipeSO> waitingrecipeSOList; // สำหรับ backward compatibility
+    private List<RecipeSO> waitingRecipeSOList; // สำหรับ backward compatibility
 
     private float spawnRecipeTimer;
     private float spawnRecipeTimerMax = 4f;
@@ -97,7 +97,7 @@ public class DeliveryManager : MonoBehaviour
     {
         Instance = this;
         waitingOrdersList = new List<OrderData>();
-        waitingrecipeSOList = new List<RecipeSO>();
+        waitingRecipeSOList = new List<RecipeSO>();
     }
 
     private void Update()
@@ -117,7 +117,7 @@ public class DeliveryManager : MonoBehaviour
         {
             spawnRecipeTimer = spawnRecipeTimerMax;
 
-            if (waitingOrdersList.Count < waitingRecipesMax && recipeListSO.recipeSOLsit.Count > 0)
+            if (waitingOrdersList.Count < waitingRecipesMax && recipeListSO.recipeSOList.Count > 0)
             {
                 SpawnNewOrder();
             }
@@ -200,7 +200,7 @@ public class DeliveryManager : MonoBehaviour
     /// </summary>
     private void SpawnNewOrder()
     {
-        RecipeSO randomRecipe = recipeListSO.recipeSOLsit[UnityEngine.Random.Range(0, recipeListSO.recipeSOLsit.Count)];
+        RecipeSO randomRecipe = recipeListSO.recipeSOList[UnityEngine.Random.Range(0, recipeListSO.recipeSOList.Count)];
 
         // ตรวจสอบเงื่อนไขว่าออเดอร์นี้จะเป็น VIP หรือไม่ (เกิดได้เมื่อมีคูลดาวน์พร้อม และยังไม่มี VIP ในคิว)
         bool spawnAsVIP = false;
@@ -235,10 +235,14 @@ public class DeliveryManager : MonoBehaviour
 
     private void SyncBackwardCompatibilityList()
     {
-        waitingrecipeSOList.Clear();
+        if (waitingRecipeSOList == null)
+        {
+            waitingRecipeSOList = new List<RecipeSO>();
+        }
+        waitingRecipeSOList.Clear();
         foreach (var order in waitingOrdersList)
         {
-            waitingrecipeSOList.Add(order.recipeSO);
+            waitingRecipeSOList.Add(order.recipeSO);
         }
     }
 
@@ -410,10 +414,17 @@ public class DeliveryManager : MonoBehaviour
         return waitingOrdersList;
     }
 
-    public List<RecipeSO> GetWaitingRecipeSPList()
+    public List<RecipeSO> GetWaitingRecipeSOList()
     {
-        return waitingrecipeSOList;
+        if (waitingRecipeSOList == null)
+        {
+            waitingRecipeSOList = new List<RecipeSO>();
+        }
+        return waitingRecipeSOList;
     }
+
+    [System.Obsolete("Typo in original API method name. Use GetWaitingRecipeSOList instead.")]
+    public List<RecipeSO> GetWaitingRecipeSPList() => GetWaitingRecipeSOList();
 
     public int GetSuccessfulRecipesAmount()
     {

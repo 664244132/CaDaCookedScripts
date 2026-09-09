@@ -98,5 +98,20 @@ _Avoid_: Infinite plate dispenser, decoupled washing, orphan plate generation
 A fail-safe state restoration pattern where a cooking workstation (e.g. StoveCounter) immediately reverts from Frying/Fried/Progressing to Idle (extinguishing flame visuals, halting sizzling audio, and resetting progress gauges) the instant its cooking ingredient is abruptly removed or stolen outside the normal Player pickup flow (e.g. by KitchenCatNPC).
 _Avoid_: Ghost frying, infinite sizzling, phantom cooking
 
+**Flank Staging Zone**:
+The designated perimeter waiting positions at the far left (X ≈ -9.2m) and far right (X ≈ +9.2m) screen boundaries where kitchen obstacle NPCs (e.g. KitchenCatNPC) lurk and patrol, keeping central chef workstations free from immediate proximity interference.
+_Avoid_: Corridor spawning, chef path blocking, workstation crowding
 
+**Steal Telegraph**:
+A deliberate anticipation window (1.0–1.5s windup) where a thieving NPC pauses at a targeted workstation, emitting visual and acoustic cues (exclamation bubble, alert meow, tail twitch) before seizing the food, affording the chef fair reaction time to intervene.
+_Avoid_: Instant snatch, zero-frame theft, unavoidable item loss
 
+**Chef Presence Deterrent**:
+The spatial protection rule preventing NPCs from targeting or snatching items from any workstation currently occupied by or adjacent to the active chef (within 1.5m), ensuring uninterrupted active cooking.
+_Avoid_: Face-to-face theft, work disruption, interactive robbery
+
+### UI & Presentation Layer
+
+**UI Theme Design Tokens**:
+A centralized repository of color tokens, Rich Text styling constants, and DRY text formatters (`UITheme.cs`) that decouples visual presentation and text formatting from gameplay logic, serving as the single source of truth for UI appearance across the project.
+_Avoid_: Hardcoded hex tags, inline font markup, scattered text styles

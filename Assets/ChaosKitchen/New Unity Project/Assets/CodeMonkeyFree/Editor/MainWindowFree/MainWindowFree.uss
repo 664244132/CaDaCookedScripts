@@ -1,3 +1,9 @@
+/* =========================================================================
+   MainWindowFree.uss - UI Toolkit Stylesheet for CodeMonkey Editor Window
+   Separated from MainWindowFree.uxml in accordance with CSSCodingGuide.md
+   ========================================================================= */
+
+/* --- Base Utility & Typography --- */
 .custom-label {
     font-size: 20px;
     -unity-font-style: bold;
@@ -14,20 +20,269 @@
     white-space: normal;
 }
 
-.lectureButton {
-    margin-top: 4px;
-    margin-right: 4px;
-    margin-bottom: 4px;
-    margin-left: 4px;
-    padding-top: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
-    padding-left: 10px;
-}
-
 .cursor-link {
     cursor: link;
 }
 
-.qotdAnswerButton {
+/* --- Main Layout --- */
+.main-container {
+    flex-grow: 1;
 }
+
+.logo-banner {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 90px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url("project://database/Assets/ChaosKitchen/New Unity Project/Assets/CodeMonkeyFree/Textures/CodeMonkeyLogoSmallHeight.png?fileID=2800000&guid=7ddeb48e951f72446b79a79cc209e604&type=3#CodeMonkeyLogoSmallHeight");
+}
+
+.main-menu-container {
+    flex-grow: 1;
+}
+
+.main-scroll-view {
+    height: 571px;
+}
+
+/* --- Updates Banner --- */
+.checking-updates-container {
+    flex-grow: 1;
+}
+
+.checking-updates-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    background-color: rgb(243, 158, 0);
+    color: rgb(255, 255, 255);
+    margin: 5px;
+    padding: 5px;
+}
+
+/* --- Premium Banner --- */
+.premium-banner-container {
+    flex-grow: 1;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 4px;
+}
+
+.premium-banner-label {
+    flex-grow: 1;
+    flex-shrink: 1;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    white-space: normal;
+}
+
+/* --- Lecture List Button --- */
+.lecture-list-toggle-button {
+    height: 40px;
+    -unity-font-style: bold;
+    visibility: visible;
+    display: none;
+}
+
+.lectureButton {
+    margin: 4px;
+    padding: 10px;
+}
+
+/* --- Message Containers --- */
+.static-message-container {
+    flex-grow: 1;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 4px;
+}
+
+.static-message-label {
+    font-size: 11px;
+    white-space: normal;
+}
+
+.promo-message-container {
+    flex-grow: 1;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 4px;
+}
+
+.promo-message-label {
+    font-size: 11px;
+    -unity-text-align: upper-center;
+    white-space: normal;
+}
+
+/* --- Dynamic Header Card --- */
+.dynamic-header-card {
+    flex-grow: 1;
+    margin: 5px;
+    padding: 10px;
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: rgb(0, 157, 212);
+}
+
+.dynamic-header-image {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 48px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url("project://database/Assets/ChaosKitchen/New Unity Project/Assets/CodeMonkeyFree/Textures/freeCourses_KitchenChaos.png?fileID=2800000&guid=123185b2c0ce05949bdeaf4e652c52c1&type=3#freeCourses_KitchenChaos");
+}
+
+.dynamic-header-text {
+    font-size: 10px;
+    -unity-text-align: upper-center;
+}
+
+/* --- Question of the Day (QOTD) --- */
+.qotd-card {
+    flex-grow: 1;
+    margin: 5px;
+    padding: 10px;
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: rgb(108, 108, 108);
+}
+
+.qotd-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-color: rgb(0, 0, 0);
+    -unity-text-outline-width: 0;
+    letter-spacing: 10px;
+    white-space: normal;
+}
+
+.qotd-question-label {
+    font-size: 12px;
+    -unity-font-style: normal;
+    -unity-text-align: upper-center;
+    white-space: normal;
+}
+
+.qotdAnswerButton {
+    font-size: 9px;
+    -unity-text-align: middle-left;
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    padding-left: 8px;
+    margin: 2px;
+}
+
+/* --- Dynamic Message --- */
+.dynamic-message-container {
+    flex-grow: 1;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    display: none;
+}
+
+.dynamic-message-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    white-space: normal;
+}
+
+/* --- Latest Videos --- */
+.latest-videos-card {
+    flex-grow: 1;
+    margin: 5px;
+    padding: 10px;
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: rgb(255, 255, 255);
+}
+
+.latest-videos-title {
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+}
+
+.latest-videos-row {
+    flex-grow: 1;
+    flex-direction: row;
+}
+
+.video-slot-container {
+    flex-grow: 1;
+    width: 50%;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+/* --- My Games --- */
+.my-games-container {
+    flex-grow: 1;
+    margin: 5px;
+    padding: 5px;
+}
+
+.my-games-label {
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+}
+
+/* --- Version Tag --- */
+.version-tag-label {
+    position: absolute;
+    width: 100%;
+    font-size: 8px;
+    -unity-font-style: bold;
+    -unity-text-align: upper-right;
+    flex-direction: column;
+    margin: 0;
+}
+
+/* --- Lecture List Navigation --- */
+.lecture-list-container {
+    flex-grow: 1;
+}
+
+.back-to-menu-button {
+    height: 40px;
+    -unity-font-style: bold;
+    border-color: rgb(0, 0, 0);
+    background-color: rgb(197, 197, 197);
+    color: rgb(46, 46, 46);
+}
+
+/* --- Code and Text Template Labels --- */
+.code-template-label {
+    background-color: rgb(255, 255, 255);
+    color: rgb(43, 43, 43);
+    white-space: normal;
+    -unity-text-align: upper-left;
+    -unity-font-definition: initial;
+    -unity-font-style: normal;
+    font-size: 12px;
+    margin-top: 0;
+    margin-right: 5px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    padding-top: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+}
+
+.text-template-label {
+    white-space: normal;
+    -unity-paragraph-spacing: 70px;
+    margin-top: 0;
+    margin-right: 5px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    padding-top: 0;
+    padding-right: 2px;
+    padding-bottom: 0;
+    padding-left: 2px;
+}
+

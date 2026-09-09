@@ -135,7 +135,7 @@ public class PlateKitchenObject : KitchenObject
             stackBadgeText = badgeObj.AddComponent<TextMeshPro>();
             stackBadgeText.fontSize = 2.4f;
             stackBadgeText.alignment = TextAlignmentOptions.Center;
-            stackBadgeText.color = new Color(0.1f, 0.85f, 1.0f); // Bright Cyan
+            stackBadgeText.color = UITheme.ColorPrimaryCyan;
             stackBadgeText.fontStyle = FontStyles.Bold;
             stackBadgeText.text = "";
 
@@ -185,7 +185,7 @@ public class PlateKitchenObject : KitchenObject
         if (stackBadgeRoot != null && stackBadgeText != null)
         {
             stackBadgeRoot.transform.localPosition = new Vector3(0f, 0.40f + (stackCount * PLATE_OFFSET_Y), 0f);
-            stackBadgeText.text = $"<color=#00E5FF><b>CLEAN x{stackCount}</b></color>";
+            stackBadgeText.text = UITheme.FormatCleanPlateBadge(stackCount);
             stackBadgeRoot.SetActive(true);
         }
     }

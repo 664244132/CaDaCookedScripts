@@ -297,16 +297,16 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
             {
                 if (cleanPlatesCount >= MAX_CLEAN_PLATES)
                 {
-                    promptLabelText.text = $"<color=#FF9100><b>[ ! ] RACK FULL! PICK UP [E]</b></color>\n<size=75%>Rack Full ({cleanPlatesCount}/{MAX_CLEAN_PLATES}) | Sink: {dirty.GetPlatesCount()}</size>";
+                    promptLabelText.text = UITheme.FormatRackFullPrompt(cleanPlatesCount, MAX_CLEAN_PLATES, dirty.GetPlatesCount());
                 }
                 else
                 {
-                    promptLabelText.text = $"<color=#00E5FF><b>[F] SCRUB ({currentScrubCount}/{SCRUBS_PER_PLATE})</b></color>\n<size=75%>Plates in Sink: {dirty.GetPlatesCount()} (Rack: {cleanPlatesCount}/{MAX_CLEAN_PLATES})</size>";
+                    promptLabelText.text = UITheme.FormatScrubPrompt(currentScrubCount, SCRUBS_PER_PLATE, dirty.GetPlatesCount(), cleanPlatesCount, MAX_CLEAN_PLATES);
                 }
             }
             else if (cleanPlatesCount > 0)
             {
-                promptLabelText.text = $"<color=#76FF03><b>[E] PICK CLEAN PLATE</b></color>\n<size=75%>Clean Plates: {cleanPlatesCount}/{MAX_CLEAN_PLATES}</size>";
+                promptLabelText.text = UITheme.FormatPickCleanPlatePrompt(cleanPlatesCount, MAX_CLEAN_PLATES);
             }
         }
     }
@@ -759,7 +759,7 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
         bgRect.sizeDelta = new Vector2(220, 24);
 
         Image bgImage = bgObj.AddComponent<Image>();
-        bgImage.color = new Color(0.12f, 0.12f, 0.15f, 0.92f);
+        bgImage.color = UITheme.ColorDarkBackground;
 
         // Fill Bar
         GameObject fillObj = new GameObject("ProgressFill");
@@ -773,7 +773,7 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
         progressFillImage.type = Image.Type.Filled;
         progressFillImage.fillMethod = Image.FillMethod.Horizontal;
         progressFillImage.fillAmount = 0f;
-        progressFillImage.color = new Color(0.0f, 0.85f, 1.0f); // ฟ้าครามสดใส
+        progressFillImage.color = UITheme.ColorPrimaryCyan; // ฟ้าครามสดใส
 
         // Prompt Text
         GameObject textObj = new GameObject("PromptLabel");

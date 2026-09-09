@@ -1,97 +1,115 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
+/// <summary>
+/// สคริปต์ทดลองเก็บไอเทมและตรวจจับโซนอันตราย (Item Pickup & Danger Zone Prototype)
+/// </summary>
 public class Myscripts : MonoBehaviour
 {
-    public GameObject panel;
-    public TextMeshProUGUI message;
-    public TextMeshProUGUI display_count;
+    [Header("UI References")]
+    [SerializeField] private GameObject panel;
+    [SerializeField] private TextMeshProUGUI message;
+    [FormerlySerializedAs("display_count")]
+    [SerializeField] private TextMeshProUGUI displayCount;
 
-    int all_items = 0;
-    int current_items = 0;
+    [Header("Item Tracking")]
+    private int allItems = 0;
+    private int currentItems = 0;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    // Properties สำหรับความเข้ากันได้ย้อนหลัง (Backward Compatibility)
+    public GameObject Panel => panel;
+    public TextMeshProUGUI Message => message;
+    public TextMeshProUGUI DisplayCount => displayCount;
+    public TextMeshProUGUI display_count => displayCount;
+    public int AllItems => allItems;
+    public int CurrentItems => currentItems;
+    public int all_items => allItems;
+    public int current_items => currentItems;
+
+    private void Start()
     {
         if (panel != null) panel.SetActive(false);
         if (message != null) message.gameObject.SetActive(false);
-        all_items = GameObject.FindGameObjectsWithTag("Items").Length;
+        allItems = GameObject.FindGameObjectsWithTag("Items").Length;
         UpdateDisplay();
     }
 
     private void UpdateDisplay()
     {
-        if (display_count != null)
+        if (displayCount != null)
         {
-            display_count.text = "Find your crew and take supplie : " + current_items + "/" + all_items;
+            displayCount.text = $"Find your crew and take supplies : {currentItems}/{allItems}";
         }
 
-        if (all_items > 0 && current_items >= all_items)
+        if (allItems > 0 && currentItems >= allItems)
         {
             if (message != null)
             {
                 message.gameObject.SetActive(true);
-                message.text = "Misson DONE!";
+                message.text = "Mission DONE!";
             }
         }
     }
 
     private void OnCollisionEnter(Collision obj)
     {
-        if(obj.gameObject.CompareTag("Electric"))
+        if (obj == null || obj.gameObject == null) return;
+
+        if (obj.gameObject.CompareTag("Electric"))
         {
             Debug.Log("Player Touched The DANGER!");
-            panel.SetActive(true);
+            if (panel != null) panel.SetActive(true);
         }
     }
 
-    //private void OnCollisionStay(Collision obj)
-    //{
-    //    if (obj.gameObject.CompareTag("Electric"))
-    //    {
-    //        Debug.Log("Player Stay The DANGER!");
-    //    }
-    //}
-
     private void OnCollisionExit(Collision obj)
     {
+        if (obj == null || obj.gameObject == null) return;
+
         if (obj.gameObject.CompareTag("Electric"))
         {
             Debug.Log("Player Leave from The DANGER!");
-            panel.SetActive(false);
+            if (panel != null) panel.SetActive(false);
         }
     }
 
     private void OnTriggerEnter(Collider obj)
     {
-        if(obj.gameObject.CompareTag("Items"))
+        if (obj == null || obj.gameObject == null) return;
+
+        if (obj.gameObject.CompareTag("Items"))
         {
             Debug.Log("Trigger Item");
-            message.gameObject.SetActive(true);
+            if (message != null) message.gameObject.SetActive(true);
         }
     }
 
     private void OnTriggerStay(Collider obj)
     {
-        if (obj.gameObject.CompareTag("Items"))
+        // Early Return ป้องกันการซ้อนเงื่อนไขลึก (De Morgan's Laws & Early Return Pattern)
+        if (obj == null || obj.gameObject == null) return;
+        if (!obj.gameObject.CompareTag("Items")) return;
+
+        // กด E เก็บของ พร้อมเช็ค Null Safety
+        if (Keyboard.current != null && Keyboard.current.eKey.isPressed)
         {
-            if (Keyboard.current != null && Keyboard.current.eKey.isPressed) //กด E เก็บของ พร้อมเช็ค Null Safety
-            {
-                Destroy(obj.gameObject); //ทำลายกล่องที่เก็บไป
-                if (message != null) message.gameObject.SetActive(false); //ลบข้อความไปด้วย
-                current_items++;
-                UpdateDisplay();
-            }
+            Destroy(obj.gameObject); // ทำลายกล่องที่เก็บไป
+            if (message != null) message.gameObject.SetActive(false); // ลบข้อความไปด้วย
+            currentItems++;
+            UpdateDisplay();
         }
     }
 
     private void OnTriggerExit(Collider obj)
     {
+        if (obj == null || obj.gameObject == null) return;
+
         if (obj.gameObject.CompareTag("Items"))
         {
             Debug.Log("Leave Item");
-            message.gameObject.SetActive(false);
+            if (message != null) message.gameObject.SetActive(false);
         }
     }
 }

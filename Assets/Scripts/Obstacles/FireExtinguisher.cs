@@ -359,7 +359,7 @@ public class FireExtinguisher : KitchenObject
             promptCanvasObject.SetActive(true);
             promptRectTransform.sizeDelta = new Vector2(360f, 110f);
             promptBackground.color = new Color(0.04f, 0.04f, 0.07f, 0.95f);
-            promptText.text = "<size=30><color=#FFE600><b>[ F ]  HOLD TO SPRAY</b></color></size>\n<size=26><color=#FFFFFF><b>[ E ]  DROP TO FLOOR</b></color></size>";
+            promptText.text = UITheme.FormatExtinguisherHoldPrompt();
             
             // ลอยอยู่เหนือศีรษะผู้เล่นอย่างชัดเจน
             promptCanvasObject.transform.position = player.transform.position + Vector3.up * 2.35f;
@@ -373,7 +373,7 @@ public class FireExtinguisher : KitchenObject
                 promptCanvasObject.SetActive(true);
                 promptRectTransform.sizeDelta = new Vector2(310f, 75f);
                 promptBackground.color = new Color(0.12f, 0.10f, 0.02f, 0.96f);
-                promptText.text = "<size=34><color=#FFE600><b>[ E ]</b></color></size>  <size=30><color=#FFFFFF><b>PICK UP</b></color></size>";
+                promptText.text = UITheme.FormatExtinguisherPickupPrompt();
                 
                 // ลอยและโยกขึ้นลงเล็กน้อยเหนือถังดับเพลิง
                 float bobOffset = Mathf.Sin(Time.time * 4f) * 0.1f;

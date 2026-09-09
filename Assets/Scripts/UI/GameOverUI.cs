@@ -84,7 +84,7 @@ public class GameOverUI : MonoBehaviour
                     titleText.transform.localScale = Vector3.one;
                     titleText.fontSize = 84;
                     titleText.fontStyle = FontStyles.Bold;
-                    titleText.color = new Color(1.0f, 0.45f, 0.0f); // Vibrant Orange
+                    titleText.color = UITheme.ColorTitleOrange;
 
                     RectTransform titleRect = titleText.GetComponent<RectTransform>();
                     if (titleRect != null)
@@ -136,19 +136,14 @@ public class GameOverUI : MonoBehaviour
         int stars = DeliveryManager.Instance.GetStarRating();
         string rankTitle = DeliveryManager.Instance.GetChefRankTitle();
 
-        string starBadgeColor = stars switch
-        {
-            3 => "#FFD700", // Gold
-            2 => "#E2E8F0", // Silver
-            1 => "#CD7F32", // Bronze
-            _ => "#94A3B8"  // Grey
-        };
-
-        recipesDeliveryText.text =
-            $"<size=44><color={starBadgeColor}><b>{rankTitle}</b></color></size>\n\n" +
-            $"<size=62><color=#FFD700><b>FINAL SCORE : {totalScore:N0} PTS</b></color></size>\n\n" +
-            $"<size=32><color=#FFFFFF>Dishes Delivered : <color=#38BDF8><b>{deliveredAmount}</b></color>      |      Max Combo : <color=#FFA500><b>x{maxCombo}</b></color></color></size>\n\n" +
-            $"<size=24><color=#94A3B8>Returning to Main Menu in <b>{Mathf.CeilToInt(remainingSeconds)}s</b>...</color></size>";
+        recipesDeliveryText.text = UITheme.FormatGameOverDashboard(
+            rankTitle,
+            stars,
+            totalScore,
+            deliveredAmount,
+            maxCombo,
+            remainingSeconds
+        );
     }
 
     /// <summary>
