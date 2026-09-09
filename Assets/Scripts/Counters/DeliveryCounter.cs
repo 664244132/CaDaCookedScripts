@@ -39,20 +39,7 @@ public class DeliveryCounter : BaseCounter
             targetCamera = FindFirstObjectByType<Camera>();
         }
 
-        if (DeliveryManager.Instance != null)
-        {
-            DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
-        }
-
         UpdateDirtyPlatesVisual();
-    }
-
-    private void OnDestroy()
-    {
-        if (DeliveryManager.Instance != null)
-        {
-            DeliveryManager.Instance.OnRecipeSuccess -= DeliveryManager_OnRecipeSuccess;
-        }
     }
 
     private void LateUpdate()
@@ -62,12 +49,6 @@ public class DeliveryCounter : BaseCounter
         {
             badgeRoot.transform.rotation = targetCamera.transform.rotation;
         }
-    }
-
-    private void DeliveryManager_OnRecipeSuccess(object sender, EventArgs e)
-    {
-        // เมื่อส่งอาหารสำเร็จ เพิ่มจานเปื้อนสะสมบนเคาน์เตอร์ส่งอาหาร
-        AddDirtyPlate();
     }
 
     /// <summary>
@@ -92,6 +73,9 @@ public class DeliveryCounter : BaseCounter
             {
                 DeliveryManager.Instance.DeliveryRecipe(plateKitchenObject);
                 player.GetKitchenObject().DestroySelf();
+
+                // ตาม Q2 ตัวเลือก A: จานอาหารที่ส่ง (ทั้งสูตรถูกและผิด) จะกลายเป็นจานเปื้อนสะสมเสมอ เพื่อคงจำนวนจานครบ 4 ใบในครัว 100% ไร้ความเสี่ยง Softlock
+                AddDirtyPlate();
             }
             else
             {

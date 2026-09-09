@@ -34,6 +34,8 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     private Vector3 spawnPosition;
     private float respawnTimer;
     private float fleeTimer;
+    private BaseCounter[] cachedCounters;
+    private float searchCooldownTimer;
 
     private void Awake()
     {
@@ -60,6 +62,8 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     private void Start()
     {
         state = State.Idle;
+        // Cache รายการเคาน์เตอร์ทั้งหมดในฉากไว้ล่วงหน้า เพื่อป้องกันการ FindObjectsByType ทุกเฟรมใน Update (Rule 5 & 6)
+        cachedCounters = FindObjectsByType<BaseCounter>(FindObjectsSortMode.None);
     }
 
     private void Update()
@@ -144,16 +148,33 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
 
     private void FindTargetCounter()
     {
-        BaseCounter[] counters = FindObjectsByType<BaseCounter>(FindObjectsSortMode.None);
-        foreach (BaseCounter counter in counters)
+        if (cachedCounters == null || cachedCounters.Length == 0)
         {
-            if (counter.HasKitchenObject())
+            cachedCounters = FindObjectsByType<BaseCounter>(FindObjectsSortMode.None);
+        }
+
+        // ค้นหาเป้าหมายเป็นช่วงๆ ทุก 0.25 วินาที เพื่อประหยัด CPU และไม่สร้าง GC ใน Update (Rule 5 & 6)
+        searchCooldownTimer -= Time.deltaTime;
+        if (searchCooldownTimer <= 0f)
+        {
+            searchCooldownTimer = 0.25f;
+            foreach (BaseCounter counter in cachedCounters)
             {
-                targetCounter = counter;
-                state = State.WalkingToCounter;
-                OnCatMeow?.Invoke(this, EventArgs.Empty);
-                Debug.Log($"🐱 KitchenCat: Targeted food on [{counter.name}]! Sneaking in...");
-                return;
+                if (counter != null && counter.HasKitchenObject())
+                {
+                    KitchenObject targetObj = counter.GetKitchenObject();
+                    // ตาม Q3 ตัวเลือก A: แมวไม่แตะต้องจานอาหาร (Blacklist Plates) ขโมยเฉพาะวัตถุดิบหรือถังดับเพลิง
+                    if (targetObj is PlateKitchenObject || targetObj is DirtyPlateKitchenObject)
+                    {
+                        continue;
+                    }
+
+                    targetCounter = counter;
+                    state = State.WalkingToCounter;
+                    OnCatMeow?.Invoke(this, EventArgs.Empty);
+                    Debug.Log($"🐱 KitchenCat: Targeted food on [{counter.name}]! Sneaking in...");
+                    return;
+                }
             }
         }
 
@@ -167,6 +188,13 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
         if (targetCounter != null && targetCounter.HasKitchenObject() && !HasKitchenObject())
         {
             KitchenObject kitchenObject = targetCounter.GetKitchenObject();
+            if (kitchenObject is PlateKitchenObject || kitchenObject is DirtyPlateKitchenObject)
+            {
+                // หากเป็นจานอาหาร ไม่ขโมย
+                state = State.Idle;
+                return;
+            }
+
             kitchenObject.SetKitchenObjectParent(this);
 
             StartSprintingAway();

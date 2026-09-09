@@ -18,7 +18,7 @@ public class KitchenGameManager : MonoBehaviour
     }
 
     private State state;
-    private float WaitingToStartTimer = 1f;
+    private float waitingToStartTimer = 1f;
     private float countdownToStartTimer = 15f; // เพิ่มเวลานับถอยหลังเริ่มเกมและสอนเล่นเป็น 15 วินาที
     private float gamePlayingTimer;
     private float gamePlayingTimerMax = 150f; // 2 นาที 30 วินาที
@@ -60,8 +60,8 @@ public class KitchenGameManager : MonoBehaviour
         switch (state)
         {
             case State.WaitingToStart:
-                WaitingToStartTimer -= Time.deltaTime;
-                if (WaitingToStartTimer < 0f)
+                waitingToStartTimer -= Time.deltaTime;
+                if (waitingToStartTimer < 0f)
                 {
                     state = State.CountdownToStart;
                     countdownToStartTimer = 15f;

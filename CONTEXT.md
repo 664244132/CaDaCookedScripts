@@ -82,3 +82,21 @@ _Avoid_: Rage quit timer, order timeout 2
 The action of clearing burned or unwanted ingredients from a Plate into the Trash Counter while preserving the clean dishware in the Chef's hands.
 _Avoid_: Plate disposal, dish trashing
 
+**Commercial Sink Station**:
+A dedicated, fully-clad brushed stainless steel dishwashing workstation featuring a deep recessed wash basin, Pre-Rinse gooseneck faucet with active water dripping, corrugated wire drying rack, authentic cleaning props (sponge and soap bottle), and high-visibility World-Space station signage.
+_Avoid_: Wooden sink, flat sink, invisible wash counter
+
+**Sink Orientation Alignment**:
+The geometric alignment convention where a workstation's interactive front (doors, sink basin opening, faucet spray, and signage) strictly faces Local +Z (towards the player/chef in the kitchen), while its rear backsplash wall strictly faces Local -Z (towards the perimeter room wall), guaranteeing correct perspective across any procedural slot in the kitchen grid.
+_Avoid_: Backwards sink, reverse counter, upside-down station
+
+**Closed-Loop Dishwashing Ecosystem**:
+A conservation law in the kitchen where the total number of plates is strictly bounded (fixed at 4). PlatesCounter ceases passive continuous generation; clean plates must be transported from SinkCounter to PlatesCounter (or used directly), and delivered dishes return exclusively as dirty plates to be scrubbed, establishing an interdependent gameplay cycle without infinite resources.
+_Avoid_: Infinite plate dispenser, decoupled washing, orphan plate generation
+
+**Stove Extrication Recovery**:
+A fail-safe state restoration pattern where a cooking workstation (e.g. StoveCounter) immediately reverts from Frying/Fried/Progressing to Idle (extinguishing flame visuals, halting sizzling audio, and resetting progress gauges) the instant its cooking ingredient is abruptly removed or stolen outside the normal Player pickup flow (e.g. by KitchenCatNPC).
+_Avoid_: Ghost frying, infinite sizzling, phantom cooking
+
+
+

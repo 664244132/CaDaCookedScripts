@@ -106,6 +106,17 @@ public class SoundManager : MonoBehaviour
         PlaySound(audioClipRefsSO.deliverySuccess, deliveryCounter.transform.position);
     }
 
+    /// <summary>
+    /// เล่นเสียงสัญญาณเตือน (Warning Sound / Beep) เช่น เตือนเมื่อจานหมด
+    /// </summary>
+    public void PlayWarningSound(Vector3 position)
+    {
+        if (audioClipRefsSO != null && audioClipRefsSO.warning != null && audioClipRefsSO.warning.Length > 0)
+        {
+            PlaySound(audioClipRefsSO.warning, position, 1.2f);
+        }
+    }
+
     private void PlaySound(AudioClip[] audioClipArray , Vector3 position , float volume = 1f)
     {
         PlaySound(audioClipArray[Random.Range(0,audioClipArray.Length)], position, volume);

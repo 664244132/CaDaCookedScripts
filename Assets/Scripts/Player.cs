@@ -502,14 +502,16 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         dustObj.transform.localPosition = new Vector3(0, 0.15f, -0.35f);
 
         dashParticleSystem = dustObj.AddComponent<ParticleSystem>();
+        dashParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
         var main = dashParticleSystem.main;
+        main.playOnAwake = false;
         main.duration = 0.2f;
         main.loop = false;
         main.startLifetime = 0.3f;
         main.startSpeed = 2.5f;
         main.startSize = 0.35f;
         main.startColor = new Color(1f, 1f, 1f, 0.65f);
-        main.playOnAwake = false;
 
         var emission = dashParticleSystem.emission;
         emission.rateOverTime = 0;
@@ -525,8 +527,6 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         {
             renderer.material = FireExtinguisher.GetSafeMaterial(new Color(0.92f, 0.92f, 0.95f, 0.6f));
         }
-
-        dashParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 }
 

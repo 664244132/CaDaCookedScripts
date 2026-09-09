@@ -172,7 +172,83 @@
 - [CONTEXT.md](file:///c:/CaDaCooked/CaDaCookedScripts/CONTEXT.md):
   - บันทึกคำศัพท์: `Rack Full Lock`, `Angry Patience Timer`, `Plate Scraping`
 
+### 🔹 Session 69: Visual Overhaul - Commercial Stainless Steel Dishwashing Sink Station
+- [Assets/Scripts/Counters/SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs):
+  - **Complete Visual Cladding (100% ลบภาพเคาน์เตอร์ไม้เดิม):** ปิดการแสดงผล `ClearCounter_Visual` และ MeshRenderer ไม้เดิมทั้งหมด
+  - **Commercial Stainless Steel Base & Top:** เสริมโครงสร้างตู้สแตนเลสขัดเงาแบบครอบตัวเคาน์เตอร์ทั้งหมด (`StationBaseBody` + `StationTopPlate`) พร้อมบานเปิดคู่หน้า (`LeftDoorPanel`, `RightDoorPanel`), มือจับโครเมียมคู่ทรงกระบอก (`LeftDoorHandle`, `RightDoorHandle`), และแผ่นกันเตะ (`StationKickplate`)
+  - **Commercial High Backsplash:** ติดตั้งแผงกันน้ำกระเซ็นสแตนเลสทรงสูงด้านหลังเคาน์เตอร์ (`BacksplashWall` + `BacksplashTrimLip`) ให้ภาพลักษณ์สเตชั่นล้างจานภัตตาคารแท้
+  - **Deep Recessed Wash Basin:** ปรับตำแหน่งอ่างล้างจานฝั่งซ้ายให้เป็นหลุมลึกจริง มีขอบกำแพงกั้น 4 ทิศทาง (`BasinFrontRim`, `BasinBackRim`, `BasinLeftRim`, `BasinCenterDivider`), สะดืออ่างและตะแกรงระบายน้ำทรงกลม (`DrainStrainerRing` + `DrainHoleCore`), ผิวน้ำประกายฟ้าใส (`SinkWaterSurface`), และกลุ่มฟองสบู่ลอย 4 จุด (`FoamCluster1-4`)
+  - **Pre-Rinse Spring Gooseneck Faucet:** ก๊อกน้ำสปริงคอห่านเชิงพาณิชย์ทรงสูง พร้อมวาล์วน้ำร้อนแดง (`HotWaterValve`) และน้ำเย็นน้ำเงิน (`ColdWaterValve`), สปริงโครเมียมดามคอก๊อก (`SpringCoil`), คอโค้ง 2 ท่อน (`ArchSegment1-2`), หัวฉีดกระดิ่งสเปรย์ (`SprayBell`) มีขอบยางกันกระแทก (`SprayBumperRing`) และก้านบีบ (`SqueezeLever`)
+  - **Continuous Gentle Water Drip:** ติดตั้งระบบละอองน้ำหยดเบาๆ ตลอดเวลาจากปลายหัวฉีดลงสู่ผิวน้ำในอ่าง (`SinkDripParticles`)
+  - **Corrugated Drying Rack:** ตะแกรงสะเด็ดน้ำสแตนเลสฝั่งขวา มีโครงท่อขอบนอก (`RackOuterFront/Back/Left/Right`), ถาดลาดเอียงระบายน้ำลงอ่าง (`DrainboardBed`), และซี่ตะแกรงสแตนเลส 6 เส้นขนานกัน (`RackWireSlat_1-6`)
+  - **Authentic Cleaning Props:** ฟองน้ำล้างจาน 2 ชั้นแบบสก๊อตช์ไบรต์ (เหลือง-เขียวสดใส) และขวดน้ำยาล้างจานสีเขียวมรกตใสพร้อมหัวปั๊มสีขาว (`Emerald Dish Soap Pump Bottle`)
+  - **World Space 3D Station Signboard:** ป้ายชื่อสเตชั่น World Space บน Backsplash (`🧼 SINK STATION`) คมชัด มองเห็นได้ทันทีจากทุกมุมมอง
+- [CONTEXT.md](file:///c:/CaDaCooked/CaDaCookedScripts/CONTEXT.md):
+  - บันทึกคำศัพท์: `Commercial Sink Station`
+
+### 🔹 Session 70: Codebase Quality & Markdown Standards Compliance Audit
+- **Comprehensive Quality Audit Across 65 C# Scripts:**
+  - ตรวจสอบความสอดคล้องกับคู่มือ `markdowns/` ทั้งหมด (`REFACTORCODE.md`, `CSharpCodingGuide.md`, `DeMorgansLaws.md`, `DEBUG.md`, `SECURITY.md`)
+  - ตรวจสอบผ่าน C# Compiler (`Editor.log`): **0 Error CS, 0 Warning CS** (100% Clean)
+  - ตรวจสอบ Memory Allocation & GC Spikes ในลูป `Update()`/`FixedUpdate()`: **0 GC Allocations**
+- [Assets/Scripts/Obstacles/KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs):
+  - **Throttle Expensive Search:** แก้ไข `FindObjectsByType<BaseCounter>()` จากที่เคยรันทุกเฟรมใน `Update()` ขณะแมวอยู่ในสถานะ `State.Idle` ให้มี Throttling คูลดาวน์ 0.25 วินาที พร้อมแคชอาร์เรย์ `cachedCounters` ป้องกันปัญหา CPU Spikes และ Garbage Collection
+- [Assets/Scripts/Obstacles/FireExtinguisher.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/FireExtinguisher.cs):
+  - **Eliminate Redundant Player Lookups:** เพิ่ม `cachedPlayer` และเมธอด `GetPlayer()` ช่วยแคชการค้นหาตัวละครผู้เล่น แทนที่การเรียก `FindFirstObjectByType<Player>()` ซ้ำซ้อน 3 จุดใน `Update()`, `UpdatePromptBillboard()`, และ `StartSpraying()`
+- [Assets/Scripts/Counters/StoveCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/StoveCounter.cs):
+  - **Zero GC Allocation in Update Loop:** ประกาศแคช `progressChangedEventArgs` และ `stateChangedEventArgs` ที่ระดับคลาส พร้อมสร้างเมธอด `NotifyProgressChanged()` และ `NotifyStateChanged()` ช่วยกำจัดการสร้างวัตถุ `new IHasProgress.OnProgressChangedEventArgs` ทุกเฟรม (60+ ครั้ง/วินาที) ขณะกำลังทอดและไหม้
+- [Assets/Scripts/DeliveryManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/DeliveryManager.cs):
+  - **Zero GC Allocation for Event Args:** ประกาศแคช `comboChangedEventArgs` และ `vipOrderEventArgs` ที่ระดับคลาส กำจัดการสร้าง `new OnVIPOrderEventArgs` และ `new OnComboChangedEventArgs` ในลูปอัปเดตออเดอร์
+- [Assets/Scripts/Counters/SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs):
+  - **Clean Type Pattern (De Morgan's Laws):** ปรับแก้โค้ดปฏิเสธที่ซับซ้อน `if (!(GetKitchenObject() is DirtyPlateKitchenObject dirtyPlates))` ให้เป็น `DirtyPlateKitchenObject dirtyPlates = GetKitchenObject() as DirtyPlateKitchenObject; if (dirtyPlates == null) return;` อ่านเข้าใจง่าย ตรงตามหลักการออกแบบ C#
+- [Assets/Scripts/PlayerSounds.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlayerSounds.cs) & [Assets/Scripts/PlayerAnimator.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlayerAnimator.cs):
+  - **Null-Safety Defensive Guards:** เพิ่มการตรวจสอบ `player != null` และ `SoundManager.Instance != null` ใน `PlayerSounds.cs` และเพิ่ม Fallback `GetComponentInParent<Player>()` พร้อม Null Guard ใน `PlayerAnimator.cs` ป้องกัน `NullReferenceException` 100%
+- [Assets/Scripts/KitchenGameManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/KitchenGameManager.cs) & [Assets/Scripts/Counters/PlatesCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/PlatesCounter.cs):
+  - **Naming Conventions & Typo Normalization:** แก้ไขตัวแปร private ให้เป็น camelCase (`waitingToStartTimer`, `spawnPlateTimerMax`) และแก้ไขตัวสะกดที่ผิด (`platesSpwanedAmount` -> `platesSpawnedAmount`) ตามคู่มือ `CSharpCodingGuide.md`
+
+### 🔹 Session 71: Sink Station Visual Orientation Alignment (แก้ไขทิศทางการหันหน้าของโมเดลอ่างล้างจาน)
+- [Assets/Scripts/Counters/SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs):
+  - **Sink Orientation Alignment:** แก้ไขการจัดวางพิกัดเชิงเรขาคณิต (Local Z Coordinate Alignment) ในฟังก์ชัน `EnsureSinkStructureVisuals()`
+  - **Root Cause & Mathematical Inversion:** สล็อตเคาน์เตอร์ในครัวของเกมทั้งหมด (KitchenChaos) มีระนาบพิกัดที่ `transform.forward` (Local +Z) หันหน้าเข้าหาตัวเชฟและพื้นที่กลางครัวเสมอ แต่ใน Session 69 ชิ้นส่วนโครงสร้างด้านหน้า (บานตู้, แผ่นกันเตะ, มือจับ, ปลายหัวฉีด) ถูกวางไว้ที่ Local -Z (-0.69f) และแผงกันน้ำกระเซ็นทรงสูง (`BacksplashWall`) วางไว้ที่ Local +Z (+0.67f) ส่งผลให้เมื่อสุ่มไปอยู่แถวล่างของจอ (`RotY = 0`) แผง Backsplash จึงหันมาบังหลุมอ่างจากสายตาผู้เล่น
+  - **Single-Axis Coordinate Inversion (Preserving X Alignment):** ทำการสลับพิกัด Local Z ทั้งหมดโดยไม่หมุน Transform รวม:
+    - ส่วนหน้าของเคาน์เตอร์ (`LeftDoorPanel`, `RightDoorPanel`, `LeftDoorHandle`, `RightDoorHandle`, `StationKickplate`, `BasinFrontRim`, `RackOuterFront`, `Sponge`, `SprayBell`) ย้ายไปอยู่ที่พิกัด Local +Z (หันเข้าหาผู้เล่น 100%)
+    - ส่วนหลังของเคาน์เตอร์ (`BacksplashWall`, `BacksplashTrimLip`, `BasinBackRim`, `RackOuterBack`, `faucetRoot`, `SoapBottleBody`, `StationSignboard`) ย้ายไปอยู่ที่พิกัด Local -Z (แนบชิดกำแพงห้อง)
+    - ป้ายชื่อสเตชั่น (`StationSignboard` + `StationSignText`) หันหน้าเข้าหาผู้เล่นและกล้องทาง Local +Z
+    - อนุภาคหยดน้ำต่อเนื่อง (`SinkDripParticles`) ย้ายตำแหน่งใต้หัวสเปรย์ใหม่ที่ `(-0.30f, 1.54f, -0.10f)` ลงสู่อ่างได้อย่างแม่นยำ
+  - **Preserved Logical Slot Sync:** รักษาแกน X ของหลุมอ่างไว้ที่ฝั่งซ้าย (`X = -0.30f`) และตะแกรงคว่ำจานไว้ที่ฝั่งขวา (`X = +0.33f`) ตรงตามตำแหน่ง `sinkBasinPoint` และ `dryingRackPoint` 100% ทำให้ตำแหน่งเกิดจานเปื้อนและจานสะอาดไม่เลื่อนหรือเพี้ยน
+### 🔹 Session 72: Closed-Loop Dishwashing Ecosystem & Stove Extrication Recovery
+- [Assets/Scripts/Counters/BaseCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/BaseCounter.cs):
+  - **Virtual ClearKitchenObject:** แปลงเมธอด `ClearKitchenObject()` ให้เป็น `public virtual` เพื่อให้เคาน์เตอร์ลูกสามารถ Override และดักจับเหตุการณ์เมื่อวัตถุดิบถูกเคลื่อนย้ายออกไปนอกลูปปกติ
+- [Assets/Scripts/Counters/StoveCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/StoveCounter.cs):
+  - **Stove Extrication Recovery (แก้บัคเตาทอดค้าง):** Override `ClearKitchenObject()` และเพิ่ม Defensive Guard ใน `Update()`: เมื่อวัตถุดิบถูกแมวขโมยไปหรือถูกดึงออกอย่างกะทันหัน เตาจะทำการล้างสถานะ `ResetStoveState()` กลับเป็น `State.Idle`, ดับไฟแดง, ปิดควัน, หยุดเสียงฉ่าของ `StoveCounterSound` และรีเซ็ตหลอด Progress เป็น 0 ทันที 100%
+- [Assets/Scripts/Counters/CuttingCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/CuttingCounter.cs):
+  - **Cutting Extrication Guard:** Override `ClearKitchenObject()` เพื่อรีเซ็ต `cuttingProgress` เป็น 0 และล้างหลอด Progress ทันทีหากวัตถุดิบถูกแมวหรือผู้เล่นดึงออกขณะกำลังหั่น
+- [Assets/Scripts/PlateKitchenObject.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlateKitchenObject.cs):
+  - **Stackable Clean Plates (Q1 ตัวเลือก A):** เพิ่มระบบ `stackCount` (1..4) และการแสดงผลโมเดลจานสะอาดซ้อนกันเป็นกอง พร้อมป้าย Billboard 3D `<color=#00E5FF><b>CLEAN x{stackCount}</b></color>` อนุญาตให้ยกจานสะอาดหลายใบพร้อมกันได้ โดยไม่อนุญาตให้ใส่อาหารขณะถือจานเป็นกอง
+- [Assets/Scripts/Counters/SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs):
+  - **Batch Clean Plates Retrieval:** เมื่อกด [E] ที่ตะแกรงสะเด็ดน้ำ ผู้เล่นจะยกจานสะอาดที่ล้างเสร็จแล้วทั้งหมดเป็นกอง (Stack 1..4 ใบ) ติดมือไปเติมที่ `PlatesCounter` ในเที่ยวเดียวได้ทันที
+- [Assets/Scripts/Counters/PlatesCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/PlatesCounter.cs):
+  - **Closed-Loop Plate Dispenser:** จำกัดเพดานจานสูงสุด 4 ใบ (`platesSpawnedAmountMax = 4`)
+  - **Disable Infinite Passive Spawn:** นำการสร้างจานอัตโนมัติออกจาก `Update()` บังคับให้ผู้เล่นต้องพึ่งพาการล้างจานจาก `SinkCounter` เท่านั้น
+  - **Stack Batch Deposit:** รองรับการนำกองจานสะอาดจาก `SinkCounter` มาเติมคืนที่แท่นวางจานในคราวเดียว
+  - **Empty Plates 3D Warning Badge (Q4 ตัวเลือก A):** แสดงป้ายลอย 3D `⚠️ NO PLATES!\nWASH AT SINK` สีส้มสดใสเมื่อจานหมด (0 ใบ) พร้อมเล่นเสียงสัญญาณเตือนเมื่อกด [E] ขณะจานหมด
+- [Assets/Scripts/Counters/DeliveryCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/DeliveryCounter.cs):
+  - **Anti-Softlock Plate Conservation (Q2 ตัวเลือก A):** เรียก `AddDirtyPlate()` ทันทีที่มีการส่งจานอาหาร (ทั้งกรณีออเดอร์ถูกต้องและออเดอร์ผิดสูตร) รับประกันว่าจำนวนจานรวมในครัวจะคงที่ 4 ใบตลอดกาล 100% ไร้ความเสี่ยง Softlock
+- [Assets/Scripts/Obstacles/KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs):
+  - **Cat Plate Blacklist (Q3 ตัวเลือก A):** เพิ่มเงื่อนไขตรวจสอบใน `FindTargetCounter()` และ `StealFromCounter()` ข้ามจานอาหารทุกชนิด (`PlateKitchenObject` และ `DirtyPlateKitchenObject`) ให้แมวสนใจเฉพาะวัตถุดิบเดี่ยวๆ หรือถังดับเพลิงเท่านั้น ป้องกันจานสูญหายจากการโดนแมวขโมยออกนอกจอ 100%
+- [Assets/Scripts/SoundManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/SoundManager.cs):
+  - **PlayWarningSound Utility:** เพิ่มเมธอด `PlayWarningSound(Vector3 position)` สำหรับเล่นเสียงเตือนจากจุดกำเนิดเสียง
+- [CONTEXT.md](file:///c:/CaDaCooked/CaDaCookedScripts/CONTEXT.md):
+  - บันทึกคำศัพท์ใหม่: `Closed-Loop Dishwashing Ecosystem`, `Stove Extrication Recovery`
+
+### 🔹 Session 73: ParticleSystem Duration & Pure ASCII Font Fallback Fixes
+- [Assets/Scripts/Player.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Player.cs):
+  - **ParticleSystem Duration Warning Fix:** สลับเรียก `dashParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear)` ทันทีหลัง `AddComponent<ParticleSystem>()` และตั้งค่า `main.playOnAwake = false` ก่อนกำหนดค่า `main.duration = 0.2f` แก้ไข Warning "Setting the duration while system is still playing is not supported" ได้ 100%
+- [Assets/Scripts/Counters/SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs) & [Assets/Scripts/Counters/PlatesCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/PlatesCounter.cs):
+  - **Pure ASCII Standard (ขจัดปัญหากล่องสี่เหลี่ยม □):** แทนที่ Unicode emoji `🧼` (\U0001F9FC) และ `⚠️` (\u26A0) บน TextMeshPro ด้วยข้อความ ASCII สากล `[ SINK STATION ]` และ `[ ! ]` แก้ไขปัญหา Font Asset [LiberationSans SDF] ขาดแคลน Glyph ตัวอักษรพิเศษ ขจัด Console Warning ใน Unity 100%
+
 ---
+
 
 ## 🔒 Security & Code Standards Checklist
 - [x] **No Direct DB Mutations (Rule 10):** ไม่มีการรันคำสั่ง SQL หรือปรับแต่งฐานข้อมูลโดยตรง

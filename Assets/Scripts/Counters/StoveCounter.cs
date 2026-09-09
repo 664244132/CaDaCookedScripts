@@ -29,6 +29,10 @@ public class StoveCounter : BaseCounter, IHasProgress
     private float burningTimer;
     private BurningRecipeSO burningRecipeSO;
 
+    // Cache event args เพื่อลดขยะ GC (0 GC Allocation) ตามกฎ REFACTORCODE.md ข้อ 5
+    private readonly IHasProgress.OnProgressChangedEventArgs progressChangedEventArgs = new IHasProgress.OnProgressChangedEventArgs();
+    private readonly OnStateChangedEventArgs stateChangedEventArgs = new OnStateChangedEventArgs();
+
     private void Awake()
     {
         if (fireHazard == null)
@@ -53,10 +57,7 @@ public class StoveCounter : BaseCounter, IHasProgress
                 case State.Frying:
                     fryingTimer += Time.deltaTime * 1.3f;
 
-                    OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                    {
-                        progressNormalized = fryingTimer / fryingRecipeSO.fryingTimerMax
-                    });
+                    NotifyProgressChanged(fryingTimer / fryingRecipeSO.fryingTimerMax);
 
                     if (fryingTimer > fryingRecipeSO.fryingTimerMax)
                     {
@@ -67,19 +68,13 @@ public class StoveCounter : BaseCounter, IHasProgress
                         burningTimer = 0f;
                         burningRecipeSO = GetBurningRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
 
-                        OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
-                        {
-                            state = state
-                        });
+                        NotifyStateChanged();
                     }
                     break;
                 case State.Fried:
                     burningTimer += Time.deltaTime;
 
-                    OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                    {
-                        progressNormalized = burningTimer / burningRecipeSO.burningTimerMax
-                    });
+                    NotifyProgressChanged(burningTimer / burningRecipeSO.burningTimerMax);
 
                     if (burningTimer > burningRecipeSO.burningTimerMax)
                     {
@@ -93,21 +88,57 @@ public class StoveCounter : BaseCounter, IHasProgress
                             fireHazard.Ignite();
                         }
 
-                        OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
-                        {
-                            state = state
-                        });
-
-                        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                        {
-                            progressNormalized = 0f
-                        });
+                        NotifyStateChanged();
+                        NotifyProgressChanged(0f);
                     }
                     break;
                 case State.Burned:
                     break;
             }
         }
+        else
+        {
+            // Defensive Guard: หากไม่มีวัตถุอยู่บนเตา แต่สถานะเตายังค้างอยู่ (เช่น แมวขโมยไป) ให้รีเซ็ตกลับเป็น State.Idle ทันที
+            if (state != State.Idle)
+            {
+                ResetStoveState();
+            }
+        }
+    }
+
+    public override void ClearKitchenObject()
+    {
+        base.ClearKitchenObject();
+
+        // เมื่อวัตถุดิบถูกนำออกจากเตา (เช่น แมวขโมย หรือผู้เล่นหยิบออก) ให้รีเซ็ตสถานะเตากลับเป็น Idle ทันที
+        if (state != State.Idle)
+        {
+            ResetStoveState();
+        }
+    }
+
+    /// <summary>
+    /// ล้างสถานะการทำงานของเตาแก๊ส ดับไฟ ปิดควัน หยุดเสียงฉ่า และรีเซ็ตหลอด Progress
+    /// </summary>
+    private void ResetStoveState()
+    {
+        state = State.Idle;
+        fryingTimer = 0f;
+        burningTimer = 0f;
+        NotifyStateChanged();
+        NotifyProgressChanged(0f);
+    }
+
+    private void NotifyStateChanged()
+    {
+        stateChangedEventArgs.state = state;
+        OnStateChanged?.Invoke(this, stateChangedEventArgs);
+    }
+
+    private void NotifyProgressChanged(float progressNormalized)
+    {
+        progressChangedEventArgs.progressNormalized = progressNormalized;
+        OnProgressChanged?.Invoke(this, progressChangedEventArgs);
     }
 
     public override void Interact(Player player)
@@ -129,15 +160,8 @@ public class StoveCounter : BaseCounter, IHasProgress
                     state = State.Frying;
                     fryingTimer = 0f;
 
-                    OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
-                    {
-                        state = state
-                    });
-
-                    OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                    {
-                        progressNormalized = fryingTimer / fryingRecipeSO.fryingTimerMax
-                    });
+                    NotifyStateChanged();
+                    NotifyProgressChanged(fryingTimer / fryingRecipeSO.fryingTimerMax);
                 }
             }
         }
@@ -153,15 +177,8 @@ public class StoveCounter : BaseCounter, IHasProgress
 
                         state = State.Idle;
 
-                        OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
-                        {
-                            state = state
-                        });
-
-                        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                        {
-                            progressNormalized = 0f
-                        });
+                        NotifyStateChanged();
+                        NotifyProgressChanged(0f);
                     }
                 }
             }
@@ -173,15 +190,8 @@ public class StoveCounter : BaseCounter, IHasProgress
                 // **[BUG FIX]: Reset state and UI when picking up item from stove without a plate**
                 state = State.Idle;
 
-                OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
-                {
-                    state = state
-                });
-
-                OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                {
-                    progressNormalized = 0f
-                });
+                NotifyStateChanged();
+                NotifyProgressChanged(0f);
             }
         }
     }

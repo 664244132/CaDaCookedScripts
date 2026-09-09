@@ -51,6 +51,16 @@ public class CuttingCounter : BaseCounter, IHasProgress
         }
     }
 
+    public override void ClearKitchenObject()
+    {
+        base.ClearKitchenObject();
+        cuttingProgress = 0;
+        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
+        {
+            progressNormalized = 0f
+        });
+    }
+
     public override void InteractAlternate(Player player)
     {
         if (!HasKitchenObject() || !HasRecipeWithInput(GetKitchenObject().GetKitchenObjectSO())) return;

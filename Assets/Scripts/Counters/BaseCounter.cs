@@ -9,12 +9,12 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
 
     private KitchenObject kitchenObject;
 
-    public virtual void Interact(Player player) //àªç¤ player ààÅÐ basecounter
+    public virtual void Interact(Player player) //à¹€à¸Šà¹‡à¸„ player à¹€à¹€à¸¥à¸° basecounter
     {
         Debug.LogError("BaseCounter.Interact();");
     }
 
-    public virtual void InteractAlternate(Player player) //àªç¤ player ààÅÐ basecounter
+    public virtual void InteractAlternate(Player player) //à¹€à¸Šà¹‡à¸„ player à¹€à¹€à¸¥à¸° basecounter
     {
         //Debug.LogError("BaseCounter.InteractAlternate();");
     }
@@ -39,7 +39,7 @@ public class BaseCounter : MonoBehaviour, IKitchenObjectParent
         return kitchenObject;
     }
 
-    public void ClearKitchenObject()
+    public virtual void ClearKitchenObject()
     {
         kitchenObject = null;
     }

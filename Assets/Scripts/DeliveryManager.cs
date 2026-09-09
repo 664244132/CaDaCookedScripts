@@ -89,6 +89,10 @@ public class DeliveryManager : MonoBehaviour
     private float vipSpawnCooldown = 30f;
     private float vipSpawnTimer = 25f; // โอกาสเกิดครั้งแรกหลังจากเริ่มเล่นไปสักพัก
 
+    // Cache event args เพื่อลดขยะ GC (0 GC Allocation) ตามกฎ REFACTORCODE.md ข้อ 5
+    private readonly OnComboChangedEventArgs comboChangedEventArgs = new OnComboChangedEventArgs();
+    private readonly OnVIPOrderEventArgs vipOrderEventArgs = new OnVIPOrderEventArgs();
+
     private void Awake()
     {
         Instance = this;
@@ -138,10 +142,11 @@ public class DeliveryManager : MonoBehaviour
                     ResetComboStreak();
 
                     // ยิง Event ลูกค้าโกรธสำหรับออเดอร์ทุกประเภทที่หมดเวลา
-                    OnOrderAngry?.Invoke(this, new OnVIPOrderEventArgs { orderData = order });
+                    vipOrderEventArgs.orderData = order;
+                    OnOrderAngry?.Invoke(this, vipOrderEventArgs);
                     OnAnyOrderAngry?.Invoke(this, EventArgs.Empty);
 
-                    OnVIPOrderExpired?.Invoke(this, new OnVIPOrderEventArgs { orderData = order });
+                    OnVIPOrderExpired?.Invoke(this, vipOrderEventArgs);
                     OnRecipeFailed?.Invoke(this, EventArgs.Empty);
                     OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
                 }
@@ -160,7 +165,8 @@ public class DeliveryManager : MonoBehaviour
                         Debug.Log($"[DeliveryManager] 😡 Customer is ANGRY for: {order.recipeSO.recipeName}! (20s remaining before departure)");
 
                         // ยิง Event ลูกค้าโกรธสำหรับออเดอร์ปกติ
-                        OnOrderAngry?.Invoke(this, new OnVIPOrderEventArgs { orderData = order });
+                        vipOrderEventArgs.orderData = order;
+                        OnOrderAngry?.Invoke(this, vipOrderEventArgs);
                         OnAnyOrderAngry?.Invoke(this, EventArgs.Empty);
                         OnRecipeFailed?.Invoke(this, EventArgs.Empty);
                     }
@@ -220,7 +226,8 @@ public class DeliveryManager : MonoBehaviour
         if (spawnAsVIP)
         {
             Debug.Log($"[DeliveryManager] 👑 VIP CRITIC ORDER SPAWNED: {randomRecipe.recipeName} (25s Limit)");
-            OnVIPOrderSpawned?.Invoke(this, new OnVIPOrderEventArgs { orderData = newOrder });
+            vipOrderEventArgs.orderData = newOrder;
+            OnVIPOrderSpawned?.Invoke(this, vipOrderEventArgs);
         }
 
         OnRecipeSpawned?.Invoke(this, EventArgs.Empty);
@@ -297,15 +304,14 @@ public class DeliveryManager : MonoBehaviour
                         {
                             KitchenGameManager.Instance.AddGamePlayingTime(12.0f); // เพิ่มเวลา +12 วินาที
                         }
-                        OnVIPOrderSuccess?.Invoke(this, new OnVIPOrderEventArgs { orderData = waitingOrder });
+                        vipOrderEventArgs.orderData = waitingOrder;
+                        OnVIPOrderSuccess?.Invoke(this, vipOrderEventArgs);
                     }
 
                     // แจ้งเตือนการเปลี่ยนแปลงของคอมโบ
-                    OnComboStreakChanged?.Invoke(this, new OnComboChangedEventArgs
-                    {
-                        comboStreak = comboStreak,
-                        comboMultiplier = currentComboMultiplier
-                    });
+                    comboChangedEventArgs.comboStreak = comboStreak;
+                    comboChangedEventArgs.comboMultiplier = currentComboMultiplier;
+                    OnComboStreakChanged?.Invoke(this, comboChangedEventArgs);
 
                     waitingOrdersList.RemoveAt(i);
                     SyncBackwardCompatibilityList();
@@ -333,11 +339,9 @@ public class DeliveryManager : MonoBehaviour
         if (comboStreak > 0)
         {
             comboStreak = 0;
-            OnComboStreakChanged?.Invoke(this, new OnComboChangedEventArgs
-            {
-                comboStreak = 0,
-                comboMultiplier = 1.0f
-            });
+            comboChangedEventArgs.comboStreak = 0;
+            comboChangedEventArgs.comboMultiplier = 1.0f;
+            OnComboStreakChanged?.Invoke(this, comboChangedEventArgs);
         }
     }
 

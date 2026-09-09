@@ -32,8 +32,18 @@ public class FireExtinguisher : KitchenObject
     private Vector3 initialSpawnPosition;
     private bool isRespawning;
     private float respawnTimer;
+    private Player cachedPlayer;
 
     private static Shader cachedSafeShader;
+
+    private Player GetPlayer()
+    {
+        if (cachedPlayer == null)
+        {
+            cachedPlayer = Player.Instance != null ? Player.Instance : FindFirstObjectByType<Player>();
+        }
+        return cachedPlayer;
+    }
 
     private void Awake()
     {
@@ -296,7 +306,7 @@ public class FireExtinguisher : KitchenObject
 
         UpdatePromptBillboard();
 
-        Player player = FindFirstObjectByType<Player>();
+        Player player = GetPlayer();
         bool isHeldByPlayer = (player != null && GetKitchenObjectParent() as Player == player);
 
         // ปรับทิศทางละอองขาวให้ตรงกับทิศที่ผู้เล่นหันหน้าตลอดเวลาแบบ Realtime
@@ -338,7 +348,7 @@ public class FireExtinguisher : KitchenObject
         // หันหน้าตามกล้องเสมอ
         promptCanvasObject.transform.forward = targetCamera.transform.forward;
 
-        Player player = FindFirstObjectByType<Player>();
+        Player player = GetPlayer();
         if (player == null) return;
 
         bool isHeldByPlayer = (GetKitchenObjectParent() as Player == player);
@@ -392,7 +402,7 @@ public class FireExtinguisher : KitchenObject
     {
         isSpraying = true;
 
-        Player player = FindFirstObjectByType<Player>();
+        Player player = GetPlayer();
         Vector3 originPos = (player != null) ? player.transform.position : transform.position;
         Vector3 forward = (player != null) ? player.transform.forward : forwardDirection;
 
