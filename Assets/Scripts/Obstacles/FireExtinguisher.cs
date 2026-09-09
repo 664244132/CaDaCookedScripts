@@ -28,6 +28,11 @@ public class FireExtinguisher : KitchenObject
     private TextMeshProUGUI promptText;
     private Camera targetCamera;
 
+    // ระบบคืนชีพถังดับเพลิงเมื่อถูกแมวขโมย (Anti Soft-Lock Respawn System)
+    private Vector3 initialSpawnPosition;
+    private bool isRespawning;
+    private float respawnTimer;
+
     private static Shader cachedSafeShader;
 
     private void Awake()
@@ -41,6 +46,7 @@ public class FireExtinguisher : KitchenObject
     private void Start()
     {
         EnsureVisuals();
+        initialSpawnPosition = transform.position;
         targetCamera = Camera.main;
         if (targetCamera == null)
         {
@@ -277,6 +283,17 @@ public class FireExtinguisher : KitchenObject
 
     private void Update()
     {
+        // หากอยู่ในช่วงคูลดาวน์รอ Respawn หลังถูกแมวขโมย
+        if (isRespawning)
+        {
+            respawnTimer -= Time.deltaTime;
+            if (respawnTimer <= 0f)
+            {
+                RespawnAtInitialPosition();
+            }
+            return;
+        }
+
         UpdatePromptBillboard();
 
         Player player = FindFirstObjectByType<Player>();
@@ -457,4 +474,56 @@ public class FireExtinguisher : KitchenObject
     }
 
     public bool IsSpraying() => isSpraying;
+
+    /// <summary>
+    /// สั่งให้ถังดับเพลิงซ่อนตัวและเริ่มนับคูลดาวน์ 15 วินาทีเพื่อ Respawn กลับมายังจุดวางเดิม (ป้องกัน Soft-lock เมื่อแมวขโมย)
+    /// </summary>
+    public void ScheduleRespawn(float delay = 15.0f)
+    {
+        isRespawning = true;
+        respawnTimer = delay;
+
+        if (GetKitchenObjectParent() != null)
+        {
+            GetKitchenObjectParent().ClearKitchenObject();
+        }
+        SetKitchenObjectParent(null);
+        transform.SetParent(null);
+        StopSpraying();
+
+        // ปิดการแสดงผลและ Collider ชั่วคราวเพื่อให้ Update() ยังคงนับเวลาถอยหลังได้
+        SetVisibility(false);
+        Debug.Log($"🧯 FireExtinguisher: Cat stole extinguisher! Respawing at {initialSpawnPosition} in {delay:F1}s...");
+    }
+
+    private void RespawnAtInitialPosition()
+    {
+        isRespawning = false;
+        transform.position = initialSpawnPosition;
+        transform.rotation = Quaternion.identity;
+        EnsureCollider();
+        SetVisibility(true);
+        Debug.Log($"🧯 FireExtinguisher: RESPAWNED at initial position ({initialSpawnPosition}) successfully!");
+    }
+
+    private void SetVisibility(bool visible)
+    {
+        MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>(true);
+        foreach (var r in renderers)
+        {
+            r.enabled = visible;
+        }
+
+        Collider[] colliders = GetComponentsInChildren<Collider>(true);
+        foreach (var c in colliders)
+        {
+            c.enabled = visible;
+        }
+
+        if (promptCanvasObject != null)
+        {
+            promptCanvasObject.SetActive(visible);
+        }
+    }
 }
+

@@ -102,18 +102,21 @@ public class DeliveryManagerSingleUI : MonoBehaviour
 
             if (timerBarRoot != null)
             {
-                timerBarRoot.SetActive(false);
+                // เปิดใช้งานหลอดความอดทนของลูกค้าสำหรับออเดอร์ปกติด้วย
+                timerBarRoot.SetActive(true);
             }
         }
     }
 
     public void UpdateTimerVisual()
     {
-        if (currentOrderData != null && currentOrderData.isVIP && timerBarImage != null)
-        {
-            float ratio = currentOrderData.GetTimerNormalized();
-            timerBarImage.rectTransform.anchorMax = new Vector2(ratio, 1f);
+        if (currentOrderData == null || timerBarImage == null) return;
 
+        float ratio = currentOrderData.GetTimerNormalized();
+        timerBarImage.rectTransform.anchorMax = new Vector2(ratio, 1f);
+
+        if (currentOrderData.isVIP)
+        {
             // เปลี่ยนสีหลอดเวลาเป็นสีแดงกระพริบเมื่อใกล้หมดเวลา (เหลือ < 25%)
             if (ratio < 0.25f)
             {
@@ -122,6 +125,49 @@ public class DeliveryManagerSingleUI : MonoBehaviour
             else
             {
                 timerBarImage.color = new Color(1.0f, 0.75f, 0.0f);
+            }
+        }
+        else
+        {
+            // ออเดอร์ปกติ (Customer Patience Loop)
+            if (currentOrderData.isAngry)
+            {
+                // ลูกค้าอยู่ในสถานะโกรธ (Angry State)
+                if (backgroundImage != null)
+                {
+                    // เปลี่ยนสีกรอบการ์ดเป็นสีแดงระเรื่อ
+                    backgroundImage.color = new Color(1f, 0.8f, 0.8f, 0.98f);
+                }
+
+                recipeNameText.text = $"<color=#E02020><b>[ANGRY]</b></color> <color=#200000>{currentOrderData.recipeSO.recipeName}</color>";
+
+                // หลอดเวลากลายเป็นสีแดงกะพริบเตือน
+                timerBarImage.color = Mathf.PingPong(Time.time * 6f, 1f) > 0.5f ? new Color(0.9f, 0.1f, 0.1f) : new Color(0.5f, 0.05f, 0.05f);
+                timerBarImage.rectTransform.anchorMax = new Vector2(1f, 1f); // คงหลอดเต็มไว้แสดงสถานะโกรธสีแดง
+            }
+            else
+            {
+                if (backgroundImage != null)
+                {
+                    backgroundImage.color = Color.white;
+                }
+
+                recipeNameText.text = currentOrderData.recipeSO.recipeName;
+                recipeNameText.color = new Color(0.12f, 0.12f, 0.15f);
+
+                // เปลี่ยนสีหลอดตามเวลาความอดทนที่เหลือ: เขียว (>50%) -> ส้ม/เหลือง (20-50%) -> แดง (<20%)
+                if (ratio > 0.5f)
+                {
+                    timerBarImage.color = new Color(0.2f, 0.85f, 0.3f); // เขียว สดใส
+                }
+                else if (ratio > 0.2f)
+                {
+                    timerBarImage.color = new Color(1.0f, 0.75f, 0.1f); // ส้ม/เหลือง เตือน
+                }
+                else
+                {
+                    timerBarImage.color = Mathf.PingPong(Time.time * 8f, 1f) > 0.5f ? Color.red : new Color(1f, 0.3f, 0.1f); // แดง กะพริบวิกฤต
+                }
             }
         }
     }

@@ -24,10 +24,22 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     [SerializeField] private LayerMask countersLayerMask;
     [SerializeField] private Transform kitchenObjectHoldPoint;
 
+    [Header("Dash Mechanic Settings")]
+    [SerializeField] private float dashSpeed = 22f;
+    [SerializeField] private float dashDuration = 0.16f;
+    [SerializeField] private float dashCooldownDuration = 1.0f;
+
     private bool isWalking;
     private Vector3 lastInteractDir;
     private BaseCounter selectedCounter;
     private KitchenObject kitchenObject;
+
+    // --- Dash Variables ---
+    private bool isDashing;
+    private float dashTimer;
+    private float dashCooldownTimer;
+    private Vector3 dashDirection;
+    private ParticleSystem dashParticleSystem;
 
     // --- Obstacle & Effect Variables ---
     private bool isSlipping;
@@ -53,6 +65,8 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     {
         gameInput.OnInteractAction += GameInput_OnInteractAction;
         gameInput.OnInteractAlternateAction += GameInput_OnInteractAlternateAction;
+        gameInput.OnDashAction += GameInput_OnDashAction;
+        CreateDashDustEffect();
     }
 
     private void OnDestroy()
@@ -61,6 +75,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         {
             gameInput.OnInteractAction -= GameInput_OnInteractAction;
             gameInput.OnInteractAlternateAction -= GameInput_OnInteractAlternateAction;
+            gameInput.OnDashAction -= GameInput_OnDashAction;
         }
     }
 
@@ -147,6 +162,46 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         }
     }
 
+    /// <summary>
+    /// ทำงานเมื่อผู้เล่นกดปุ่ม Dash (Spacebar บน Keyboard หรือ South/Shoulder Button บน Gamepad)
+    /// </summary>
+    private void GameInput_OnDashAction(object sender, EventArgs e)
+    {
+        if (KitchenGameManager.Instance == null || !KitchenGameManager.Instance.IsGamePlaying()) return;
+        if (dashCooldownTimer > 0f || isDashing) return;
+
+        Vector2 inputVector = gameInput.GetMovementVectorNormalized();
+        Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
+
+        // หากไม่ได้กดปุ่มทิศทาง ให้ Dash ไปข้างหน้าตามที่ตัวละครหันหน้าอยู่
+        if (moveDir == Vector3.zero)
+        {
+            dashDirection = transform.forward;
+        }
+        else
+        {
+            dashDirection = moveDir;
+            transform.forward = moveDir;
+        }
+
+        isDashing = true;
+        dashTimer = dashDuration;
+        dashCooldownTimer = dashCooldownDuration;
+
+        // หากกด Dash บนพื้นลื่น SlipperyFloor (หรือขณะกำลังลื่น) ให้เพิ่มแรงส่งสไลด์พุ่งตัวไกลขึ้น!
+        if (isSlipping || slipTimer > 0f)
+        {
+            slipMomentum += dashDirection * 8f;
+            slipTimer += 0.25f;
+            Debug.Log("⚡ SUPER SLIDE BOOST! Player dashed on slippery floor!");
+        }
+
+        if (dashParticleSystem != null)
+        {
+            dashParticleSystem.Play();
+        }
+    }
+
     private void Update()
     {
         UpdateObstacleTimers();
@@ -156,13 +211,13 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     }
 
     /// <summary>
-    /// ตรวจจับการกดค้างปุ่ม F เพื่อพ่นละอองดับเพลิงต่อเนื่อง
+    /// ตรวจจับการกดค้างปุ่ม Alternate เพื่อพ่นละอองดับเพลิงต่อเนื่อง (ผ่าน New Input System รองรับ Keyboard & Gamepad)
     /// </summary>
     private void HandleExtinguisherContinuousSpray()
     {
         if (HasKitchenObject() && GetKitchenObject() is FireExtinguisher fireExt)
         {
-            if (Input.GetKey(KeyCode.F))
+            if (gameInput != null && gameInput.IsInteractAlternatePressed())
             {
                 fireExt.StartSpraying(transform.forward);
             }
@@ -175,6 +230,11 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void UpdateObstacleTimers()
     {
+        if (dashCooldownTimer > 0f)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+        }
+
         if (slipTimer > 0f)
         {
             slipTimer -= Time.deltaTime;
@@ -239,6 +299,35 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void HandleMovement()
     {
+        // 1. หากอยู่ในสถานะ Dash พุ่งตัว
+        if (isDashing && dashTimer > 0f)
+        {
+            dashTimer -= Time.deltaTime;
+            float dashMoveDistance = dashSpeed * Time.deltaTime;
+            float playerR = 0.5f;
+            float playerH = 2.0f;
+
+            bool canDash = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerH, playerR, dashDirection, dashMoveDistance, ~0, QueryTriggerInteraction.Ignore);
+            if (canDash)
+            {
+                transform.position += dashDirection * dashMoveDistance;
+            }
+            else
+            {
+                // ชนเคาน์เตอร์หรือสิ่งกีดขวาง ให้หยุดแดชทันที
+                isDashing = false;
+                dashTimer = 0f;
+            }
+
+            if (dashTimer <= 0f)
+            {
+                isDashing = false;
+            }
+
+            isWalking = true;
+            return;
+        }
+
         Vector2 inputVector = gameInput.GetMovementVectorNormalized();
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
 
@@ -397,4 +486,42 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     {
         return kitchenObject != null;
     }
+
+    /// <summary>
+    /// สร้างเอฟเฟกต์กลุ่มฝุ่น/ควันขาวกระจายออกด้านหลังตอนพุ่งตัว Dash
+    /// </summary>
+    private void CreateDashDustEffect()
+    {
+        GameObject dustObj = new GameObject("DashDustEffect");
+        dustObj.transform.SetParent(transform, false);
+        dustObj.transform.localPosition = new Vector3(0, 0.15f, -0.35f);
+
+        dashParticleSystem = dustObj.AddComponent<ParticleSystem>();
+        var main = dashParticleSystem.main;
+        main.duration = 0.2f;
+        main.loop = false;
+        main.startLifetime = 0.3f;
+        main.startSpeed = 2.5f;
+        main.startSize = 0.35f;
+        main.startColor = new Color(1f, 1f, 1f, 0.65f);
+        main.playOnAwake = false;
+
+        var emission = dashParticleSystem.emission;
+        emission.rateOverTime = 0;
+        emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, 12) });
+
+        var shape = dashParticleSystem.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 30f;
+        shape.radius = 0.25f;
+
+        ParticleSystemRenderer renderer = dustObj.GetComponent<ParticleSystemRenderer>();
+        if (renderer != null)
+        {
+            renderer.material = FireExtinguisher.GetSafeMaterial(new Color(0.92f, 0.92f, 0.95f, 0.6f));
+        }
+
+        dashParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
 }
+

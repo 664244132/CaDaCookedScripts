@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GameInput : MonoBehaviour
 {
@@ -7,8 +8,10 @@ public class GameInput : MonoBehaviour
     public event EventHandler OnInteractAction;
     public event EventHandler OnInteractAlternateAction;
     public event EventHandler OnPauseAction;
+    public event EventHandler OnDashAction;
 
     private PlayerInputActions playerInputActions;
+    private InputAction dashAction;
 
     private void Awake()
     {
@@ -19,44 +22,67 @@ public class GameInput : MonoBehaviour
         playerInputActions.Player.Interact.performed += Interact_performed;
         playerInputActions.Player.InteractAlternate.performed += InteractAlternate_performed;
         playerInputActions.Player.Pause.performed += Pause_performed;
+
+        // ตั้งค่าปุ่ม Dash ด้วย New Input System (Spacebar บนคีย์บอร์ด, Button South / Right Shoulder บน Gamepad)
+        dashAction = new InputAction("Dash", InputActionType.Button);
+        dashAction.AddBinding("<Keyboard>/space");
+        dashAction.AddBinding("<Gamepad>/buttonSouth");
+        dashAction.AddBinding("<Gamepad>/rightShoulder");
+        dashAction.performed += Dash_performed;
+        dashAction.Enable();
     }
 
     private void OnDestroy()
     {
-        playerInputActions.Player.Interact.performed -= Interact_performed;
-        playerInputActions.Player.InteractAlternate.performed -= InteractAlternate_performed;
-        playerInputActions.Player.Pause.performed -= Pause_performed;
-        playerInputActions.Dispose();
+        if (playerInputActions != null)
+        {
+            playerInputActions.Player.Interact.performed -= Interact_performed;
+            playerInputActions.Player.InteractAlternate.performed -= InteractAlternate_performed;
+            playerInputActions.Player.Pause.performed -= Pause_performed;
+            playerInputActions.Dispose();
+        }
+
+        if (dashAction != null)
+        {
+            dashAction.performed -= Dash_performed;
+            dashAction.Disable();
+            dashAction.Dispose();
+        }
     }
 
-    private void Pause_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    private void Dash_performed(InputAction.CallbackContext obj)
+    {
+        OnDashAction?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Pause_performed(InputAction.CallbackContext obj)
     {
         OnPauseAction?.Invoke(this, EventArgs.Empty);
     }
-    private void InteractAlternate_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+
+    private void InteractAlternate_performed(InputAction.CallbackContext obj)
     {
         OnInteractAlternateAction?.Invoke(this, EventArgs.Empty);
     }
 
-    private void Interact_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    private void Interact_performed(InputAction.CallbackContext obj)
     {
         OnInteractAction?.Invoke(this, EventArgs.Empty);
     }
 
-    private void Update()
+    /// <summary>
+    /// ตรวจสอบว่าปุ่ม Alternate (F บนคีย์บอร์ด หรือ West บน Gamepad) กำลังถูกกดค้างอยู่หรือไม่
+    /// </summary>
+    public bool IsInteractAlternatePressed()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            OnPauseAction?.Invoke(this, EventArgs.Empty);
-        }
+        if (playerInputActions == null) return false;
+        return playerInputActions.Player.InteractAlternate.IsPressed();
     }
 
     public Vector2 GetMovementVectorNormalized()
     {
         Vector2 inputVector = playerInputActions.Player.Move.ReadValue<Vector2>();
-
-        inputVector = inputVector.normalized;
-
-        return inputVector;
+        return inputVector.normalized;
     }
 }
+

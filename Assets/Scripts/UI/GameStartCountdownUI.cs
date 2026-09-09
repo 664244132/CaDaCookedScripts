@@ -121,6 +121,8 @@ public class GameStartCountdownUI : MonoBehaviour
             "<b><size=30>CONTROLS / KEYS</size></b>\n\n" +
             "* <b>[ W ][ A ][ S ][ D ]</b>\n" +
             "   Move Chef Character\n\n" +
+            "* <b>[ SPACEBAR ]</b> / <b>[ Gamepad (A) / RB ]</b>\n" +
+            "   Dash Sprint Boost (Slide bonus on oil!)\n\n" +
             "* <b>[ E ]</b>\n" +
             "   Pick Up / Put Down Ingredients and Plates\n" +
             "   Deliver Order / Grab and Drop Extinguisher\n\n" +

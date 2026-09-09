@@ -93,10 +93,21 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
                 float distanceFromCenter = Vector3.Distance(transform.position, Vector3.zero);
                 if (fleeTimer >= 2.2f || distanceFromCenter >= 13f)
                 {
-                    // หนีพ้นกล้องสำเร็จ ทำลายอาหารที่ขโมยมาแล้วซ่อนตัวรอ Respawn
+                    // หนีพ้นกล้องสำเร็จ ตรวจสอบวัตถุดิบที่ขโมยมา
                     if (HasKitchenObject())
                     {
-                        GetKitchenObject().DestroySelf();
+                        KitchenObject stolenObject = GetKitchenObject();
+                        if (stolenObject is FireExtinguisher extinguisher)
+                        {
+                            // หากเป็นถังดับเพลิง ห้าม DestroySelf เด็ดขาด! ให้เริ่มคูลดาวน์ Respawn 15 วิ กลับจุดเดิม
+                            ClearKitchenObject();
+                            extinguisher.ScheduleRespawn(15.0f);
+                            Debug.Log("😼 KitchenCat: Dropped FireExtinguisher off-camera. It will respawn in 15 seconds!");
+                        }
+                        else
+                        {
+                            stolenObject.DestroySelf();
+                        }
                     }
                     
                     HideForRespawn();
@@ -205,7 +216,18 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
 
         if (HasKitchenObject())
         {
-            GetKitchenObject().DestroySelf();
+            KitchenObject droppedObj = GetKitchenObject();
+            if (droppedObj is FireExtinguisher extinguisher)
+            {
+                // หากเป็นถังดับเพลิง ให้หล่นลงพื้น ณ ตำแหน่งแมวทันที ผู้เล่นจะได้หยิบกลับไปใช้ได้
+                ClearKitchenObject();
+                extinguisher.DropToFloor(transform.position);
+                Debug.Log("🙀 KitchenCat: Dropped FireExtinguisher onto floor while scared!");
+            }
+            else
+            {
+                droppedObj.DestroySelf();
+            }
         }
 
         StartSprintingAway();

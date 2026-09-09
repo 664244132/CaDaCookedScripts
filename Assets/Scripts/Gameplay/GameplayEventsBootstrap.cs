@@ -65,6 +65,9 @@ public class GameplayEventsBootstrap : MonoBehaviour
         try { SetupComboUISystem(); Debug.Log("✅ Combo & Tip Streak UI Initialized!"); }
         catch (Exception ex) { Debug.LogError($"❌ Combo UI Error: {ex.Message}"); }
 
+        try { SetupSinkCounterSystem(); Debug.Log("✅ [Step 2] Sink Counter System Initialized!"); }
+        catch (Exception ex) { Debug.LogError($"❌ [Step 2] Sink Counter Error: {ex.Message}"); }
+
         Debug.Log("🎉 CaDaCook: All Gameplay Systems & UI are ACTIVE & RUNNING!");
     }
 
@@ -510,6 +513,45 @@ public class GameplayEventsBootstrap : MonoBehaviour
                 comboObj.transform.SetParent(mainCanvas.transform, false);
             }
             comboObj.AddComponent<ComboUI>();
+        }
+    }
+
+    // ==========================================
+    // STEP 2: SINK COUNTER SYSTEM (อ่างล้างจาน)
+    // ==========================================
+    private void SetupSinkCounterSystem()
+    {
+        if (FindFirstObjectByType<SinkCounter>() != null) return;
+
+        ClearCounter[] allCounters = FindObjectsByType<ClearCounter>(FindObjectsSortMode.None);
+        ClearCounter chosenCounter = null;
+
+        // เลือกเคาน์เตอร์ที่ว่าง ไม่เคลื่อนที่
+        foreach (ClearCounter counter in allCounters)
+        {
+            if (counter.GetComponent<MovingCounter>() != null) continue;
+            if (counter.HasKitchenObject()) continue;
+
+            chosenCounter = counter;
+            break;
+        }
+
+        if (chosenCounter != null)
+        {
+            GameObject targetObj = chosenCounter.gameObject;
+            Vector3 pos = targetObj.transform.position;
+
+            Destroy(chosenCounter);
+            targetObj.AddComponent<SinkCounter>();
+            Debug.Log($"🧼 [GameplayEventsBootstrap] Equipped SinkCounter at {pos}");
+        }
+        else
+        {
+            // Fallback: หากไม่มี ClearCounter ว่าง ให้สร้าง Standalone SinkCounter
+            GameObject sinkObj = new GameObject("SinkCounter_Standalone");
+            sinkObj.transform.position = ClampToPlayableBounds(new Vector3(4.5f, 0f, 1.2f));
+            sinkObj.AddComponent<SinkCounter>();
+            Debug.Log($"🧼 [GameplayEventsBootstrap] Created standalone SinkCounter at {sinkObj.transform.position}");
         }
     }
 }

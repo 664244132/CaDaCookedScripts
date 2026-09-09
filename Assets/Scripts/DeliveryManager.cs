@@ -18,6 +18,7 @@ public class DeliveryManager : MonoBehaviour
     public event EventHandler<OnVIPOrderEventArgs> OnVIPOrderSpawned;
     public event EventHandler<OnVIPOrderEventArgs> OnVIPOrderSuccess;
     public event EventHandler<OnVIPOrderEventArgs> OnVIPOrderExpired;
+    public event EventHandler<OnVIPOrderEventArgs> OnOrderAngry;
 
     public class OnComboChangedEventArgs : EventArgs
     {
@@ -31,13 +32,14 @@ public class DeliveryManager : MonoBehaviour
     }
 
     /// <summary>
-    /// คลาสข้อมูลออเดอร์ พร้อมระบบ VIP และเวลานับถอยหลัง
+    /// คลาสข้อมูลออเดอร์ พร้อมระบบ VIP, หลอดความอดทนลูกค้า, และสถานะโกรธ (Angry State)
     /// </summary>
     [Serializable]
     public class OrderData
     {
         public RecipeSO recipeSO;
         public bool isVIP;
+        public bool isAngry;
         public float orderTimer;
         public float orderTimerMax;
 
@@ -45,6 +47,7 @@ public class DeliveryManager : MonoBehaviour
         {
             this.recipeSO = recipeSO;
             this.isVIP = isVIP;
+            this.isAngry = false;
             this.orderTimerMax = duration;
             this.orderTimer = duration;
         }
@@ -105,7 +108,7 @@ public class DeliveryManager : MonoBehaviour
             }
         }
 
-        // อัปเดตเวลานับถอยหลังของออเดอร์ (โดยเฉพาะออเดอร์ VIP)
+        // อัปเดตเวลานับถอยหลังของออเดอร์ (ทั้ง VIP และออเดอร์ปกติ)
         for (int i = waitingOrdersList.Count - 1; i >= 0; i--)
         {
             OrderData order = waitingOrdersList[i];
@@ -125,6 +128,21 @@ public class DeliveryManager : MonoBehaviour
                     OnVIPOrderExpired?.Invoke(this, new OnVIPOrderEventArgs { orderData = order });
                     OnRecipeFailed?.Invoke(this, EventArgs.Empty);
                     OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
+                }
+            }
+            else
+            {
+                // ออเดอร์ปกติ: หลอดความอดทนลดลงเรื่อยๆ
+                if (!order.isAngry)
+                {
+                    order.orderTimer -= Time.deltaTime;
+                    if (order.orderTimer <= 0f)
+                    {
+                        order.isAngry = true;
+                        order.orderTimer = 0f;
+                        Debug.Log($"[DeliveryManager] 😡 Customer is ANGRY for: {order.recipeSO.recipeName}! (No bonus points)");
+                        OnOrderAngry?.Invoke(this, new OnVIPOrderEventArgs { orderData = order });
+                    }
                 }
             }
         }
@@ -151,7 +169,8 @@ public class DeliveryManager : MonoBehaviour
             }
         }
 
-        float orderDuration = spawnAsVIP ? 25.0f : 999f; // VIP มีเวลา 25 วินาที
+        // VIP มีเวลา 25 วินาที, ออเดอร์ปกติมีเวลาความอดทน 55 วินาที
+        float orderDuration = spawnAsVIP ? 25.0f : 55.0f;
         OrderData newOrder = new OrderData(randomRecipe, spawnAsVIP, orderDuration);
         waitingOrdersList.Add(newOrder);
 
@@ -210,13 +229,22 @@ public class DeliveryManager : MonoBehaviour
                 {
                     // ส่งอาหารได้ถูกต้อง!
                     successfulRecipesAmount++;
-                    comboStreak++;
-                    maxComboStreak = Mathf.Max(maxComboStreak, comboStreak);
 
-                    // คำนวณตัวคูณคอมโบ (1.0x -> 1.5x -> 2.0x)
-                    float currentComboMultiplier = GetComboMultiplier();
+                    bool isAngry = waitingOrder.isAngry;
+                    float currentComboMultiplier = 1.0f;
 
-                    // คำนวณคะแนนพื้นฐาน (จานปกติ 100 แต้ม, VIP 300 แต้ม 3 เท่า)
+                    if (!isAngry)
+                    {
+                        comboStreak++;
+                        maxComboStreak = Mathf.Max(maxComboStreak, comboStreak);
+                        currentComboMultiplier = GetComboMultiplier();
+                    }
+                    else
+                    {
+                        Debug.Log($"[DeliveryManager] Delivered angry order {waitingOrder.recipeSO.recipeName}! Base score only, no combo bonus.");
+                    }
+
+                    // คำนวณคะแนนพื้นฐาน (จานปกติ 100 แต้ม, VIP 300 แต้ม; หากลูกค้าโกรธคิดคะแนนฐาน 1.0x)
                     int basePoints = waitingOrder.isVIP ? 300 : 100;
                     int finalPoints = Mathf.RoundToInt(basePoints * currentComboMultiplier * scoreMultiplier);
                     totalScore += finalPoints;
