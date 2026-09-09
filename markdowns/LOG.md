@@ -140,8 +140,42 @@
   - **Zero GC Allocation Optimization (Rule 5 & 6):** ทำการ Cache รายการ `FireHazard` ทั้งหมดตั้งแต่ `Start()` และใช้ `reusableAvailableHazards` เพื่อขจัด GC Alloc และการเรียก `FindObjectsByType` ในลูปเกม
 - [markdowns/AboutProject.md](file:///c:/CaDaCooked/CaDaCookedScripts/markdowns/AboutProject.md):
   - อัปเดตรายละเอียดระบบไฟไหม้คู่พร้อมกัน 2 จุด และระบบ Waypoint Patrol + Idle Pause ของแมวขโมย
+### 🔹 Session 83: KitchenCatNPC Counter Stuck Fix (Open Aisle Floor Patrol & Kinematic Rigidbody)
+- [Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs):
+  - **Open Aisle Floor Positioning:** ย้ายพิกัดเกิดของแมวทั้งสองตัวออกจากแนวเคาน์เตอร์ (`X = ±7.8f`) มาสู่ **พื้นทางเดินโล่ง (Open Aisle Floor)** ในครัวอย่างสมบูรณ์: แมวส้มขวา `(4.8f, 0f, 2.8f)` และแมวเทาซ้าย `(-4.8f, 0f, 2.8f)` แก้ปัญหาแมวเกิดทับหรือจมอยู่ในเคาน์เตอร์ 100%
+  - **Kinematic Rigidbody Setup:** ติดตั้ง `Rigidbody` แบบ `isKinematic = true` และ `useGravity = false` ให้กับแมวขโมยตั้งแต่สร้าง เพื่อให้เป็น Kinematic Trigger อย่างสมบูรณ์
+- [Assets/Scripts/Obstacles/KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs):
+  - **Counter Clearance Patrol System:** ปรับปรุง `PickNewPatrolWaypoint()` ด้วยการสุ่มตำแหน่งรอบทางเดินโล่ง พร้อมคำนวณเวกเตอร์ผลักหลบเคาน์เตอร์ (`Counter Clearance`) หากจุดหมายอยู่ใกล้เคาน์เตอร์เกิน 1.15m จะปรับถอยห่างออกมายังพื้นโล่งอัตโนมัติ ทำให้แมวจะไม่เลือกจุดหมายภายในเคาน์เตอร์เด็ดขาด
+  - **EnsurePassThroughColliders Guarantee:** เพิ่มการตรวจสอบและติดตั้ง Kinematic Rigidbody อัตโนมัติ ป้องกันปัญหา PhysX Depenetration บล็อกการเคลื่อนที่
+  - **Zero Warnings Compilation:** เชื่อมโยงตัวแปร `patrolRadius = 0.85f` ในการคำนวณ Waypoint แก้ไขคอมไพเลอร์ warning CS0414 จนหมดจด
+- [markdowns/AboutProject.md](file:///c:/CaDaCooked/CaDaCookedScripts/markdowns/AboutProject.md):
+  - อัปเดตรายละเอียดระบบ Open Aisle Waypoint Patrol และ Counter Clearance
+### 🔹 Session 84: KitchenCatNPC Shoo Distance Calibration (1.5 Meters)
+- [Assets/Scripts/Obstacles/KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs):
+  - ปรับระยะตรวจจับที่ผู้เล่นเดินเข้าใกล้แล้วแมวขโมยตกใจวิ่งหนี (`shooDistance`) เป็น **1.5 เมตร (`1.5f`)**
+  - เพิ่มเมธอด API `SetShooDistance(float distance)` และ `GetShooDistance()`
+- [Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs):
+  - กำหนดค่า `catNPC.SetShooDistance(1.5f);` อย่างชัดเจนใน `CreateNekoCat()`
+- [markdowns/AboutProject.md](file:///c:/CaDaCooked/CaDaCookedScripts/markdowns/AboutProject.md):
+  - บันทึกระยะ Shoo Distance 1.5 เมตร ในหมวดหมู่ระบบอุปสรรค
+### 🔹 Session 85: KitchenCatNPC Respawn Cooldown Calibration (3.0 Seconds)
+- [Assets/Scripts/Obstacles/KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs):
+  - ปรับระยะเวลาหน่วงก่อนที่แมวขโมยจะกลับมาเกิดใหม่หลังขโมยอาหารสำเร็จและวิ่งพ้นกล้องออกไป (`respawnCooldown`) เป็น **3.0 วินาที (`3.0f`)** (จากเดิม 4.5 วินาที)
+  - เพิ่มเมธอด API `SetRespawnCooldown(float cooldown)` และ `GetRespawnCooldown()`
+- [Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs):
+  - กำหนดค่า `catNPC.SetRespawnCooldown(3.0f);` อย่างชัดเจนใน `CreateNekoCat()`
+- [markdowns/AboutProject.md](file:///c:/CaDaCooked/CaDaCookedScripts/markdowns/AboutProject.md):
+  - บันทึกระยะเวลา Respawn Cooldown 3.0 วินาที ในหมวดหมู่ระบบอุปสรรคและเหตุการณ์ไดนามิก
+### 🔹 Session 86: KitchenCatNPC Cooldown (7.0s) & Shoo Distance (1.7m) Calibration
+- [Assets/Scripts/Obstacles/KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs):
+  - ปรับระยะเวลาหน่วงก่อนที่แมวขโมยจะกลับมาเกิดใหม่หลังขโมยอาหารสำเร็จและวิ่งพ้นกล้องออกไป (`respawnCooldown`) เป็น **7.0 วินาที (`7.0f`)** (จากเดิม 3.0 วินาที)
+  - ปรับระยะตรวจจับที่ผู้เล่นเดินเข้าใกล้แล้วแมวขโมยตกใจวิ่งหนี (`shooDistance`) เป็น **1.7 เมตร (`1.7f`)** (จากเดิม 1.5 เมตร)
+- [Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs):
+  - กำหนดค่า `catNPC.SetShooDistance(1.7f);` และ `catNPC.SetRespawnCooldown(7.0f);` อย่างชัดเจนใน `CreateNekoCat()`
+- [markdowns/AboutProject.md](file:///c:/CaDaCooked/CaDaCookedScripts/markdowns/AboutProject.md):
+  - บันทึกสเปก Shoo Distance 1.7 เมตร และ Respawn Cooldown 7.0 วินาที ในหมวดหมู่ระบบอุปสรรคและเหตุการณ์ไดนามิก
 - **Rigorous Verification:**
-  - ผ่านการคอมไพล์ด้วย Unity Roslyn C# Compiler ทั้ง 3 Assemblies (`CodeMonkeyFreeEditor.rsp`, `Assembly-CSharp.rsp`, `Assembly-CSharp-Editor.rsp`) ได้รับ **Exit Code 0 (0 Errors, 0 Warnings)** ครบถ้วน 100%
+  - ผ่านการตรวจ Audit อย่างละเอียด 100% จาก Unity Roslyn C# Compiler ทั้ง 3 Assemblies (`CodeMonkeyFreeEditor.rsp`, `Assembly-CSharp.rsp`, `Assembly-CSharp-Editor.rsp`) ได้รับ **Exit Code 0 (0 Errors, 0 Warnings, 0 Issues)**
 
 ---
 

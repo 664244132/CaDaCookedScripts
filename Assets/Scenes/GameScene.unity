@@ -3592,7 +3592,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Myscripts
   panel: {fileID: 1264331262}
   message: {fileID: 1441252809}
-  display_count: {fileID: 139867457}
+  displayCount: {fileID: 139867457}
 --- !u!4 &336604193 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4896653716000216, guid: 18d653ec6ac008e43a69363f42d8c371, type: 3}
@@ -6266,7 +6266,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 658522301777592603, guid: b378c8c7799eba342a7c00e83058151c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2100675387}
   m_SourcePrefab: {fileID: 100100000, guid: b378c8c7799eba342a7c00e83058151c, type: 3}
 --- !u!4 &795811748 stripped
 Transform:
@@ -13682,7 +13685,13 @@ MonoBehaviour:
   countersLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  collisionsLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   kitchenObjectHoldPoint: {fileID: 1153418381}
+  dashSpeed: 22
+  dashDuration: 0.16
+  dashCooldownDuration: 1
 --- !u!4 &1635443842
 Transform:
   m_ObjectHideFlags: 0
@@ -16396,6 +16405,32 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdb26c54f13e8114baa5150f13d70325, type: 3}
+--- !u!1 &2100675385 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 658522301777592603, guid: b378c8c7799eba342a7c00e83058151c, type: 3}
+  m_PrefabInstance: {fileID: 795811747}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &2100675387
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100675385}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &2108880307 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4697813873680284752, guid: 4fb052047707ed645a77e875351e3a5c, type: 3}

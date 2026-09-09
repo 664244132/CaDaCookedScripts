@@ -22,8 +22,8 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     [Header("Cat Speed Settings")]
     [SerializeField] private float walkSpeed = 3.8f;
     [SerializeField] private float fleeSpeed = 9.5f;        // วิ่งเร็วมากๆ เพื่อหนีพ้นกล้อง
-    [SerializeField] private float shooDistance = 2.0f;     // ระยะที่ผู้เล่นเข้าใกล้แล้วแมวตกใจ
-    [SerializeField] private float respawnCooldown = 4.5f;  // กลับมาใหม่ทุกๆ 4.5 วินาที
+    [SerializeField] private float shooDistance = 1.7f;     // ระยะที่ผู้เล่นเข้าใกล้แล้วแมวตกใจ (1.7 เมตร)
+    [SerializeField] private float respawnCooldown = 7.0f;  // กลับมาเกิดใหม่หลังขโมยของสำเร็จ 7 วินาที
     [SerializeField] private Transform kitchenObjectHoldPoint;
     [SerializeField] private Transform exitPoint;
 
@@ -34,7 +34,7 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     [SerializeField] private float arrivalThreshold = 0.25f;       // ระยะที่ถือว่าเดินถึงจุดหมาย
     [SerializeField] private float minIdlePauseDuration = 1.5f;     // เวลาหยุดยืนดมกลิ่นตรวจตราขั้นต่ำ
     [SerializeField] private float maxIdlePauseDuration = 3.5f;     // เวลาหยุดยืนดมกลิ่นตรวจตราสูงสุด
-    [SerializeField] private float patrolRadius = 2.0f;            // รัศมีการเดินลาดตระเวนรอบจุดเกิด
+    [SerializeField] private float patrolRadius = 0.85f;           // รัศมีการเดินลาดตระเวนรอบจุดเกิดบนพื้นทางเดินโล่ง
 
     private State state;
     private BaseCounter targetCounter;
@@ -94,19 +94,42 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
     }
 
     /// <summary>
-    /// สุ่มเลือกจุดตรวจตราแห่งใหม่รอบจุดเกิดริมครัว
+    /// สุ่มเลือกจุดตรวจตราแห่งใหม่บนพื้นทางเดินโล่งรอบจุดเกิด พร้อมระบบ Counter Clearance ป้องกันไม่ให้จุดหมายตกไปอยู่ในเคาน์เตอร์
     /// </summary>
     private void PickNewPatrolWaypoint()
     {
-        float randomOffsetX = UnityEngine.Random.Range(-0.6f, 0.6f);
+        float randomOffsetX = UnityEngine.Random.Range(-patrolRadius, patrolRadius);
         float randomOffsetZ = UnityEngine.Random.Range(-patrolRadius, patrolRadius);
-        currentPatrolWaypoint = new Vector3(spawnPosition.x + randomOffsetX, spawnPosition.y, spawnPosition.z + randomOffsetZ);
+        Vector3 candidatePos = new Vector3(spawnPosition.x + randomOffsetX, spawnPosition.y, spawnPosition.z + randomOffsetZ);
+
+        // ตรวจเช็ค Counter Clearance: หากจุดหมายอยู่ใกล้เคาน์เตอร์ใดๆ เกิน 1.15 เมตร ให้ปรับจุดหมายถอยห่างจากเคาน์เตอร์ออกมายังพื้นโล่ง
+        if (cachedCounters != null)
+        {
+            foreach (BaseCounter counter in cachedCounters)
+            {
+                if (counter != null && Vector3.Distance(candidatePos, counter.transform.position) < 1.15f)
+                {
+                    Vector3 awayFromCounter = (candidatePos - counter.transform.position);
+                    awayFromCounter.y = 0;
+                    if (awayFromCounter.sqrMagnitude < 0.01f)
+                    {
+                        awayFromCounter = (spawnPosition - counter.transform.position);
+                        awayFromCounter.y = 0;
+                    }
+                    candidatePos = counter.transform.position + awayFromCounter.normalized * 1.35f;
+                    candidatePos.y = spawnPosition.y;
+                    break;
+                }
+            }
+        }
+
+        currentPatrolWaypoint = candidatePos;
         isWaitingAtWaypoint = false;
     }
 
     /// <summary>
-    /// ปรับแต่ง Collider ทั้งหมดบนตัวแมวให้เป็น Trigger (isTrigger = true) และ Rigidbody ให้เป็น Kinematic
-    /// เพื่อให้แมวสามารถเดินทะลุผ่านเคาน์เตอร์ กำแพง และวัตถุต่างๆ ได้อย่างราบรื่น ไม่ติดขัด
+    /// ปรับแต่ง Collider ทั้งหมดบนตัวแมวให้เป็น Trigger (isTrigger = true) และติดตั้ง Rigidbody ให้เป็น Kinematic
+    /// เพื่อให้แมวสามารถเดินทะลุผ่านเคาน์เตอร์ กำแพง และวัตถุต่างๆ ได้อย่างราบรื่น ไม่ติดขัด 100%
     /// </summary>
     private void EnsurePassThroughColliders()
     {
@@ -118,11 +141,13 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
             col.isTrigger = true;
         }
 
-        if (TryGetComponent(out Rigidbody rb))
+        if (!TryGetComponent(out Rigidbody rb))
         {
-            rb.isKinematic = true;
-            rb.useGravity = false;
+            rb = gameObject.AddComponent<Rigidbody>();
         }
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
     }
 
     /// <summary>
@@ -135,6 +160,32 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
         currentPatrolWaypoint = pos;
         isWaitingAtWaypoint = true;
         idlePauseTimer = 1.0f;
+    }
+
+    /// <summary>
+    /// กำหนดระยะห่างที่ผู้เล่นเข้าใกล้แล้วแมวจะตกใจวิ่งหนี (ค่าเริ่มต้น 1.7 เมตร)
+    /// </summary>
+    public void SetShooDistance(float distance)
+    {
+        shooDistance = distance;
+    }
+
+    public float GetShooDistance()
+    {
+        return shooDistance;
+    }
+
+    /// <summary>
+    /// กำหนดเวลาคูลดาวน์ก่อนที่แมวจะกลับมาเกิดใหม่หลังขโมยของสำเร็จ (ค่าเริ่มต้น 7 วินาที)
+    /// </summary>
+    public void SetRespawnCooldown(float cooldown)
+    {
+        respawnCooldown = cooldown;
+    }
+
+    public float GetRespawnCooldown()
+    {
+        return respawnCooldown;
     }
 
     private void Update()

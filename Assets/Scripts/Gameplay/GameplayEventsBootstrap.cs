@@ -364,11 +364,11 @@ public class GameplayEventsBootstrap : MonoBehaviour
     {
         if (FindObjectsByType<KitchenCatNPC>(FindObjectsSortMode.None).Length == 0)
         {
-            // แมวส้ม 3D (Neko Cat 01) ประจำการริมขอบจอฝั่งขวา (Flank Staging Zone)
-            CreateNekoCat("Cat_NekoOrange", "Neko Cat 01", new Vector3(7.8f, 0f, 4.5f), new Color(0.95f, 0.55f, 0.15f));
+            // แมวส้ม 3D (Neko Cat 01) ประจำการบนพื้นทางเดินโล่งฝั่งขวาของครัว (Right Aisle Open Floor)
+            CreateNekoCat("Cat_NekoOrange", "Neko Cat 01", new Vector3(4.8f, 0f, 2.8f), new Color(0.95f, 0.55f, 0.15f));
 
-            // แมวเทา 3D (Neko Cat 02) ประจำการริมขอบจอฝั่งซ้าย (Flank Staging Zone)
-            CreateNekoCat("Cat_NekoGrey", "Neko Cat 02", new Vector3(-7.8f, 0f, 4.5f), new Color(0.45f, 0.45f, 0.48f));
+            // แมวเทา 3D (Neko Cat 02) ประจำการบนพื้นทางเดินโล่งฝั่งซ้ายของครัว (Left Aisle Open Floor)
+            CreateNekoCat("Cat_NekoGrey", "Neko Cat 02", new Vector3(-4.8f, 0f, 2.8f), new Color(0.45f, 0.45f, 0.48f));
         }
     }
 
@@ -412,6 +412,15 @@ public class GameplayEventsBootstrap : MonoBehaviour
             head.GetComponent<MeshRenderer>().material = catMat;
         }
 
+        // ติดตั้ง Kinematic Rigidbody ให้แมวสามารถเคลื่อนผ่านวัตถุได้โดยไม่ถูกแรงผลัก PhysX บล็อก (Pass-Through)
+        if (!catObj.TryGetComponent(out Rigidbody catRb))
+        {
+            catRb = catObj.AddComponent<Rigidbody>();
+        }
+        catRb.isKinematic = true;
+        catRb.useGravity = false;
+        catRb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+
         // ติดตั้ง Collider สำหรับตรวจจับการเข้าใกล้ (ตั้งค่าเป็น Trigger เพื่อให้เดินทะลุวัตถุได้ ไม่ติดขัด)
         if (!catObj.TryGetComponent(out Collider _))
         {
@@ -451,6 +460,8 @@ public class GameplayEventsBootstrap : MonoBehaviour
             catNPC = catObj.AddComponent<KitchenCatNPC>();
         }
         catNPC.SetSpawnPosition(pos);
+        catNPC.SetShooDistance(1.7f);
+        catNPC.SetRespawnCooldown(7.0f);
     }
 
     // ==========================================
