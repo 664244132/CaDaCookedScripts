@@ -7,23 +7,20 @@ public class PlayerController : MonoBehaviour
     public float rotationSpeed = 100f;
 
     [Header("Shooting Settings")]
-    public GameObject bulletPrefab; // ช่องใส่ Prefab กระสุน
-    public Transform firePoint;     // ช่องใส่จุดปล่อยกระสุน
+    public GameObject bulletPrefab; // Prefab เธเธฃเธฐเธชเธธเธ
+    public Transform firePoint;     // เธเธธเธ”เธเธฅเนเธญเธขเธเธฃเธฐเธชเธธเธ
 
     void Update()
     {
-        // --- ส่วนการเคลื่อนที่ (Movement) ---
-        float horizontal = Input.GetAxis("Horizontal"); // ปุ่ม A/D หรือ ลูกศรซ้าย/ขวา
-        float vertical = Input.GetAxis("Vertical");     // ปุ่ม W/S หรือ ลูกศรขึ้น/ลง
+        // --- เธเธฒเธฃเน€เธเธฅเธทเนเธญเธเธ—เธตเน (Movement) ---
+        float horizontal = Input.GetAxis("Horizontal"); // A/D
+        float vertical = Input.GetAxis("Vertical");     // W/S
 
-        // เคลื่อนที่ไปข้างหน้า/หลัง
         transform.Translate(Vector3.forward * vertical * moveSpeed * Time.deltaTime);
-
-        // หมุนตัวละคร (เพื่อให้กล้องหมุนตามไปด้วยแบบง่ายๆ)
         transform.Rotate(Vector3.up * horizontal * rotationSpeed * Time.deltaTime);
 
-        // --- ส่วนการยิงปืน (Shooting) ---
-        if (Input.GetButtonDown("Fire1")) // คลิกซ้าย หรือ Ctrl ซ้าย
+        // --- เธเธฒเธฃเธขเธดเธเธเธทเธ (Shooting) ---
+        if (Input.GetButtonDown("Fire1"))
         {
             Shoot();
         }
@@ -31,7 +28,9 @@ public class PlayerController : MonoBehaviour
 
     void Shoot()
     {
-        // สร้างกระสุนขึ้นมา ณ ตำแหน่ง FirePoint และหันหน้าตาม FirePoint
-        Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        if (bulletPrefab != null && firePoint != null)
+        {
+            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        }
     }
 }

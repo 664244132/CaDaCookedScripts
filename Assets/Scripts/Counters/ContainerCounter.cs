@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class ContainerCounter : BaseCounter
 {
@@ -10,10 +9,9 @@ public class ContainerCounter : BaseCounter
 
     public override void Interact(Player player)
     {
-        if (!player.HasKitchenObject()) // เช็คว่า player ไม่ได้ถืออะไรไว้
-        {
+        if (player.HasKitchenObject()) return;
+
         KitchenObject.SpawnKitchenObject(kitchenObjectSO, player);
         OnPlayerGrabbedObject?.Invoke(this, EventArgs.Empty);
-        }
     }
 }

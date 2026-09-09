@@ -31,16 +31,10 @@ public class PlatesCounter : BaseCounter
 
     public override void Interact(Player player)
     {
-        if (!player.HasKitchenObject())
-        {
-            if (platesSpwanedAmount > 0)
-            {
-                platesSpwanedAmount--;
+        if (player.HasKitchenObject() || platesSpwanedAmount <= 0) return;
 
-                KitchenObject.SpawnKitchenObject(plateKitchenObjectSO, player);
-
-                OnPlateRemoved?.Invoke(this, EventArgs.Empty);
-            }
-        }
+        platesSpwanedAmount--;
+        KitchenObject.SpawnKitchenObject(plateKitchenObjectSO, player);
+        OnPlateRemoved?.Invoke(this, EventArgs.Empty);
     }
 }

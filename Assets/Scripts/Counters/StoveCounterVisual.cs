@@ -8,7 +8,18 @@ public class StoveCounterVisual : MonoBehaviour
 
     private void Start()
     {
-        stoveCounter.OnStateChanged += StoveCounter_OnStateChanged;
+        if (stoveCounter != null)
+        {
+            stoveCounter.OnStateChanged += StoveCounter_OnStateChanged;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (stoveCounter != null)
+        {
+            stoveCounter.OnStateChanged -= StoveCounter_OnStateChanged;
+        }
     }
 
     private void StoveCounter_OnStateChanged(object sender, StoveCounter.OnStateChangedEventArgs e)

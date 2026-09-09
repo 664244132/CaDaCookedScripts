@@ -15,7 +15,18 @@ public class CuttingCounterVisual : MonoBehaviour
 
     private void Start()
     {
-        cuttingCounter.OnCut += CuttingCounter_OnCut;
+        if (cuttingCounter != null)
+        {
+            cuttingCounter.OnCut += CuttingCounter_OnCut;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (cuttingCounter != null)
+        {
+            cuttingCounter.OnCut -= CuttingCounter_OnCut;
+        }
     }
 
     private void CuttingCounter_OnCut(object sender, System.EventArgs e)

@@ -1,7 +1,6 @@
-using NUnit.Framework;
-using UnityEngine;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class PlateCompleteVisual : MonoBehaviour
 {
@@ -13,16 +12,28 @@ public class PlateCompleteVisual : MonoBehaviour
         public GameObject gameObject;
     }
 
-    [SerializeField] private PlateKitchenObject PlateKitchenObject;
+    [UnityEngine.Serialization.FormerlySerializedAs("PlateKitchenObject")]
+    [SerializeField] private PlateKitchenObject plateKitchenObject;
     [SerializeField] private List<KitchenObjectSO_GameObject> kitchenObjectSOGameObjectList;
 
     private void Start()
     {
-        PlateKitchenObject.OnIngredientAdded += PlateKitchenObject_OnIngredientAdded;
+        if (plateKitchenObject != null)
+        {
+            plateKitchenObject.OnIngredientAdded += PlateKitchenObject_OnIngredientAdded;
+        }
 
         foreach (KitchenObjectSO_GameObject kitchenObjectSOGameObject in kitchenObjectSOGameObjectList)
         { 
                 kitchenObjectSOGameObject.gameObject.SetActive(false);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (plateKitchenObject != null)
+        {
+            plateKitchenObject.OnIngredientAdded -= PlateKitchenObject_OnIngredientAdded;
         }
     }
 

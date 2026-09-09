@@ -1,5 +1,4 @@
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,20 +14,26 @@ public class Myscripts : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        panel.gameObject.SetActive(false);
-        message.gameObject.SetActive(false);
+        if (panel != null) panel.SetActive(false);
+        if (message != null) message.gameObject.SetActive(false);
         all_items = GameObject.FindGameObjectsWithTag("Items").Length;
+        UpdateDisplay();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void UpdateDisplay()
     {
-        //Debug.Log("UPDATE STARTING.....");
-        display_count.text = "Find your crew and take supplie : "+current_items+"/"+all_items; //π—∫®”π«π‰Õ‡∑Á¡∑’Ë‡°Á∫‰¥È
-        if (current_items == all_items)
+        if (display_count != null)
         {
-            message.gameObject.SetActive (true);
-            message.text = "Misson DONE!";
+            display_count.text = "Find your crew and take supplie : " + current_items + "/" + all_items;
+        }
+
+        if (all_items > 0 && current_items >= all_items)
+        {
+            if (message != null)
+            {
+                message.gameObject.SetActive(true);
+                message.text = "Misson DONE!";
+            }
         }
     }
 
@@ -71,12 +76,12 @@ public class Myscripts : MonoBehaviour
     {
         if (obj.gameObject.CompareTag("Items"))
         {
-            Debug.Log("Stay Item");
-            if (Keyboard.current.eKey.isPressed) //°¥ E ‡°Á∫¢Õß
+            if (Keyboard.current != null && Keyboard.current.eKey.isPressed) //‡∏Å‡∏î E ‡πÄ‡∏Å‡πá‡∏ö‡∏Ç‡∏≠‡∏á ‡∏û‡∏£‡πâ‡∏≠‡∏°‡πÄ‡∏ä‡πá‡∏Ñ Null Safety
             {
-                Destroy(obj.gameObject); //∑”≈“¬°≈ËÕß∑’Ë‡°Á∫‰ª
-                message.gameObject.SetActive(false); //≈∫¢ÈÕ§«“¡‰ª¥È«¬
+                Destroy(obj.gameObject); //‡∏ó‡∏≥‡∏•‡∏≤‡∏¢‡∏Å‡∏•‡πà‡∏≠‡∏á‡∏ó‡∏µ‡πà‡πÄ‡∏Å‡πá‡∏ö‡πÑ‡∏õ
+                if (message != null) message.gameObject.SetActive(false); //‡∏•‡∏ö‡∏Ç‡πâ‡∏≠‡∏Ñ‡∏ß‡∏≤‡∏°‡πÑ‡∏õ‡∏î‡πâ‡∏ß‡∏¢
                 current_items++;
+                UpdateDisplay();
             }
         }
     }

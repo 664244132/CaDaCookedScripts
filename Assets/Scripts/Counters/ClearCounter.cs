@@ -1,36 +1,26 @@
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
-using System.Collections.Generic;
 
 public class ClearCounter : BaseCounter
 {
-
     [SerializeField] private KitchenObjectSO kitchenObjectSO;
 
     public override void Interact(Player player) // drop items on counters
     {
-        if (!HasKitchenObject()) // ∂È“‰¡Ë¡’ obj
+        if (!HasKitchenObject()) // ‡∏ñ‡πâ‡∏≤‡πÑ‡∏°‡πà‡∏°‡∏µ obj
         {
             if (player.HasKitchenObject())
             {
-                // player ∂◊ÕÕ–‰√¡“¥È«¬
                 player.GetKitchenObject().SetKitchenObjectParent(this);
             }
-            else
-            {
-                // ∂È“‰¡Ë‰¥È∂◊ÕÕ–‰√
-            }
         }
-        else // ∂È“¡’ obj Õ¬ŸËË∫π counter Õ¬ŸË‡‡≈È«
+        else // ‡∏ñ‡πâ‡∏≤‡∏°‡∏µ obj ‡∏≠‡∏¢‡∏π‡πà‡πà‡∏ö‡∏ô counter ‡∏≠‡∏¢‡∏π‡πà‡πÄ‡πÄ‡∏•‡πâ‡∏ß
         {
             if(player.HasKitchenObject())
             {
-                // player ∂◊ÕÕ–‰√¡“¥È«¬
+                // player ‡∏ñ‡∏∑‡∏≠‡∏≠‡∏∞‡πÑ‡∏£‡∏°‡∏≤‡∏î‡πâ‡∏ß‡∏¢
                 if (player.GetKitchenObject().TryGetPlate(out PlateKitchenObject plateKitchenObject))
                 {
-                    // ºŸÈ‡≈Ëπ°”≈—ß∂◊Õ®“¬Õ¬ŸË
+                    // ‡∏ú‡∏π‡πâ‡πÄ‡∏•‡πà‡∏ô‡∏Å‡∏≥‡∏•‡∏±‡∏á‡∏ñ‡∏∑‡∏≠‡∏à‡∏≤‡∏¢‡∏≠‡∏¢‡∏π‡πà
                     if (plateKitchenObject.TryAddIngredient(GetKitchenObject().GetKitchenObjectSO()))
                     {
                         GetKitchenObject().DestroySelf();
@@ -49,7 +39,7 @@ public class ClearCounter : BaseCounter
             }
             else
             {
-                // player ‰¡Ë‰¥È∂◊ÕÕ–‰√
+                // player ‡πÑ‡∏°‡πà‡πÑ‡∏î‡πâ‡∏ñ‡∏∑‡∏≠‡∏≠‡∏∞‡πÑ‡∏£
                 GetKitchenObject().SetKitchenObjectParent(player);
             }
         }
