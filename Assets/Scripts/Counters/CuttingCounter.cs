@@ -12,6 +12,15 @@ public class CuttingCounter : BaseCounter, IHasProgress
 
     private int cuttingProgress;
 
+    // Cache EventArgs เพื่อให้เป็น 0 GC Allocations ตามกฎ REFACTORCODE.md Rule 5
+    private readonly IHasProgress.OnProgressChangedEventArgs progressChangedEventArgs = new IHasProgress.OnProgressChangedEventArgs();
+
+    private void NotifyProgressChanged(float progressNormalized)
+    {
+        progressChangedEventArgs.progressNormalized = progressNormalized;
+        OnProgressChanged?.Invoke(this, progressChangedEventArgs);
+    }
+
     public override void Interact(Player player)
     {
         if (!HasKitchenObject())
@@ -24,11 +33,7 @@ public class CuttingCounter : BaseCounter, IHasProgress
                     cuttingProgress = 0;
 
                     CuttingRecipeSO cuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
-
-                    OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                    {
-                        progressNormalized = (float)cuttingProgress / cuttingRecipeSO.cuttingProgressMax
-                    });
+                    NotifyProgressChanged((float)cuttingProgress / cuttingRecipeSO.cuttingProgressMax);
                 }
             }
         }
@@ -55,10 +60,7 @@ public class CuttingCounter : BaseCounter, IHasProgress
     {
         base.ClearKitchenObject();
         cuttingProgress = 0;
-        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-        {
-            progressNormalized = 0f
-        });
+        NotifyProgressChanged(0f);
     }
 
     public override void InteractAlternate(Player player)
@@ -71,11 +73,7 @@ public class CuttingCounter : BaseCounter, IHasProgress
         OnAnyCut?.Invoke(this, EventArgs.Empty);
 
         CuttingRecipeSO cuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
-
-        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-        {
-            progressNormalized = (float)cuttingProgress / cuttingRecipeSO.cuttingProgressMax
-        });
+        NotifyProgressChanged((float)cuttingProgress / cuttingRecipeSO.cuttingProgressMax);
 
         if (cuttingProgress >= cuttingRecipeSO.cuttingProgressMax)
         {

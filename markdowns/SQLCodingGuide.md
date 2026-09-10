@@ -58,7 +58,7 @@
 
 ## 11. ตรวจสอบชื่อคอลัมน์ใน Schema ก่อนเขียน SQL (Exact Column Name Verification)
 
-- **โค้ดที่ดี:** ตรวจสอบโครงสร้างตารางจริงจากไฟล์ [`database/schema.sql`](file:///c:/xampp/htdocs/DevNotes/database/schema.sql) เสมอก่อนเขียนคำสั่ง `SELECT` หรือ `JOIN`
+- **โค้ดที่ดี:** ตรวจสอบโครงสร้างตารางจริงจากไฟล์ `database/schema.sql` เสมอก่อนเขียนคำสั่ง `SELECT` หรือ `JOIN`
 - **เหตุผล:** เพื่อป้องกันปัญหาการมโนชื่อคอลัมน์ผิดพลาด เช่น ตาราง `public.users` เก็บชื่อผู้ใช้งานไว้ในคอลัมน์ **`display_name`** (ไม่มีคอลัมน์ชื่อ `name`) หากเขียน `u.name` ฐานข้อมูล PostgreSQL จะล้มเหลวด้วยข้อผิดพลาด `column u.name does not exist` การเขียนที่ปลอดภัยควรใช้ `COALESCE(u.display_name, u.email, 'Community Member')` แทน
 ```
 

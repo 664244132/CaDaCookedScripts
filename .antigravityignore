@@ -141,3 +141,33 @@ sysinfo.txt
 *.docx
 *.apk
 *.aab
+
+# 11. Python Caches, Scratch Scripts & Local Audit Dumps
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+scratch/
+*.orig
+*.bak
+
+# 12. OS Generated Files & Desktop Metadata
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# 13. Unity Export Artifacts, Crash Reports & Diagnostics
+ExportedObj/
+.consulo/
+CrashReports/
+
+# 14. Local Environment Configurations, Patches & Diffs
+.env
+.env.*
+*.patch
+*.diff

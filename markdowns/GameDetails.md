@@ -6,14 +6,16 @@
 
 ## 📑 สารบัญ (Table of Contents)
 
-1. [🎮 1. การออกแบบตัวเกม (Game Design Overview)](#-1-การออกแบบตัวเกม-game-design-overview)
-2. [📖 2. เนื้อเรื่องและปูมหลังของเกม (Story & Narrative)](#-2-เนื้อเรื่องและปูมหลังของเกม-story--narrative)
-3. [🎨 3. การออกแบบองค์ประกอบในเกม (Game Elements Design)](#-3-การออกแบบองค์ประกอบในเกม-game-elements-design)
-4. [⚙️ 4. ตรรกะและระบบการทำงานภายในเกม (Game Logic & System Mechanics)](#️-4-ตรรกะและระบบการทำงานภายในเกม-game-logic--system-mechanics)
-5. [✨ 5. องค์ประกอบพิเศษและจุดเด่นที่แตกต่างจากเกมทั่วไป (Special & Unique Features)](#-5-องค์ประกอบพิเศษและจุดเด่นที่แตกต่างจากเกมทั่วไป-special--unique-features)
+1. [🎮 1. การออกแบบตัวเกม (Game Design Overview)](#section-1-game-design-overview)
+2. [📖 2. เนื้อเรื่องและปูมหลังของเกม (Story & Narrative)](#section-2-story-narrative)
+3. [🎨 3. การออกแบบองค์ประกอบในเกม (Game Elements Design)](#section-3-game-elements-design)
+4. [⚙️ 4. ตรรกะและระบบการทำงานภายในเกม (Game Logic & System Mechanics)](#section-4-game-logic-system-mechanics)
+5. [✨ 5. องค์ประกอบพิเศษและจุดเด่นที่แตกต่างจากเกมทั่วไป (Special & Unique Features)](#section-5-special-unique-features)
+6. [🏁 สรุปภาพรวมโปรเจกต์ (Project Summary)](#section-6-project-summary)
 
 ---
 
+<a id="section-1-game-design-overview"></a>
 ## 🎮 1. การออกแบบตัวเกม (Game Design Overview)
 
 ### 1.1 แนวเกมและกลุ่มเป้าหมาย (Genre & Target Audience)
@@ -77,6 +79,7 @@ flowchart LR
 
 ---
 
+<a id="section-2-story-narrative"></a>
 ## 📖 2. เนื้อเรื่องและปูมหลังของเกม (Story & Narrative)
 
 ### 2.1 วิกฤตครัวด่วน! ภารกิจเสิร์ฟมื้อสำคัญแด่ท่านนายกรัฐมนตรี (The Prime Minister's Banquet Emergency)
@@ -123,6 +126,7 @@ flowchart LR
 
 ---
 
+<a id="section-3-game-elements-design"></a>
 ## 🎨 3. การออกแบบองค์ประกอบในเกม (Game Elements Design)
 
 ### 3.1 ตัวละครและแอนิเมชัน (Characters & Animation)
@@ -177,6 +181,7 @@ flowchart LR
 
 ---
 
+<a id="section-4-game-logic-system-mechanics"></a>
 ## ⚙️ 4. ตรรกะและระบบการทำงานภายในเกม (Game Logic & System Mechanics)
 
 ### 4.1 ระบบ Finite State Machine (FSM)
@@ -229,6 +234,7 @@ flowchart LR
 
 ---
 
+<a id="section-5-special-unique-features"></a>
 ## ✨ 5. องค์ประกอบพิเศษและจุดเด่นที่แตกต่างจากเกมทั่วไป (Special & Unique Features)
 
 ### 5.1 ระบบอุปสรรคและภัยพิบัติไดนามิก (Dynamic Hazard System)
@@ -281,13 +287,17 @@ flowchart LR
 - 👣 **เสียงฝีเท้า (Footstep SFX):** เสียงก้าวเท้ากระทบพื้นตามจังหวะการเดินของเชฟ
 
 ### 5.4 การปรับแต่งประสิทธิภาพและความเข้ากันได้ทางเทคนิค (Technical Innovations)
-1. **Zero Garbage Collection in `Update()`:** ปราศจากการใช้คำสั่ง `new` ในฟังก์ชันลูปทุกเฟรม แคชหน่วยความจำและตัวแปรทั้งหมดตั้งแต่ `Awake()`
-2. **Safe Event Invocations:** ทุก C# Event เรียกใช้ผ่าน `?.Invoke()` ป้องกัน NullReferenceException 100%
-3. **Pure ASCII & Localization Polish:** ข้อความ UI และป้ายเตือนทั้งหมดผ่านการจัดรูปแบบให้คมชัด ไม่เกิดปัญหากล่องสี่เหลี่ยม `□` จาก Missing Glyph ในทุกระบบปฏิบัติการ
-4. **Balanced 16:9 Canvas Scaler:** ตั้งค่าหน้าจอเป็น Full HD 1920x1080 พร้อม `MatchWidthOrHeight = 0.5` ทำให้ UI แสดงผลสมส่วน ไม่บวมหรือยืดในทุกความละเอียดหน้าจอ
+1. **Zero Garbage Collection Audio Pooling (0 GC Allocations):** วางระบบ `AudioSourcePool` สำรอง 20 แชนเนลเสียง หมุนเวียนใช้ซ้ำแบบ Round-Robin แทน `AudioSource.PlayClipAtPoint` ขจัดปัญหา Micro-stutter จากการ Instantiate/Destroy ออบเจกต์เสียง 10-20 ตัว/วินาที
+2. **60 FPS Target Frame Rate & Physics Timestep Sync:** ล็อกเฟรมเรต 60 FPS พร้อมซิงค์ `Time.fixedDeltaTime = 1f / 60f` เพื่อให้รอบฟิสิกส์และการเรนเดอร์สอดคล้องกัน ขจัดอาการภาพสั่น (Micro-judder)
+3. **Zero Garbage Collection in `Update()` & EventArgs:** ปราศจากการใช้คำสั่ง `new` ในลูปทุกเฟรม แคชหน่วยความจำและตัวแปรทั้งหมดตั้งแต่ `Awake()` รวมถึงแคช `OnProgressChangedEventArgs` ในทุก Counter
+4. **Camera Transform Caching:** แคช `Transform` ของกล้องใน `Start()` ขจัด Engine calls ซ้ำซ้อนใน `LateUpdate()` ของ UI ลอยทุกชิ้น
+5. **Safe Event Invocations:** ทุก C# Event เรียกใช้ผ่าน `?.Invoke()` ป้องกัน NullReferenceException 100%
+6. **Pure ASCII & Localization Polish:** ข้อความ UI และป้ายเตือนทั้งหมดผ่านการจัดรูปแบบให้คมชัด ไม่เกิดปัญหากล่องสี่เหลี่ยม `□` จาก Missing Glyph ในทุกระบบปฏิบัติการ
+7. **Balanced 16:9 Canvas Scaler:** ตั้งค่าหน้าจอเป็น Full HD 1920x1080 พร้อม `MatchWidthOrHeight = 0.5` ทำให้ UI แสดงผลสมส่วน ไม่บวมหรือยืดในทุกความละเอียดหน้าจอ
 
 ---
 
+<a id="section-6-project-summary"></a>
 ## 🏁 สรุปภาพรวมโปรเจกต์ (Project Summary)
 
 เกม **CaDaCook** ได้ผสมผสานระหว่าง **ความสนุกสนานของเกมเพลย์ทำอาหารที่ควบคุมง่าย เข้ากับความท้าทายจากระบบอุปสรรคและเหตุการณ์ไม่คาดฝัน** ภายใต้โครงสร้างสถาปัตยกรรมโค้ดที่สะอาด เป็นระเบียบ ยืดหยุ่น และมีประสิทธิภาพสูงตามมาตรฐานสากลของ Senior Software Engineer พร้อมรองรับการต่อยอดเป็นเกมเต็มรูปแบบหรือนำไปใช้เป็นผลงานอ้างอิงทางวิชาการและวิจัยได้อย่างสมบูรณ์แบบ

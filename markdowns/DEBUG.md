@@ -158,6 +158,9 @@ $rspDir = "c:\CaDaCooked\CaDaCookedScripts\Library\Bee\artifacts\1900b0aE.dag"
 | **ข้อความ UI แสดงผลเป็นกล่องสี่เหลี่ยม □** | มีการใช้อักขระ Unicode พิเศษ หรือ Emojis ที่ฟอนต์สากลไม่มี Glyph รองรับ | ปรับเปลี่ยนข้อความให้เป็น **Pure ASCII** หรือจัดรูปแบบผ่าน Rich Text `<color=#FFD700><b>...</b></color>` หรือใช้ `UITheme.cs` |
 | **เปิดโปรเจกต์เครื่องใหม่แล้วแมพว่างเปล่า (Untitled Scene)** | Unity โหลด Scene เริ่มต้นว่างเปล่าเนื่องจากไม่ได้บันทึก Last Opened Scene ข้ามเครื่อง | ดับเบิ้ลคลิกเปิด [Assets/Scenes/GameScene.unity](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scenes/GameScene.unity) หรือ [MainMenuScene.unity](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scenes/MainMenuScene.unity) |
 | **GC Alloc Spikes & กระตุกในลูป Update()** | มีการใช้คำสั่ง `new` (เช่น `new Vector3()`, `new List<>()`, การต่อ String) หรือเรียก `GetComponent<T>()` ซ้ำๆ ทุกเฟรม | แคช Instance และตัวแปรอ้างอิงไว้ใน `Awake()` หรือ `Start()` แล้วนำกลับมาใช้ซ้ำ (Reuse) ตามกฎข้อ 5 และ 6 |
+| **ภาพกระตุกเป็นจังหวะ / Micro-judder ขณะเดิน** | รอบการคำนวณฟิสิกส์ไม่ตรงกับรอบเรนเดอร์ หรือ Frame Rate แกว่งไป-มา | ตรวจสอบใน [KitchenGameManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/KitchenGameManager.cs) ว่ามีการตั้ง `Application.targetFrameRate = 60` และซิงค์ `Time.fixedDeltaTime = 1f / 60f;` ใน `Awake()` |
+| **เสียงกระตุกหรือขยะหน่วยความจำพุ่งสูงตอนเล่น SFX** | มีการเรียกใช้ `AudioSource.PlayClipAtPoint` ซึ่งสร้างและทำลาย GameObject เสียงทุกครั้งที่เล่น | เปลี่ยนมาเรียกใช้ `SoundManager.Instance.PlaySound()` ซึ่งรันผ่านระบบ **Zero-GC AudioSourcePool (20 ช่องสัญญาณ)** เพื่อนำ AudioSource กลับมาใช้ซ้ำแบบ 0 GC Alloc |
+| **UI ลอยฟ้าหน่วงเครื่องเมื่อมีเคาน์เตอร์จำนวนมาก** | สคริปต์ Billboard ดึงค่า `Camera.main.transform` ผ่าน C++ Engine Property ทุกเฟรม | ตรวจสอบใน [LookAtCamera.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/LookAtCamera.cs) ให้แคช `targetCameraTransform` ใน `Start()` เพื่อนำมาใช้อ้างอิงใน `LateUpdate()` |
 
 ---
 

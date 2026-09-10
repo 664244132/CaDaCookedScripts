@@ -20,16 +20,32 @@ namespace CodeMonkey.FreeWindow {
             if (codeMonkeyFreeSO != null) {
                 return codeMonkeyFreeSO;
             }
-            string[] codeMonkeyFreeSOGuidArray = AssetDatabase.FindAssets(nameof(CodeMonkeyFreeSO));
+
+            // ค้นหาเฉพาะ Asset ที่เป็น ScriptableObject ชนิด CodeMonkeyFreeSO (ข้ามไฟล์ .cs)
+            string[] codeMonkeyFreeSOGuidArray = AssetDatabase.FindAssets($"t:{nameof(CodeMonkeyFreeSO)}");
 
             foreach (string codeMonkeyFreeSOGuid in codeMonkeyFreeSOGuidArray) {
                 string codeMonkeyFreeSOPath = AssetDatabase.GUIDToAssetPath(codeMonkeyFreeSOGuid);
+
+                // ป้องกันการโหลดไฟล์สคริปต์ C# หรือไฟล์ชนิดอื่นที่ไม่ใช่ .asset
+                if (!codeMonkeyFreeSOPath.EndsWith(".asset", StringComparison.OrdinalIgnoreCase)) {
+                    continue;
+                }
+
                 codeMonkeyFreeSO = AssetDatabase.LoadAssetAtPath<CodeMonkeyFreeSO>(codeMonkeyFreeSOPath);
-                return codeMonkeyFreeSO;
+                if (codeMonkeyFreeSO != null) {
+                    return codeMonkeyFreeSO;
+                }
             }
 
-            Debug.LogError("Cannot find CodeMonkeyFreeSO!");
-            return null;
+            // Fallback (Q2 Option A): หากหาไฟล์ .asset ไม่พบ ให้สร้าง Instance ชั่วคราวในหน่วยความจำ เพื่อให้ Editor ทำงานต่อได้โดยไม่เกิด NRE
+            if (codeMonkeyFreeSO == null) {
+                codeMonkeyFreeSO = ScriptableObject.CreateInstance<CodeMonkeyFreeSO>();
+                codeMonkeyFreeSO.currentVersion = "1.01";
+                codeMonkeyFreeSO.subtype = "kitchenchaos";
+            }
+
+            return codeMonkeyFreeSO;
         }
 
 
@@ -78,6 +94,8 @@ namespace CodeMonkey.FreeWindow {
 
         public static void CheckForUpdates(Action<LastUpdateResponse> onFoundUpdate) {
             CodeMonkeyFreeSO codeMonkeyInteractiveSO = GetCodeMonkeyFreeSO();
+            if (codeMonkeyInteractiveSO == null) return;
+
             long unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             if (codeMonkeyInteractiveSO.lastUpdateResponse.version == null || codeMonkeyInteractiveSO.lastUpdateResponse.version == "") {
@@ -87,7 +105,7 @@ namespace CodeMonkey.FreeWindow {
             long secondsBetweenCheckingForUpdates = 3600;
             if (unixTimestamp - codeMonkeyInteractiveSO.checkedLastUpdateTimestamp < secondsBetweenCheckingForUpdates) {
                 // Too soon
-                onFoundUpdate(codeMonkeyInteractiveSO.lastUpdateResponse);
+                onFoundUpdate?.Invoke(codeMonkeyInteractiveSO.lastUpdateResponse);
                 return;
             }
 
@@ -97,6 +115,7 @@ namespace CodeMonkey.FreeWindow {
 
             string url = "https://unitycodemonkey.com/generic_action_json.php";
             UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST");
+            unityWebRequest.timeout = 5;
 
             string jsonData = JsonUtility.ToJson(new GenericActionJSONData {
                 at = "editorwindowversion",
@@ -116,7 +135,7 @@ namespace CodeMonkey.FreeWindow {
                         unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ProtocolError) {
                         // Error
                         //onError(unityWebRequest.error);
-                        onFoundUpdate(codeMonkeyInteractiveSO.lastUpdateResponse);
+                        onFoundUpdate?.Invoke(codeMonkeyInteractiveSO.lastUpdateResponse);
                     } else {
                         string downloadText = unityWebRequest.downloadHandler.text;
                         WebsiteResponse websiteResponse = JsonUtility.FromJson<WebsiteResponse>(downloadText);
@@ -124,14 +143,14 @@ namespace CodeMonkey.FreeWindow {
                             // Success
                             LastUpdateResponse lastUpdateResponse = JsonUtility.FromJson<LastUpdateResponse>(websiteResponse.returnText);
                             codeMonkeyInteractiveSO.lastUpdateResponse = lastUpdateResponse;
-                            onFoundUpdate(codeMonkeyInteractiveSO.lastUpdateResponse);
+                            onFoundUpdate?.Invoke(codeMonkeyInteractiveSO.lastUpdateResponse);
                         } else {
                             // Something went wrong
-                            onFoundUpdate(codeMonkeyInteractiveSO.lastUpdateResponse);
+                            onFoundUpdate?.Invoke(codeMonkeyInteractiveSO.lastUpdateResponse);
                         }
                     }
                 } catch (Exception) {
-                    onFoundUpdate(codeMonkeyInteractiveSO.lastUpdateResponse);
+                    onFoundUpdate?.Invoke(codeMonkeyInteractiveSO.lastUpdateResponse);
                 }
                 unityWebRequest.Dispose();
             };
@@ -150,12 +169,14 @@ namespace CodeMonkey.FreeWindow {
 
         public static void GetLastQOTD(Action<LastQOTDResponse> onResponse) {
             CodeMonkeyFreeSO codeMonkeyInteractiveSO = GetCodeMonkeyFreeSO();
+            if (codeMonkeyInteractiveSO == null) return;
+
             long unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             long secondsBetweenCheckingForUpdates = SECONDS_BETWEEN_CONTACTING_WEBSITE;
             if (unixTimestamp - codeMonkeyInteractiveSO.lastQotdTimestamp < secondsBetweenCheckingForUpdates) {
                 // Too soon
-                onResponse(codeMonkeyInteractiveSO.lastQOTDResponse);
+                onResponse?.Invoke(codeMonkeyInteractiveSO.lastQOTDResponse);
                 return;
             }
 
@@ -165,6 +186,7 @@ namespace CodeMonkey.FreeWindow {
 
             string url = "https://unitycodemonkey.com/generic_action_json.php";
             UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST");
+            unityWebRequest.timeout = 5;
 
             string jsonData = JsonUtility.ToJson(new GenericActionJSONData {
                 at = "getLastQotd",
@@ -183,7 +205,7 @@ namespace CodeMonkey.FreeWindow {
                         unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ProtocolError) {
                         // Error
                         //onError(unityWebRequest.error);
-                        onResponse(codeMonkeyInteractiveSO.lastQOTDResponse);
+                        onResponse?.Invoke(codeMonkeyInteractiveSO.lastQOTDResponse);
                     } else {
                         string downloadText = unityWebRequest.downloadHandler.text;
                         WebsiteResponse websiteResponse = JsonUtility.FromJson<WebsiteResponse>(downloadText);
@@ -191,14 +213,14 @@ namespace CodeMonkey.FreeWindow {
                             // Success
                             LastQOTDResponse lastQOTDResponse = JsonUtility.FromJson<LastQOTDResponse>(websiteResponse.returnText);
                             codeMonkeyInteractiveSO.lastQOTDResponse = lastQOTDResponse;
-                            onResponse(codeMonkeyInteractiveSO.lastQOTDResponse);
+                            onResponse?.Invoke(codeMonkeyInteractiveSO.lastQOTDResponse);
                         } else {
                             // Something went wrong
-                            onResponse(codeMonkeyInteractiveSO.lastQOTDResponse);
+                            onResponse?.Invoke(codeMonkeyInteractiveSO.lastQOTDResponse);
                         }
                     }
                 } catch (Exception) {
-                    onResponse(codeMonkeyInteractiveSO.lastQOTDResponse);
+                    onResponse?.Invoke(codeMonkeyInteractiveSO.lastQOTDResponse);
                 }
                 unityWebRequest.Dispose();
             };
@@ -215,12 +237,14 @@ namespace CodeMonkey.FreeWindow {
 
         public static void GetLastDynamicHeader(Action<LastDynamicHeaderResponse> onResponse) {
             CodeMonkeyFreeSO codeMonkeyInteractiveSO = GetCodeMonkeyFreeSO();
+            if (codeMonkeyInteractiveSO == null) return;
+
             long unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             long secondsBetweenCheckingForUpdates = SECONDS_BETWEEN_CONTACTING_WEBSITE;
             if (unixTimestamp - codeMonkeyInteractiveSO.lastDynamicHeaderTimestamp < secondsBetweenCheckingForUpdates) {
                 // Too soon
-                onResponse(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
+                onResponse?.Invoke(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
                 return;
             }
 
@@ -230,6 +254,7 @@ namespace CodeMonkey.FreeWindow {
 
             string url = "https://unitycodemonkey.com/generic_action_json.php";
             UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST");
+            unityWebRequest.timeout = 5;
 
             string jsonData = JsonUtility.ToJson(new GenericActionJSONData {
                 at = "getDynamicEmailHeaderJson",
@@ -248,7 +273,7 @@ namespace CodeMonkey.FreeWindow {
                         unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ProtocolError) {
                         // Error
                         //onError(unityWebRequest.error);
-                        onResponse(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
+                        onResponse?.Invoke(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
                     } else {
                         string downloadText = unityWebRequest.downloadHandler.text;
                         WebsiteResponse websiteResponse = JsonUtility.FromJson<WebsiteResponse>(downloadText);
@@ -257,14 +282,14 @@ namespace CodeMonkey.FreeWindow {
                             LastDynamicHeaderResponse lastDynamicHeaderResponse = 
                                 JsonUtility.FromJson<LastDynamicHeaderResponse>(websiteResponse.returnText);
                             codeMonkeyInteractiveSO.lastDynamicHeaderResponse = lastDynamicHeaderResponse;
-                            onResponse(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
+                            onResponse?.Invoke(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
                         } else {
                             // Something went wrong
-                            onResponse(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
+                            onResponse?.Invoke(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
                         }
                     }
                 } catch (Exception) {
-                    onResponse(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
+                    onResponse?.Invoke(codeMonkeyInteractiveSO.lastDynamicHeaderResponse);
                 }
                 unityWebRequest.Dispose();
             };
@@ -279,12 +304,14 @@ namespace CodeMonkey.FreeWindow {
 
         public static void GetLatestMessage(Action<WebsiteLatestMessage> onResponse) {
             CodeMonkeyFreeSO codeMonkeyInteractiveSO = GetCodeMonkeyFreeSO();
+            if (codeMonkeyInteractiveSO == null) return;
+
             long unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             long secondsBetweenCheckingForUpdates = SECONDS_BETWEEN_CONTACTING_WEBSITE;
             if (unixTimestamp - codeMonkeyInteractiveSO.websiteLatestMessageTimestamp < secondsBetweenCheckingForUpdates) {
                 // Too soon
-                onResponse(codeMonkeyInteractiveSO.websiteLatestMessage);
+                onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestMessage);
                 return;
             }
 
@@ -294,6 +321,7 @@ namespace CodeMonkey.FreeWindow {
 
             string url = "https://unitycodemonkey.com/generic_action_json.php";
             UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST");
+            unityWebRequest.timeout = 5;
 
             string jsonData = JsonUtility.ToJson(new GenericActionJSONData {
                 at = "editorwindowlatestMessage",
@@ -313,7 +341,7 @@ namespace CodeMonkey.FreeWindow {
                         unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ProtocolError) {
                         // Error
                         //onError(unityWebRequest.error);
-                        onResponse(codeMonkeyInteractiveSO.websiteLatestMessage);
+                        onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestMessage);
                     } else {
                         string downloadText = unityWebRequest.downloadHandler.text;
                         WebsiteResponse websiteResponse = JsonUtility.FromJson<WebsiteResponse>(downloadText);
@@ -321,14 +349,14 @@ namespace CodeMonkey.FreeWindow {
                             // Success
                             WebsiteLatestMessage websiteLatestMessage = JsonUtility.FromJson<WebsiteLatestMessage>(websiteResponse.returnText);
                             codeMonkeyInteractiveSO.websiteLatestMessage = websiteLatestMessage;
-                            onResponse(codeMonkeyInteractiveSO.websiteLatestMessage);
+                            onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestMessage);
                         } else {
                             // Something went wrong
-                            onResponse(codeMonkeyInteractiveSO.websiteLatestMessage);
+                            onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestMessage);
                         }
                     }
                 } catch (Exception) {
-                    onResponse(codeMonkeyInteractiveSO.websiteLatestMessage);
+                    onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestMessage);
                 }
                 unityWebRequest.Dispose();
             };
@@ -351,12 +379,14 @@ namespace CodeMonkey.FreeWindow {
 
         public static void GetWebsiteLatestVideos(Action<LatestVideos> onResponse) {
             CodeMonkeyFreeSO codeMonkeyInteractiveSO = GetCodeMonkeyFreeSO();
+            if (codeMonkeyInteractiveSO == null) return;
+
             long unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             long secondsBetweenCheckingForUpdates = SECONDS_BETWEEN_CONTACTING_WEBSITE;
             if (unixTimestamp - codeMonkeyInteractiveSO.websiteLatestVideosTimestamp < secondsBetweenCheckingForUpdates) {
                 // Too soon
-                onResponse(codeMonkeyInteractiveSO.websiteLatestVideos);
+                onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestVideos);
                 return;
             }
 
@@ -366,6 +396,7 @@ namespace CodeMonkey.FreeWindow {
 
             string url = "https://unitycodemonkey.com/generic_action_json.php";
             UnityWebRequest unityWebRequest = new UnityWebRequest(url, "POST");
+            unityWebRequest.timeout = 5;
 
             string jsonData = JsonUtility.ToJson(new GenericActionJSONData {
                 at = "getLastVideos",
@@ -384,7 +415,7 @@ namespace CodeMonkey.FreeWindow {
                         unityWebRequestAsyncOperation.webRequest.result == UnityWebRequest.Result.ProtocolError) {
                         // Error
                         //onError(unityWebRequest.error);
-                        onResponse(codeMonkeyInteractiveSO.websiteLatestVideos);
+                        onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestVideos);
                     } else {
                         string downloadText = unityWebRequest.downloadHandler.text;
                         WebsiteResponse websiteResponse = JsonUtility.FromJson<WebsiteResponse>(downloadText);
@@ -392,14 +423,14 @@ namespace CodeMonkey.FreeWindow {
                             // Success
                             LatestVideos websiteLatestVideos = JsonUtility.FromJson<LatestVideos>(websiteResponse.returnText);
                             codeMonkeyInteractiveSO.websiteLatestVideos = websiteLatestVideos;
-                            onResponse(codeMonkeyInteractiveSO.websiteLatestVideos);
+                            onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestVideos);
                         } else {
                             // Something went wrong
-                            onResponse(codeMonkeyInteractiveSO.websiteLatestVideos);
+                            onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestVideos);
                         }
                     }
                 } catch (Exception) {
-                    onResponse(codeMonkeyInteractiveSO.websiteLatestVideos);
+                    onResponse?.Invoke(codeMonkeyInteractiveSO.websiteLatestVideos);
                 }
                 unityWebRequest.Dispose();
             };

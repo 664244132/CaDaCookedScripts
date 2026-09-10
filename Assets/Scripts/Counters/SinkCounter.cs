@@ -41,6 +41,16 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
     private ParticleSystem bubblesParticleSystem;
     private AudioSource audioSource;
     private Camera targetCamera;
+    private Transform targetCameraTransform;
+
+    // Cache EventArgs เพื่อให้เป็น 0 GC Allocations ตามกฎ REFACTORCODE.md Rule 5
+    private readonly IHasProgress.OnProgressChangedEventArgs progressChangedEventArgs = new IHasProgress.OnProgressChangedEventArgs();
+
+    private void NotifyProgressChanged(float progressNormalized)
+    {
+        progressChangedEventArgs.progressNormalized = progressNormalized;
+        OnProgressChanged?.Invoke(this, progressChangedEventArgs);
+    }
 
     private void Awake()
     {
@@ -55,6 +65,11 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
         if (targetCamera == null)
         {
             targetCamera = FindFirstObjectByType<Camera>();
+        }
+
+        if (targetCamera != null)
+        {
+            targetCameraTransform = targetCamera.transform;
         }
 
         // ค้นหา PlateKitchenObjectSO จาก PlatesCounter ในฉากอัตโนมัติหากยังไม่ได้ตั้งค่า
@@ -98,9 +113,9 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
         }
 
         // ป้าย Progress Bar หันเข้าหากล้องเสมอ
-        if (targetCamera != null && progressCanvasRoot.activeSelf)
+        if (targetCameraTransform != null && progressCanvasRoot.activeSelf)
         {
-            progressCanvasRoot.transform.rotation = targetCamera.transform.rotation;
+            progressCanvasRoot.transform.rotation = targetCameraTransform.rotation;
         }
     }
 
@@ -118,11 +133,7 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
                     incomingDirtyPlates.SetKitchenObjectParent(this);
                     currentScrubCount = 0;
                     UpdateProgressHUD(0f, true);
-
-                    OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                    {
-                        progressNormalized = 0f
-                    });
+                    NotifyProgressChanged(0f);
 
                     Debug.Log($"🧽 [SinkCounter] Placed {incomingDirtyPlates.GetPlatesCount()} dirty plates in the sink!");
                 }
@@ -175,11 +186,7 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
             heldDirtyPlates.SetKitchenObjectParent(player);
             currentScrubCount = 0;
             UpdateProgressHUD(0f, false);
-
-            OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-            {
-                progressNormalized = 0f
-            });
+            NotifyProgressChanged(0f);
         }
     }
 
@@ -210,10 +217,7 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
         UpdateProgressHUD(progressNormalized, true);
 
         OnScrubProgress?.Invoke(this, EventArgs.Empty);
-        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-        {
-            progressNormalized = progressNormalized
-        });
+        NotifyProgressChanged(progressNormalized);
 
         // เมื่อขัดครบ 4 ครั้ง -> จานเปื้อน 1 ใบกลายเป็นจานสะอาด
         if (currentScrubCount >= SCRUBS_PER_PLATE)
@@ -230,11 +234,7 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
                 // ยังมีจานเปื้อนเหลือในกอง ขัดล้างใบต่อไป
                 dirtyPlates.SetPlatesCount(remainingDirty);
                 UpdateProgressHUD(0f, true);
-
-                OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                {
-                    progressNormalized = 0f
-                });
+                NotifyProgressChanged(0f);
 
                 Debug.Log($"🧼 [SinkCounter] 1 plate cleaned! {remainingDirty} dirty plates left in sink.");
             }
@@ -243,11 +243,7 @@ public class SinkCounter : BaseCounter, IHasProgress, IKitchenObjectParent
                 // ล้างจานเปื้อนในกองหมดเกลี้ยงแล้ว
                 dirtyPlates.DestroySelf();
                 UpdateProgressHUD(0f, false);
-
-                OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                {
-                    progressNormalized = 0f
-                });
+                NotifyProgressChanged(0f);
 
                 Debug.Log("🎉 [SinkCounter] All dirty plates washed successfully!");
             }

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d777d270cee3a5c419cb21a828556f1a, type: 3}
   m_Name: CodeMonkeyFreeSO
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: CodeMonkeyFreeEditor::CodeMonkey.FreeWindow.CodeMonkeyFreeSO
   currentVersion: 1.01
   subtype: kitchenchaos
   lastShownTimestamp: 1788953052

@@ -7,9 +7,47 @@ public class SoundManager : MonoBehaviour
 
     [SerializeField] private AudioClipRefsSO audioClipRefsSO;
 
+    [Header("Audio Pooling Optimization (Zero GC Allocations - Rule 5)")]
+    [SerializeField] private int audioSourcePoolSize = 20;
+    private AudioSource[] audioSourcePool;
+    private Transform[] audioSourceTransforms;
+    private int poolIndex = 0;
+    private Camera mainCameraCached;
+
     private void Awake()
     {
         Instance = this;
+        InitializeAudioSourcePool();
+        mainCameraCached = Camera.main;
+    }
+
+    /// <summary>
+    /// สร้าง AudioSource Pool ล่วงหน้า 20 ช่องสัญญาณ เพื่อนำกลับมาใช้ซ้ำ (Recycle) 
+    /// ป้องกันการ Instantiate/Destroy GameObject เสียงทุกครั้งที่เดินหรือทำอาหาร (0 GC Allocations)
+    /// </summary>
+    private void InitializeAudioSourcePool()
+    {
+        GameObject poolContainer = new GameObject("--- AudioSourcePool ---");
+        poolContainer.transform.SetParent(transform);
+
+        audioSourcePool = new AudioSource[audioSourcePoolSize];
+        audioSourceTransforms = new Transform[audioSourcePoolSize];
+
+        for (int i = 0; i < audioSourcePoolSize; i++)
+        {
+            GameObject soundObj = new GameObject($"PooledAudioSource_{i:D2}");
+            soundObj.transform.SetParent(poolContainer.transform);
+
+            AudioSource source = soundObj.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.spatialBlend = 1.0f; // มิติเสียง 3D เหมือน PlayClipAtPoint
+            source.minDistance = 2.0f;
+            source.maxDistance = 25.0f;
+            source.rolloffMode = AudioRolloffMode.Linear;
+
+            audioSourcePool[i] = source;
+            audioSourceTransforms[i] = soundObj.transform;
+        }
     }
 
     private void Start()
@@ -103,8 +141,8 @@ public class SoundManager : MonoBehaviour
     {
         if (audioClipRefsSO != null && audioClipRefsSO.warning != null && audioClipRefsSO.warning.Length > 0)
         {
-            Camera mainCam = Camera.main;
-            Vector3 soundPos = mainCam != null ? mainCam.transform.position : Vector3.zero;
+            if (mainCameraCached == null) mainCameraCached = Camera.main;
+            Vector3 soundPos = mainCameraCached != null ? mainCameraCached.transform.position : Vector3.zero;
             PlaySound(audioClipRefsSO.warning, soundPos, 1.2f);
         }
     }
@@ -130,9 +168,31 @@ public class SoundManager : MonoBehaviour
     {
         PlaySound(audioClipArray[Random.Range(0,audioClipArray.Length)], position, volume);
     }
+
+    /// <summary>
+    /// เล่นเสียง SFX 3D แบบไร้การสร้างขยะ Heap (0 GC Allocation) โดยนำ AudioSource จาก Pool มาใช้ซ้ำ
+    /// </summary>
     private void PlaySound(AudioClip audioClip, Vector3 position, float volume = 1f)
     {
-        AudioSource.PlayClipAtPoint(audioClip, position, volume);
+        if (audioClip == null) return;
+
+        // Fallback กรณี Pool ยังไม่ถูกเตรียมไว้
+        if (audioSourcePool == null || audioSourcePool.Length == 0)
+        {
+            AudioSource.PlayClipAtPoint(audioClip, position, volume);
+            return;
+        }
+
+        // หมุนเวียนดึง AudioSource จาก Pool แบบ Round-Robin
+        AudioSource audioSource = audioSourcePool[poolIndex];
+        Transform sourceTransform = audioSourceTransforms[poolIndex];
+        poolIndex = (poolIndex + 1) % audioSourcePoolSize;
+
+        sourceTransform.position = position;
+        audioSource.clip = audioClip;
+        audioSource.volume = volume;
+        audioSource.spatialBlend = 1.0f;
+        audioSource.Play();
     }
 
     public void PlayerFootstepsSound(Vector3 position , float volume)

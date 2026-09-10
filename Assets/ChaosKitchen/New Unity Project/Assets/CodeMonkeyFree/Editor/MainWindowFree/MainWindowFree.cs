@@ -22,7 +22,8 @@ namespace CodeMonkey.FreeWindow {
 
 
         static MainWindowFree() {
-            EditorApplication.update += Startup;
+            // Q1 Option A: ปิดพฤติกรรม Auto-Popup และ WebRequest อัตโนมัติเมื่อเริ่มเปิด Editor
+            // ปรับให้เปิดทำงานเฉพาะเมื่อผู้ใช้คลิกเลือกเมนู Code Monkey -> Code Monkey Free Assets ใน Unity เองเท่านั้น
         }
 
         private static void Startup() {
@@ -30,6 +31,10 @@ namespace CodeMonkey.FreeWindow {
 
             try {
                 CodeMonkeyFreeSO codeMonkeyInteractiveSO = CodeMonkeyFreeSO.GetCodeMonkeyFreeSO();
+                if (codeMonkeyInteractiveSO == null) {
+                    return; // Guard Clause ป้องกัน NullReferenceException
+                }
+
                 long unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 long secondsBetweenShowingWindow = 60 * 60 * 24;
                 if (unixTimestamp - codeMonkeyInteractiveSO.lastShownTimestamp < secondsBetweenShowingWindow) {
@@ -165,6 +170,7 @@ namespace CodeMonkey.FreeWindow {
             if (targetVisualElement == null) return;
 
             UnityWebRequest unityWebRequest = UnityWebRequestTexture.GetTexture(imageUrl);
+            unityWebRequest.timeout = 5; // Q3 Option A: timeout 5 วินาที
             unityWebRequest.SendWebRequest().completed += (AsyncOperation asyncOperation) => {
                 try {
                     UnityWebRequestAsyncOperation unityWebRequestAsyncOperation = asyncOperation as UnityWebRequestAsyncOperation;
@@ -254,31 +260,46 @@ namespace CodeMonkey.FreeWindow {
             lectureListVisualElement = root.Q<VisualElement>("lectureList");
             mainMenuVisualElement = root.Q<VisualElement>("mainMenu");
 
-            root.Q<Label>("versionLabel").text = CodeMonkeyFreeSO.GetCodeMonkeyFreeSO().currentVersion;
+            CodeMonkeyFreeSO so = CodeMonkeyFreeSO.GetCodeMonkeyFreeSO();
+            Label versionLabel = root.Q<Label>("versionLabel");
+            if (versionLabel != null) {
+                versionLabel.text = so != null ? so.currentVersion : "1.01";
+            }
 
-            Button lectureListButton = mainMenuVisualElement.Q<Button>("lectureListButton");
-            lectureListButton.RegisterCallback((ClickEvent clickEvent) => {
-                //ShowLectureButtons();
-            });
+            Button lectureListButton = mainMenuVisualElement != null ? mainMenuVisualElement.Q<Button>("lectureListButton") : null;
+            if (lectureListButton != null) {
+                lectureListButton.RegisterCallback((ClickEvent clickEvent) => {
+                    //ShowLectureButtons();
+                });
+            }
 
             ShowMainMenu();
         }
 
         private void ShowMainMenu() {
-            lectureListVisualElement.style.display = DisplayStyle.None;
-            mainMenuVisualElement.style.display = DisplayStyle.Flex;
+            if (lectureListVisualElement != null) lectureListVisualElement.style.display = DisplayStyle.None;
+            if (mainMenuVisualElement != null) mainMenuVisualElement.style.display = DisplayStyle.Flex;
+
+            if (codeMonkeyFreeSO == null) {
+                codeMonkeyFreeSO = CodeMonkeyFreeSO.GetCodeMonkeyFreeSO();
+            }
 
             // Check for updates
             CodeMonkeyFreeSO.CheckForUpdates((CodeMonkeyFreeSO.LastUpdateResponse lastUpdateResponse) => {
+                if (codeMonkeyFreeSO == null || mainMenuVisualElement == null) return;
+
                 if (codeMonkeyFreeSO.currentVersion == lastUpdateResponse.version) {
-                    mainMenuVisualElement.Q<VisualElement>("checkingForUpdates").style.display = DisplayStyle.None;
+                    VisualElement checkingElem = mainMenuVisualElement.Q<VisualElement>("checkingForUpdates");
+                    if (checkingElem != null) checkingElem.style.display = DisplayStyle.None;
                     return;
                 }
 
                 VisualElement checkingForUpdatesVisualElement =
                     mainMenuVisualElement.Q<VisualElement>("checkingForUpdates");
+                if (checkingForUpdatesVisualElement == null) return;
                 checkingForUpdatesVisualElement.style.display = DisplayStyle.Flex;
                 Label textLabel = checkingForUpdatesVisualElement.Q<Label>();
+                if (textLabel == null) return;
                 textLabel.text = "New version available!\n" +
                     codeMonkeyFreeSO.currentVersion + " -> " + lastUpdateResponse.version + "\n" +
                     "<u>Click here!</u>";
@@ -368,10 +389,16 @@ namespace CodeMonkey.FreeWindow {
 
 
             CodeMonkeyFreeSO.GetWebsiteLatestVideos((CodeMonkeyFreeSO.LatestVideos latestVideos) => {
-                AddLatestVideoReference(latestVideos.videos[0], latestVideosVisualElement.Q<VisualElement>("_1Container"));
-                AddLatestVideoReference(latestVideos.videos[1], latestVideosVisualElement.Q<VisualElement>("_2Container"));
-                AddLatestVideoReference(latestVideos.videos[2], latestVideosVisualElement.Q<VisualElement>("_3Container"));
-                AddLatestVideoReference(latestVideos.videos[3], latestVideosVisualElement.Q<VisualElement>("_4Container"));
+                if (latestVideos?.videos == null || latestVideosVisualElement == null) return;
+
+                if (latestVideos.videos.Length > 0 && latestVideos.videos[0] != null)
+                    AddLatestVideoReference(latestVideos.videos[0], latestVideosVisualElement.Q<VisualElement>("_1Container"));
+                if (latestVideos.videos.Length > 1 && latestVideos.videos[1] != null)
+                    AddLatestVideoReference(latestVideos.videos[1], latestVideosVisualElement.Q<VisualElement>("_2Container"));
+                if (latestVideos.videos.Length > 2 && latestVideos.videos[2] != null)
+                    AddLatestVideoReference(latestVideos.videos[2], latestVideosVisualElement.Q<VisualElement>("_3Container"));
+                if (latestVideos.videos.Length > 3 && latestVideos.videos[3] != null)
+                    AddLatestVideoReference(latestVideos.videos[3], latestVideosVisualElement.Q<VisualElement>("_4Container"));
             });
 
             void AddLatestVideoReference(CodeMonkeyFreeSO.LatestVideoSingle latestVideoSingle, VisualElement containerVisualElement) {

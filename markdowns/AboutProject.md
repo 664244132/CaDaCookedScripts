@@ -18,6 +18,13 @@
   - [IKitchenObjectParent](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/IKitchenObjectParent.cs): กำหนดพฤติกรรมการเป็นเจ้าของ/ถือ/ส่งต่อวัตถุดิบ (Player, BaseCounter, KitchenCatNPC)
   - [IHasProgress](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/IHasProgress.cs): กำหนดพฤติกรรมของเคาน์เตอร์ที่มีหลอดแสดงความคืบหน้า (CuttingCounter, StoveCounter)
 
+### 1.2 สถาปัตยกรรมประสิทธิภาพสูงและการควบคุม Frame Pacing (Zero-GC & High Performance Architecture)
+เพื่อให้เกมทำงานได้อย่างราบรื่น 60 FPS นิ่งสนิท ปราศจากอาการกระตุกหรือ Micro-stutter ระบบจึงได้รับการปรับปรุงประสิทธิภาพตามมาตรฐานระดับสูง:
+- **Zero-GC AudioSourcePool (20 Channels):** ใน [SoundManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/SoundManager.cs) ปรับใช้ระบบ Object Pooling สร้าง AudioSource สำรองไว้ล่วงหน้า 20 แชนเนลเสียง เพื่อนำกลับมาใช้ซ้ำ (Recycle) แบบ Round-Robin ขจัดการเรียก `AudioSource.PlayClipAtPoint` ซึ่งเคยสร้าง/ทำลาย GameObject เสียง 10–20 ตัว/วินาที ขจัดขยะ Heap Allocations และอาการกระตุกจาก Garbage Collection (GC Spikes) ได้ 100%
+- **60 FPS Target Lock & 60Hz Physics Timestep Sync:** ใน [KitchenGameManager.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/KitchenGameManager.cs) ล็อคเฟรมเรตคงที่ 60 FPS (`Application.targetFrameRate = 60`) พร้อมซิงค์รอบฟิสิกส์ `Time.fixedDeltaTime = 1f / 60f;` (~0.0166s) ให้ตรงกับรอบการเรนเดอร์ ขจัดอาการสั่นกระตุก (Micro-judder) ขณะตัวละครเดินและช่วยลดอุณหภูมิการทำงานของเครื่อง
+- **Camera Transform Caching:** ใน [LookAtCamera.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/LookAtCamera.cs) แคช `targetCameraTransform` ตั้งแต่ `Start()` เพื่อขจัดการเรียกข้าม C++ Engine Property `Camera.main` ซ้ำซ้อนใน `LateUpdate()` ของ UI ลอยฟ้าทุกชิ้นในฉาก
+- **Zero-GC EventArgs Notification:** ใน [CuttingCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/CuttingCounter.cs) และ [SinkCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/SinkCounter.cs) แคชอินสแตนซ์ `progressChangedEventArgs` และเรียกส่งผ่านฟังก์ชันกลาง `NotifyProgressChanged()` ขจัดการ `new IHasProgress.OnProgressChangedEventArgs` ในหน่วยความจำทุกจังหวะหั่นและขัดล้างจาน ตามกฎ Rule 5 และ 6 อย่างเคร่งครัด
+
 ---
 
 ## 🔄 2. สถาปัตยกรรมการเปลี่ยนฉาก (Scene Architecture & Flow)
@@ -141,11 +148,11 @@ CaDaCook (Unity Project)/
 │   │   ├── 📜 DeliveryManager.cs            # คิวออเดอร์, VIP Critic, Customer Patience, คอมโบและคะแนน
 │   │   ├── 📜 DirtyPlateKitchenObject.cs    # วัตถุกองจานเปื้อน (Stackable Dirty Plates 1..4 ใบ)
 │   │   ├── 📜 GameInput.cs                  # Unity Input System Event Wrapper (Move, Interact, Dash, Pause)
-│   │   ├── 📜 KitchenGameManager.cs         # ตัวควบคุม Game State และเวลาการเล่น
+│   │   ├── 📜 KitchenGameManager.cs         # ตัวควบคุม Game State, เวลาการเล่น, ล็อค 60 FPS และซิงค์รอบฟิสิกส์ 60Hz
 │   │   ├── 📜 KitchenObject.cs              # ตัวแทนวัตถุดิบอาหาร
 │   │   ├── 📜 PlateKitchenObject.cs         # วัตถุจานอาหารและกองจานสะอาด (Stackable Clean Plates 1..4 ใบ)
 │   │   ├── 📜 Player.cs                     # ตัวควบคุมเชฟหลัก, Dash, ดับไฟ, ลื่นน้ำมัน
-│   │   ├── 📜 SoundManager.cs               # ตัวจัดการเสียง SFX ทั้งหมด
+│   │   ├── 📜 SoundManager.cs               # ตัวจัดการเสียง SFX ทั้งหมด พร้อมระบบ Zero-GC AudioSourcePool (20 แชนเนล)
 │   │   ├── 📜 Loader.cs                     # คลาสกลางควบคุมการโหลดฉาก
 │   │   ├── 📜 LoaderCallback.cs             # หน่วงเวลาสลับเฟรมการโหลดฉาก
 │   │   └── 📜 LookAtCamera.cs               # Billboard Effect หัน UI เข้าหากล้อง

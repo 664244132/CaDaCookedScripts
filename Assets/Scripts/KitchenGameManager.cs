@@ -28,6 +28,11 @@ public class KitchenGameManager : MonoBehaviour
     {
         Instance = this;
         state = State.WaitingToStart;
+
+        // ล็อกเฟรมเรตที่ 60 FPS และซิงค์รอบฟิสิกส์ให้สอดคล้องกันเพื่อความลื่นไหลสูงสุด (Option A)
+        QualitySettings.vSyncCount = 0;   // ปิด VSync เพื่อให้ targetFrameRate ควบคุมเฟรมเรตได้สม่ำเสมอ
+        Application.targetFrameRate = 60; // ล็อกเฟรมเรต 60 FPS ขจัดอาการแกว่งและลดความร้อน CPU/GPU
+        Time.fixedDeltaTime = 1f / 60f;   // ซิงค์รอบการคำนวณฟิสิกส์ให้เป็น 60Hz ตรงกับรอบหน้าจอ ขจัดอาการ Micro-judder
     }
 
     private void Start()
