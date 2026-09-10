@@ -69,10 +69,21 @@ public class DeliveryCounter : BaseCounter
         // กรณีที่ 1: ผู้เล่นถือสิ่งของมาส่ง
         if (player.HasKitchenObject())
         {
-            if (player.GetKitchenObject().TryGetPlate(out PlateKitchenObject plateKitchenObject))
+            KitchenObject heldObject = player.GetKitchenObject();
+
+            // ตรวจสอบกรณีถือถังดับเพลิงมาส่ง -> แจ้งเตือนส่งผิดสูตร และสั่งให้ถังดับเพลิง Respawn กลับไปจุดเริ่มต้น
+            if (heldObject is FireExtinguisher fireExtinguisher)
+            {
+                DeliveryManager.Instance.DeliverIncorrectRecipe();
+                fireExtinguisher.ScheduleRespawn(1.0f);
+                Debug.Log("🧯 [DeliveryCounter] FireExtinguisher submitted! Incorrect recipe, respawning at initial position in 1.0s...");
+                return;
+            }
+
+            if (heldObject.TryGetPlate(out PlateKitchenObject plateKitchenObject))
             {
                 DeliveryManager.Instance.DeliveryRecipe(plateKitchenObject);
-                player.GetKitchenObject().DestroySelf();
+                heldObject.DestroySelf();
 
                 // ตาม Q2 ตัวเลือก A: จานอาหารที่ส่ง (ทั้งสูตรถูกและผิด) จะกลายเป็นจานเปื้อนสะสมเสมอ เพื่อคงจำนวนจานครบ 4 ใบในครัว 100% ไร้ความเสี่ยง Softlock
                 AddDirtyPlate();
@@ -81,7 +92,7 @@ public class DeliveryCounter : BaseCounter
             {
                 // สิ่งของไม่ใช่จานอาหาร (เช่น วัตถุดิบเดี่ยวๆ)
                 DeliveryManager.Instance.DeliverIncorrectRecipe();
-                player.GetKitchenObject().DestroySelf();
+                heldObject.DestroySelf();
             }
             return;
         }

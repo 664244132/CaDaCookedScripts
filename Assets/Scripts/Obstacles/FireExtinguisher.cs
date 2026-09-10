@@ -47,16 +47,28 @@ public class FireExtinguisher : KitchenObject
 
     private void Awake()
     {
+        if (initialSpawnPosition == Vector3.zero && transform.position != Vector3.zero)
+        {
+            initialSpawnPosition = transform.position;
+        }
         EnsureVisuals();
         EnsureCollider();
         InitializeWhiteMistSpray();
         InitializePromptUI();
     }
 
+    public void SetInitialSpawnPosition(Vector3 pos)
+    {
+        initialSpawnPosition = pos;
+    }
+
     private void Start()
     {
         EnsureVisuals();
-        initialSpawnPosition = transform.position;
+        if (initialSpawnPosition == Vector3.zero)
+        {
+            initialSpawnPosition = transform.position;
+        }
         targetCamera = Camera.main;
         if (targetCamera == null)
         {
@@ -486,12 +498,14 @@ public class FireExtinguisher : KitchenObject
     public bool IsSpraying() => isSpraying;
 
     /// <summary>
-    /// สั่งให้ถังดับเพลิงซ่อนตัวและเริ่มนับคูลดาวน์ 15 วินาทีเพื่อ Respawn กลับมายังจุดวางเดิม (ป้องกัน Soft-lock เมื่อแมวขโมย)
+    /// สั่งให้ถังดับเพลิงซ่อนตัวและเริ่มนับคูลดาวน์เพื่อ Respawn กลับมายังจุดวางเดิม (ป้องกัน Soft-lock)
     /// </summary>
-    public void ScheduleRespawn(float delay = 15.0f)
+    public void ScheduleRespawn(float delay = 1.0f)
     {
-        isRespawning = true;
-        respawnTimer = delay;
+        if (initialSpawnPosition == Vector3.zero)
+        {
+            initialSpawnPosition = transform.position;
+        }
 
         if (GetKitchenObjectParent() != null)
         {
@@ -501,9 +515,26 @@ public class FireExtinguisher : KitchenObject
         transform.SetParent(null);
         StopSpraying();
 
+        if (delay <= 0f)
+        {
+            RespawnAtInitialPosition();
+            return;
+        }
+
+        isRespawning = true;
+        respawnTimer = delay;
+
         // ปิดการแสดงผลและ Collider ชั่วคราวเพื่อให้ Update() ยังคงนับเวลาถอยหลังได้
         SetVisibility(false);
-        Debug.Log($"🧯 FireExtinguisher: Cat stole extinguisher! Respawing at {initialSpawnPosition} in {delay:F1}s...");
+        Debug.Log($"🧯 FireExtinguisher: Scheduling respawn at {initialSpawnPosition} in {delay:F1}s...");
+    }
+
+    /// <summary>
+    /// ป้องกันไม่ให้ถังดับเพลิงถูก Destroy ออกจากหน่วยความจำอย่างถาวร (เช่น เมื่อถูกส่งที่ Delivery Counter หรือทิ้งลงถังขยะ)
+    /// </summary>
+    public override void DestroySelf()
+    {
+        ScheduleRespawn(1.0f);
     }
 
     private void RespawnAtInitialPosition()

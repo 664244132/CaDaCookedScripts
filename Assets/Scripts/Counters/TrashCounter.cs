@@ -38,7 +38,16 @@ public class TrashCounter : BaseCounter
             return;
         }
 
-        // 3. กรณีถือวัตถุดิบอื่นๆ (เช่น ผัก, เนื้อไหม้) -> ทำลายทิ้งตามปกติ
+        // 3. กรณีถือถังดับเพลิง -> ไม่อนุญาตให้ทิ้งถาวร ให้สั่ง Respawn กลับไปจุดเริ่มต้น
+        if (heldObject is FireExtinguisher fireExtinguisher)
+        {
+            fireExtinguisher.ScheduleRespawn(1.0f);
+            OnAnyObjectTrashed?.Invoke(this, EventArgs.Empty);
+            Debug.Log("🧯 [TrashCounter] FireExtinguisher placed in trash! Respawing at initial position in 1.0s...");
+            return;
+        }
+
+        // 4. กรณีถือวัตถุดิบอื่นๆ (เช่น ผัก, เนื้อไหม้) -> ทำลายทิ้งตามปกติ
         heldObject.DestroySelf();
         OnAnyObjectTrashed?.Invoke(this, EventArgs.Empty);
     }

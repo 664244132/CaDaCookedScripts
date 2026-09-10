@@ -97,6 +97,33 @@
   - รันการตรวจสอบ Codebase และ Markdown Links ผ่าน `master_audit.py`: **0 Errors, 0 Warnings, 0 Broken Links, 0 De Morgan Violations, 0 GC Alloc in Update, 0 Memory Leaks**
   - ผ่านการคอมไพล์ด้วย Unity Roslyn C# Compiler CLI ทั้ง 3 Assemblies (`CodeMonkeyFreeEditor.rsp`, `Assembly-CSharp.rsp`, `Assembly-CSharp-Editor.rsp`) ได้รับ **Exit Code 0 (0 Errors, 0 Warnings)** สมบูรณ์ 100%
 
+### 🔹 Session 92: Indestructible FireExtinguisher Delivery Respawn & Kitchen Cat Plate Ingredient Theft
+- [Assets/Scripts/Obstacles/FireExtinguisher.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/FireExtinguisher.cs):
+  - **Indestructible Fail-Safe (`DestroySelf` Override):** โอเวอร์ไรด์ `DestroySelf()` ของคลาสแม่ `KitchenObject` ให้เปลี่ยนเป็นการเรียก `ScheduleRespawn(1.0f)` แทนการถูกทำลายถาวร ทำให้ถังดับเพลิงไม่มีวันหายไปจากฉาก
+  - **Instant & Scheduled Respawn:** ปรับปรุง `ScheduleRespawn(float delay)` ให้รองรับการเกิดใหม่ทันที (`delay <= 0f`) หรือสั่งดีเลย์ 1.0 วินาทีพร้อมซ่อนโมเดลและตัดความสัมพันธ์กับพาเรนต์อย่างปลอดภัย
+  - **Spawn Position Tracking:** เพิ่ม `SetInitialSpawnPosition(Vector3)` และบันทึกพิกัดเริ่มต้นอย่างรัดกุมใน `Awake()` และ `Start()`
+- [Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Gameplay/GameplayEventsBootstrap.cs):
+  - กำหนดพิกัดเริ่มต้น `extComp.SetInitialSpawnPosition(spawnPos);` เมื่อสร้างถังดับเพลิง
+- [Assets/Scripts/Counters/DeliveryCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/DeliveryCounter.cs):
+  - **Safe FireExtinguisher Handling:** ตรวจจับเมื่อผู้เล่นกดส่งถังดับเพลิง ระบบจะส่งสัญญาณ `DeliverIncorrectRecipe()` เพื่อหักคะแนน/เล่นเสียงผิดสูตร และสั่ง `fireExtinguisher.ScheduleRespawn(1.0f)` ส่งถังกลับจุดเดิมทันที ป้องกันบัคถังดับเพลิงสูญหาย
+- [Assets/Scripts/Counters/TrashCounter.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Counters/TrashCounter.cs):
+  - **Safe Trash Handling:** ตรวจจับเมื่อผู้เล่นทิ้งถังดับเพลิงลงถังขยะ ระบบจะสั่ง `fireExtinguisher.ScheduleRespawn(1.0f)` แทนการทำลายทิ้ง
+- [Assets/Scripts/PlateKitchenObject.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlateKitchenObject.cs):
+  - **Single Ingredient Theft Support:** เพิ่ม `TryRemoveTopIngredient(out KitchenObjectSO removedIngredient)` และ `HasIngredients()` พร้อมกระจายอีเวนต์ `OnIngredientRemoved` (ตามหลัก Decoupled Architecture)
+- [Assets/Scripts/PlateCompleteVisual.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/PlateCompleteVisual.cs):
+  - ดักฟัง `OnIngredientRemoved` (และ Unsubscribe ใน `OnDestroy`) เพื่อปิดการแสดงผล 3D โมเดลของวัตถุดิบชิ้นที่ถูกดึงออกไป
+- [Assets/Scripts/UI/PlateIconsUI.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/UI/PlateIconsUI.cs):
+  - ดักฟัง `OnIngredientRemoved` (และ Unsubscribe ใน `OnDestroy`) เพื่ออัปเดตไอคอนลอยฟ้าทันที
+- [Assets/Scripts/Obstacles/KitchenCatNPC.cs](file:///c:/CaDaCooked/CaDaCookedScripts/Assets/Scripts/Obstacles/KitchenCatNPC.cs):
+  - **Plate Ingredient Target & Conservation:** ปรับเป้าหมายให้แมวสามารถเล็งเคาน์เตอร์ที่มีจานอาหารได้หากจานมีวัตถุดิบ (`plate.HasIngredients()`)
+  - **Steal Top Ingredient Only:** ใน `StealFromCounter()` เมื่อเป้าหมายเป็น `PlateKitchenObject` จะดึงเฉพาะวัตถุดิบบนสุด (`plate.TryRemoveTopIngredient`) และนำมาเสกคาบไว้ในปาก (`KitchenObject.SpawnKitchenObject`) โดยคงจานอาหารไว้บนเคาน์เตอร์ 100% ปราศจากการขโมยจาน เพื่อป้องกันปัญหา Plate Softlock โดยสิ้นเชิง
+  - **Zero-GC & Path Abort:** หากระหว่างที่แมวกำลังเดินมายังเคาน์เตอร์ วัตถุดิบบนจานถูกหยิบออกหมดก่อน แมวจะยกเลิกเป้าหมายและกลับสู่สเตต `Idle`
+- [markdowns/AboutProject.md](file:///c:/CaDaCooked/CaDaCookedScripts/markdowns/AboutProject.md):
+  - อัปเดตสเปกระบบถังดับเพลิงและระบบแมวขโมยวัตถุดิบบนจาน
+- **Rigorous Verification:**
+  - รันการตรวจสอบ Codebase และ Markdown Links ผ่าน `master_audit.py`: **0 Errors, 0 Warnings, 0 Broken Links, 0 De Morgan Violations, 0 GC Alloc in Update, 0 Memory Leaks**
+  - ผ่านการคอมไพล์ด้วย Unity Roslyn C# Compiler CLI ทั้ง 3 Assemblies (`CodeMonkeyFreeEditor.rsp`, `Assembly-CSharp.rsp`, `Assembly-CSharp-Editor.rsp`) ได้รับ **Exit Code 0 (0 Errors, 0 Warnings)** สมบูรณ์ 100%
+
 ---
 
 ## 🔒 Security & Code Standards Checklist

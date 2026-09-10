@@ -11,6 +11,12 @@ public class PlateKitchenObject : KitchenObject
         public KitchenObjectSO kitchenObjectSO;
     }
 
+    public event EventHandler<OnIngredientRemovedEventArgs> OnIngredientRemoved;
+    public class OnIngredientRemovedEventArgs : EventArgs
+    {
+        public KitchenObjectSO kitchenObjectSO;
+    }
+
     private const float PLATE_OFFSET_Y = 0.075f;
 
     [SerializeField] private List<KitchenObjectSO> validKitchenObjectSOList;
@@ -93,6 +99,35 @@ public class PlateKitchenObject : KitchenObject
     public List<KitchenObjectSO> GetKitchenObjectSOList()
     {
         return kitchenObjectSOList;
+    }
+
+    public bool HasIngredients()
+    {
+        return kitchenObjectSOList != null && kitchenObjectSOList.Count > 0;
+    }
+
+    /// <summary>
+    /// ดึงวัตถุดิบชั้นบนสุดออกจากจานอาหาร (เช่น เมื่อแมวขโมยวัตถุดิบ)
+    /// คืนค่า true หากมีวัตถุดิบและดึงสำเร็จ พร้อมยิง OnIngredientRemoved
+    /// </summary>
+    public bool TryRemoveTopIngredient(out KitchenObjectSO removedIngredient)
+    {
+        if (kitchenObjectSOList != null && kitchenObjectSOList.Count > 0)
+        {
+            int lastIndex = kitchenObjectSOList.Count - 1;
+            removedIngredient = kitchenObjectSOList[lastIndex];
+            kitchenObjectSOList.RemoveAt(lastIndex);
+
+            OnIngredientRemoved?.Invoke(this, new OnIngredientRemovedEventArgs
+            {
+                kitchenObjectSO = removedIngredient
+            });
+
+            return true;
+        }
+
+        removedIngredient = null;
+        return false;
     }
 
     /// <summary>

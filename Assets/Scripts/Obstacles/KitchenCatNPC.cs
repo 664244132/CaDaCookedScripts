@@ -200,6 +200,15 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
                 if (targetCounter == null || !targetCounter.HasKitchenObject())
                 {
                     state = State.Idle;
+                    targetCounter = null;
+                    break;
+                }
+
+                // หากเป้าหมายเป็นจานอาหาร และวัตถุดิบบนจานถูกหยิบออกไปหมดแล้ว ให้หยุดเดินและกลับสู่ State.Idle
+                if (targetCounter.GetKitchenObject() is PlateKitchenObject plate && !plate.HasIngredients())
+                {
+                    state = State.Idle;
+                    targetCounter = null;
                     break;
                 }
 
@@ -307,10 +316,20 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
                 if (counter != null && counter.HasKitchenObject())
                 {
                     KitchenObject targetObj = counter.GetKitchenObject();
-                    // ตาม Q3 ตัวเลือก A: แมวไม่แตะต้องจานอาหาร (Blacklist Plates) ขโมยเฉพาะวัตถุดิบหรือถังดับเพลิง
-                    if (targetObj is PlateKitchenObject || targetObj is DirtyPlateKitchenObject)
+
+                    // กรณีที่ 1: เป็นจานเปื้อน -> แมวไม่แตะต้อง
+                    if (targetObj is DirtyPlateKitchenObject)
                     {
                         continue;
+                    }
+
+                    // กรณีที่ 2: เป็นจานอาหาร -> ขโมยได้เฉพาะเมื่อมีวัตถุดิบบนจานเท่านั้น (หากเป็นจานเปล่าให้ข้าม)
+                    if (targetObj is PlateKitchenObject plateKitchenObject)
+                    {
+                        if (!plateKitchenObject.HasIngredients())
+                        {
+                            continue;
+                        }
                     }
 
                     targetCounter = counter;
@@ -357,21 +376,46 @@ public class KitchenCatNPC : MonoBehaviour, IKitchenObjectParent
         if (targetCounter != null && targetCounter.HasKitchenObject() && !HasKitchenObject())
         {
             KitchenObject kitchenObject = targetCounter.GetKitchenObject();
-            if (kitchenObject is PlateKitchenObject || kitchenObject is DirtyPlateKitchenObject)
+
+            // กรณีที่ 1: เป็นจานเปื้อน -> ไม่แตะต้อง
+            if (kitchenObject is DirtyPlateKitchenObject)
             {
-                // หากเป็นจานอาหาร ไม่ขโมย
                 state = State.Idle;
+                targetCounter = null;
                 return;
             }
 
-            kitchenObject.SetKitchenObjectParent(this);
+            // กรณีที่ 2: เป็นจานอาหาร -> ขโมยเฉพาะวัตถุดิบบนจาน ห้ามขโมยจานไปเด็ดขาด!
+            if (kitchenObject is PlateKitchenObject plateKitchenObject)
+            {
+                if (plateKitchenObject.TryRemoveTopIngredient(out KitchenObjectSO stolenIngredientSO))
+                {
+                    // เสกวัตถุดิบที่ขโมยมาไว้ในปากแมว (HoldPoint) โดยคงจานอาหารไว้บนเคาน์เตอร์
+                    KitchenObject.SpawnKitchenObject(stolenIngredientSO, this);
+                    StartSprintingAway();
+                    Debug.Log($"😼 KitchenCat: STOLE [{stolenIngredientSO.name}] FROM PLATE! Leaving plate on counter and sprinting away!");
+                    targetCounter = null;
+                    return;
+                }
+                else
+                {
+                    // จานเปล่า ไม่มีวัตถุดิบให้ขโมย
+                    state = State.Idle;
+                    targetCounter = null;
+                    return;
+                }
+            }
 
+            // กรณีที่ 3: วัตถุดิบเดี่ยวๆ หรือถังดับเพลิงที่วางบนเคาน์เตอร์
+            kitchenObject.SetKitchenObjectParent(this);
             StartSprintingAway();
-            Debug.Log("😼 KitchenCat: STOLE INGREDIENT! SPRINTING AWAY FAST!");
+            Debug.Log($"😼 KitchenCat: STOLE [{kitchenObject.name}]! SPRINTING AWAY FAST!");
+            targetCounter = null;
         }
         else
         {
             state = State.Idle;
+            targetCounter = null;
         }
     }
 

@@ -276,7 +276,8 @@ public class GameplayEventsBootstrap : MonoBehaviour
             if (topNozzle.TryGetComponent(out Collider nozCol)) Destroy(nozCol);
             topNozzle.GetComponent<MeshRenderer>().material = FireExtinguisher.GetSafeMaterial(new Color(0.68f, 0.70f, 0.74f), 0.85f, 0.85f);
 
-            extObj.AddComponent<FireExtinguisher>();
+            FireExtinguisher extComp = extObj.AddComponent<FireExtinguisher>();
+            extComp.SetInitialSpawnPosition(spawnPos);
         }
     }
 
